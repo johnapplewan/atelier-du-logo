@@ -1,0 +1,14 @@
+const {chromium}=require('playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch();const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route(/fonts\./,r=>r.abort());
+await p.addInitScript(()=>{const store={},subs={};window.__store=store;
+ const doc=path=>({get:async()=>({exists:!!store[path],data:()=>store[path],metadata:{}}),set:async d=>{store[path]=d;},onSnapshot:fn=>{subs[path]=fn;return()=>{}}});
+ window.__remote=(path,d)=>{store[path]=d;subs[path]&&subs[path]({exists:true,data:()=>d,metadata:{hasPendingWrites:false}})};
+ window.claude={use:async n=>n==='db'?{doc}:null};});
+await p.goto('file://'+require('path').resolve(__dirname,'../app/index.html'));await p.waitForTimeout(500);
+const patch=JSON.parse(fs.readFileSync(__dirname+'/shape-out.json','utf8')).slice(1,5).map(l=>({id:l.id,subs:l.subs}));
+await p.evaluate(pl=>__remote('atelier/patch',{at:Date.now()+1000,note:'coins vifs',layers:JSON.stringify(pl)}),patch);
+await p.waitForTimeout(1200);
+console.log('hg nodes',await p.evaluate(()=>__atelier.layers[1].subs[0].length),'letters',await p.evaluate(()=>__atelier.layers.length),'saved shape',await p.evaluate(()=>!!__store['atelier/shape']));
+console.log('bar visible',await p.isVisible('#claudeBar'));await p.screenshot({path:__dirname+'/s7.png'});await p.reload();await p.waitForTimeout(500);console.log('bar after reload',await p.isVisible('#claudeBar'));await p.click('#claudeUndo');console.log('bar after click',await p.isVisible('#claudeBar'));console.log('after claude-undo hg nodes',await p.evaluate(()=>__atelier.layers[1].subs[0].length));
+console.log(errs);await b.close();})();
