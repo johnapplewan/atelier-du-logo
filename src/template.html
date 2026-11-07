@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap">
 <style>
-:root{--night:#13213C;--ivory:#F6F2EA;--brass:#B08A4A;--cream:#F6F2EA;--paper:#FBF8F2;--line:#E2DACB;--muted:#6B6A66;--ink:#13213C;--danger:#9B3B2E}
+:root{--night:#1D1D1F;--ivory:#FFFFFF;--brass:#4F5BD5;--cream:#F4F4F2;--paper:#FBFBFA;--line:#E3E3E0;--muted:#6B6B70;--ink:#1D1D1F;--danger:#B42318}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{background:var(--cream);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
@@ -20,7 +20,7 @@ button:hover:not(:disabled){border-color:var(--brass)}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
 button:disabled{opacity:.4;cursor:default}
 button.primary{background:var(--night);color:var(--ivory);border-color:var(--night)}
-button.primary:hover:not(:disabled){background:#1d2f52}
+button.primary:hover:not(:disabled){background:#3A3A40}
 button.danger{color:var(--danger)}
 button.on{background:var(--night);color:var(--ivory);border-color:var(--night)}
 header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--paper);flex-wrap:wrap}
@@ -45,13 +45,13 @@ label.chk{display:flex;align-items:center;gap:6px;font-size:13px}
 .layers{list-style:none;margin:0;padding:0}
 .layers .gh{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:10px 0 4px}
 .layer{display:flex;align-items:center;gap:4px;padding:3px 4px;border-radius:7px;border:1px solid transparent}
-.layer:hover{background:#F3EEE4}
-.layer.sel{border-color:var(--brass);background:#F5EEDF}
+.layer:hover{background:#F1F1EF}
+.layer.sel{border-color:var(--brass);background:#EEF0FB}
 .layer .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.15);flex:none}
 .layer .nm{flex:1;min-width:0;text-align:left;background:none;border:0;padding:3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .layer.hid .nm{opacity:.45}
 .ib{border:0;background:none;padding:3px;border-radius:5px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
-.ib:hover:not(:disabled){background:#EAE3D5;color:var(--ink)}
+.ib:hover:not(:disabled){background:#E8E8E5;color:var(--ink)}
 .ib svg{width:15px;height:15px}
 .ib.act{color:var(--brass)}
 #stage{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--cream)}
@@ -60,7 +60,7 @@ label.chk{display:flex;align-items:center;gap:6px;font-size:13px}
 .zoom{position:absolute;right:12px;bottom:12px;display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;align-items:center}
 .zoom button{border:0;padding:4px 8px}
 .zoom span{min-width:46px;text-align:center;font-size:12px;color:var(--muted)}
-.hint{position:absolute;left:12px;bottom:12px;font-size:12px;color:var(--muted);background:rgba(251,248,242,.9);border:1px solid var(--line);border-radius:8px;padding:5px 9px;max-width:60%}
+.hint{position:absolute;left:12px;bottom:12px;font-size:12px;color:var(--muted);background:rgba(251,251,250,.9);border:1px solid var(--line);border-radius:8px;padding:5px 9px;max-width:60%}
 .field{display:grid;grid-template-columns:auto 1fr;gap:6px 8px;align-items:center;font-size:13px}
 .field input[type=number]{width:100%;padding:5px 7px;border:1px solid var(--line);border-radius:7px;background:#fff}
 .field input[type=color]{width:42px;height:28px;padding:0 2px;border:1px solid var(--line);border-radius:7px;background:#fff}
@@ -75,15 +75,15 @@ textarea{width:100%;min-height:90px;resize:vertical;border:1px solid var(--line)
 audio{width:100%;margin-top:6px;height:36px}
 .rec{color:var(--danger);font-variant-numeric:tabular-nums}
 dialog{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--paper);color:var(--ink);max-width:min(720px,94vw);width:100%}
-dialog::backdrop{background:rgba(19,33,60,.35)}
+dialog::backdrop{background:rgba(20,20,25,.35)}
 .prev{background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;justify-content:center;margin:10px 0}
 .prev img{max-width:100%;max-height:200px}
 #svgcode{font:12px/1.4 ui-monospace,Menlo,monospace;min-height:120px}
 .send{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .send p{margin:6px 0 0}
-.reply{margin-top:8px;padding:8px 10px;border-left:3px solid var(--brass);background:#F5EEDF;border-radius:0 8px 8px 0;font-size:13px;white-space:pre-wrap}
+.reply{margin-top:8px;padding:8px 10px;border-left:3px solid var(--brass);background:#EEF0FB;border-radius:0 8px 8px 0;font-size:13px;white-space:pre-wrap}
 .note .done{color:var(--brass);font-weight:600}
-.claudebar{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:var(--paper);border:1px solid var(--brass);border-radius:12px;padding:8px 10px 8px 14px;box-shadow:0 4px 18px rgba(19,33,60,.12);font-size:13px;max-width:94%;flex-wrap:wrap;z-index:5}
+.claudebar{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;background:var(--paper);border:1px solid var(--brass);border-radius:12px;padding:8px 10px 8px 14px;box-shadow:0 4px 18px rgba(20,20,25,.12);font-size:13px;max-width:94%;flex-wrap:wrap;z-index:5}
 .claudebar[hidden]{display:none}
 aside{position:relative}
 .collapse{position:absolute;top:10px;right:10px;width:26px;height:26px;padding:0;font-size:16px;line-height:1;border-radius:7px;color:var(--muted)}
@@ -101,7 +101,7 @@ main.noleft .mini{display:flex}
 main.noright .mini-open.right{display:block}
 .mini-tool{width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;background:var(--night);color:var(--ivory);border-color:var(--night)}
 .mini-tool svg{width:18px;height:18px}
-.flyout{position:absolute;top:66px;left:40px;display:flex;flex-direction:column;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:5px;box-shadow:0 4px 18px rgba(19,33,60,.12)}
+.flyout{position:absolute;top:66px;left:40px;display:flex;flex-direction:column;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:5px;box-shadow:0 4px 18px rgba(20,20,25,.12)}
 .flyout[hidden]{display:none}
 .flyout button{display:flex;align-items:center;gap:8px;border:0;font-size:13px;padding:6px 10px;text-align:left;white-space:nowrap}
 .flyout button.on{background:var(--night);color:var(--ivory)}
@@ -133,12 +133,12 @@ main.noright .mini-open.right{display:block}
 body.picking .sw-btn .x{display:none!important}
 .sw-add{width:38px;height:38px;border-radius:9px;border:1px dashed var(--line);font-size:18px;color:var(--muted);padding:0}
 .sug-row{display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
-.sug-row.on{border-color:var(--brass);background:#F5EEDF}
+.sug-row.on{border-color:var(--brass);background:#EEF0FB}
 .sug-row .sug-sw{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.12);flex:none}
 .sug-row .sp{flex:1;min-width:4px}
 .sug-row button{padding:4px 7px;font-size:12px}
-body.picking .sw-btn:not(.editing), body.picking .sug-sw, body.picking .zone-btn{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 21l2-6 9-9 4 4-9 9z' fill='%23fff' stroke='%2313213C' stroke-width='1.6'/%3E%3Cpath d='M14 6l2-2a2.1 2.1 0 013 3l-2 2' fill='%2313213C'/%3E%3C/svg%3E") 3 21, crosshair}
-.picker{position:fixed;z-index:20;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 8px 28px rgba(19,33,60,.18);width:220px}
+body.picking .sw-btn:not(.editing), body.picking .sug-sw, body.picking .zone-btn{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 21l2-6 9-9 4 4-9 9z' fill='%23fff' stroke='%231D1D1F' stroke-width='1.6'/%3E%3Cpath d='M14 6l2-2a2.1 2.1 0 013 3l-2 2' fill='%231D1D1F'/%3E%3C/svg%3E") 3 21, crosshair}
+.picker{position:fixed;z-index:20;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 8px 28px rgba(20,20,25,.18);width:220px}
 .picker canvas{display:block;width:200px;height:130px;border-radius:7px;cursor:crosshair;touch-action:none}
 .picker .hue{width:200px;margin:8px 0 6px;accent-color:var(--night)}
 .picker .row{gap:6px}
@@ -152,10 +152,12 @@ body.picking .sw-btn:not(.editing), body.picking .sug-sw, body.picking .zone-btn
 .fcat{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:10px 4px 2px}
 .scope input[type=search]{flex-basis:100%;padding:5px 7px;border:1px solid var(--line);border-radius:7px}
 .fontitem{display:block;width:100%;text-align:left;border:0;border-radius:8px;padding:6px;background:none}
-.fontitem:hover{background:#F3EEE4}
-.fontitem.cur{background:#F5EEDF}
+.fontitem:hover{background:#F1F1EF}
+.fontitem.cur{background:#EEF0FB}
 .fontitem .fn{font-size:12px;color:var(--muted)}
 .fontitem svg{display:block;height:34px;width:auto;max-width:100%;margin-top:2px}
+.fontitem .fsample{display:block;height:34px;line-height:34px;font-size:22px;color:var(--ink);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fontitem .fload{color:var(--muted)}
 .palbar select{flex:1;min-width:0;padding:5px 6px;border:1px solid var(--line);border-radius:7px;background:#fff}
 .palbar{flex-wrap:nowrap}
 .rename{flex:1;min-width:0;padding:4px 6px;border:1px solid var(--brass);border-radius:6px}
@@ -176,7 +178,7 @@ label.geo input[type=number]{width:64px;padding:3px 5px;border:1px solid var(--l
 .kinds button{padding:4px 7px;font-size:12px}
 .kinds button.on{background:var(--night);color:var(--ivory);border-color:var(--night)}
 .layer.ingrp{margin-left:14px}
-.ghead{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:3px 4px;border-radius:7px;margin-top:4px;background:#F1EBDF;border:1px solid transparent}
+.ghead{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:3px 4px;border-radius:7px;margin-top:4px;background:#F1F1EF;border:1px solid transparent}
 .ghead.sel{border-color:var(--brass)}
 .ghead .nm{font-weight:600;flex:1;min-width:0;text-align:left;background:none;border:0;padding:3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ghead .gpal{flex-basis:100%;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);padding:2px 0 2px 28px}
@@ -200,7 +202,7 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
 .dirrow button.on{background:var(--night);color:var(--ivory);border-color:var(--night)}
 #kbBtn{font-size:17px;width:32px;height:32px}
 #kbBtn.on{background:var(--night);color:var(--ivory)}
-.kb{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:7;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:8px 10px 10px;box-shadow:0 8px 28px rgba(19,33,60,.18);width:min(780px,96%)}
+.kb{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:7;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:8px 10px 10px;box-shadow:0 8px 28px rgba(20,20,25,.18);width:min(780px,96%)}
 .kb[hidden]{display:none}
 .kb-head{display:flex;gap:8px;align-items:center;margin-bottom:6px}
 .kb-head select{padding:4px 6px;border:1px solid var(--line);border-radius:7px;background:#fff}
@@ -229,7 +231,7 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
 <body>
 <header>
   <div class="brand">
-    <svg width="30" height="30" viewBox="0 0 256 256" aria-hidden="true"><rect x="28" y="28" width="200" height="200" rx="56" fill="#13213C"/><rect x="60" y="60" width="62" height="62" rx="20" fill="#F6F2EA"/><rect x="134" y="60" width="62" height="62" rx="20" fill="#F6F2EA"/><rect x="60" y="134" width="62" height="62" rx="20" fill="#F6F2EA"/><rect x="134" y="134" width="62" height="62" rx="20" fill="#B08A4A"/></svg>
+    <svg width="30" height="30" viewBox="0 0 256 256" aria-hidden="true"><rect x="16" y="16" width="224" height="224" rx="60" fill="#1D1D1F"/><path d="M64 180C84 92 172 164 192 76" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round"/><path d="M64 180L84 104M192 76L172 152" stroke="#4F5BD5" stroke-width="8" stroke-linecap="round"/><circle cx="84" cy="104" r="14" fill="#4F5BD5"/><circle cx="172" cy="152" r="14" fill="#4F5BD5"/></svg>
     <div><h1>Atelier du Logo</h1><div class="sub">par John Apple · édition vectorielle</div></div>
   </div>
   <div class="spacer"></div>
@@ -237,7 +239,7 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
   <div class="group">
     <button id="undo" title="Annuler (Ctrl+Z)">Annuler</button>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
-    <button id="reset" title="Revenir au logo d'origine">Revenir au logo d'origine</button>
+    <button id="reset" title="Remplacer le dessin par le logo d'exemple">Revenir à l'exemple</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
 </header>
@@ -283,7 +285,7 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
   </aside>
   <div id="stage">
     <svg id="cv" class="t-move" aria-label="Plan de travail du logo">
-      <defs><pattern id="gridPat" patternUnits="userSpaceOnUse" width="4" height="4"><path id="gridPath" d="M4 0H0V4" fill="none" stroke="#D9CFBD" stroke-width=".25"/></pattern></defs>
+      <defs><pattern id="gridPat" patternUnits="userSpaceOnUse" width="4" height="4"><path id="gridPath" d="M4 0H0V4" fill="none" stroke="#D6D6D2" stroke-width=".25"/></pattern></defs>
       <g id="world">
         <rect id="gridRect" x="-2000" y="-2000" width="5000" height="4300" fill="url(#gridPat)" style="display:none"/>
         <g id="art"></g>
@@ -369,13 +371,16 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
 <script>
 "use strict";
 const GLYPHS = __GLYPHS__;
-const C = {night:"#13213C", ivory:"#F6F2EA", brass:"#B08A4A"};
+/* workshop UI colours (selection, handles, previews): never used for the logo itself */
+const C = {night:"#1D1D1F", ivory:"#FFFFFF", brass:"#4F5BD5"};
+/* colours of the neutral example logo */
+const EX = {ink:"#22252B", paper:"#F2EFE8", accent:"#E0703A"};
 const $ = s => document.querySelector(s);
 const clone = o => JSON.parse(JSON.stringify(o));
 const r2 = n => Math.round(n*100)/100;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-/* ---------- Original logo ---------- */
+/* ---------- Example logo ---------- */
 function roundRect(x,y,w,h,r){
   const k = 0.5523*r, P=(x,y)=>({x,y});
   return [[
@@ -385,15 +390,19 @@ function roundRect(x,y,w,h,r){
     {x:x,y:y+h-r,i:P(x,y+h-r+k),o:null},{x:x,y:y+r,i:null,o:P(x,y+r-k)}
   ].map(n=>({x:r2(n.x),y:r2(n.y),i:n.i&&{x:r2(n.i.x),y:r2(n.i.y)},o:n.o&&{x:r2(n.o.x),y:r2(n.o.y)}}))];
 }
+function circle(cx,cy,r){
+  const k=0.5523*r, P=(x,y)=>({x:r2(x),y:r2(y)});
+  return [[{x:r2(cx),y:r2(cy-r),i:P(cx-k,cy-r),o:P(cx+k,cy-r)},{x:r2(cx+r),y:r2(cy),i:P(cx+r,cy-k),o:P(cx+r,cy+k)},
+    {x:r2(cx),y:r2(cy+r),i:P(cx+k,cy+r),o:P(cx-k,cy+r)},{x:r2(cx-r),y:r2(cy),i:P(cx-r,cy+k),o:P(cx-r,cy-k)}]];
+}
+/* The neutral example: a simple mark (frame, disc, dot) and the default word, laid out at build time */
 function buildOriginal(){
   const L = [
-    {id:"cadre",name:"Cadre",group:"mark",fill:C.night,subs:roundRect(28,28,200,200,56)},
-    {id:"carreau-hg",name:"Carreau haut gauche",group:"mark",fill:C.ivory,subs:roundRect(60,60,62,62,20)},
-    {id:"carreau-hd",name:"Carreau haut droit",group:"mark",fill:C.ivory,subs:roundRect(134,60,62,62,20)},
-    {id:"carreau-bg",name:"Carreau bas gauche",group:"mark",fill:C.ivory,subs:roundRect(60,134,62,62,20)},
-    {id:"carreau-bd",name:"Carreau bas droit (laiton)",group:"mark",fill:C.brass,subs:roundRect(134,134,62,62,20)},
+    {id:"cadre",name:"Cadre",group:"mark",fill:EX.ink,subs:roundRect(28,28,200,200,56)},
+    {id:"disque",name:"Disque",group:"mark",fill:EX.paper,subs:circle(128,128,64)},
+    {id:"point",name:"Point",group:"mark",fill:EX.accent,subs:circle(156,100,22)},
   ];
-  GLYPHS.letters.forEach((g,i)=>{ const l={id:"lettre-"+(i+1),name:"Lettre "+g.ch+" · "+(i+1),group:"word",fill:C.night,font:"instrument",subs:clone(g.subs)}; stamp(l, GLYPHS.baseline); L.push(l); });
+  GLYPHS.letters.forEach((g,i)=>{ const l={id:"lettre-"+(i+1),name:"Lettre "+g.ch+" · "+(i+1),group:"word",fill:EX.ink,font:"instrument",ch:g.ch,subs:clone(g.subs)}; stamp(l, GLYPHS.baseline); L.push(l); });
   return L.map(l=>Object.assign({visible:true,locked:false},l));
 }
 const ORIGIN = buildOriginal();
@@ -579,7 +588,7 @@ function renderOverlay(){
       h += `<circle data-gp="${k2}" cx="${x}" cy="${y}" r="${8/k}" fill="${q.c}" stroke="#fff" stroke-width="${2.5/k}" style="cursor:move"/><circle cx="${x}" cy="${y}" r="${9.5/k}" fill="none" stroke="${C.night}" stroke-width="${1/k}" pointer-events="none"/>`; }); } } }
   if(drag && (drag.type==="marquee"||drag.type==="lmarquee") && drag.cur){
     const a=drag.start, b=drag.cur;
-    h += `<rect x="${Math.min(a.x,b.x)}" y="${Math.min(a.y,b.y)}" width="${Math.abs(a.x-b.x)}" height="${Math.abs(a.y-b.y)}" fill="rgba(176,138,74,.10)" stroke="${C.brass}" stroke-width="${1/k}" stroke-dasharray="${4/k} ${3/k}" pointer-events="none"/>`;
+    h += `<rect x="${Math.min(a.x,b.x)}" y="${Math.min(a.y,b.y)}" width="${Math.abs(a.x-b.x)}" height="${Math.abs(a.y-b.y)}" fill="rgba(79,91,213,.10)" stroke="${C.brass}" stroke-width="${1/k}" stroke-dasharray="${4/k} ${3/k}" pointer-events="none"/>`;
   }
   ovl.innerHTML = h;
 }
@@ -614,7 +623,7 @@ function layerRow(L, i, inGrp){
 }
 function renderLayers(){
   const ul=$("#layers"); let h=""; const done=new Set();
-  for(const [g,title] of [["word","Mot « Simulimmo »"],["mark","Symbole"]]){
+  for(const [g,title] of [["word","Mot « "+esc(wordText)+" »"],["mark","Symbole"]]){
     h += `<li class="gh">${title}</li>`;
     for(let i=layers.length-1;i>=0;i--){ const L=layers[i]; if(L.group!==g) continue;
       if(L.grp && groupById(L.grp)){
@@ -812,7 +821,7 @@ function renderMini(){
 }
 function setPanels(left, right){
   mainEl.classList.toggle("noleft",!left); mainEl.classList.toggle("noright",!right);
-  try{ localStorage.setItem("simulimmo-logo-panels",JSON.stringify({left,right})); }catch(_){}
+  try{ localStorage.setItem("atelier-logo-panels",JSON.stringify({left,right})); }catch(_){}
   $("#flyout").hidden=true;
 }
 const panelsOpen=()=>({left:!mainEl.classList.contains("noleft"), right:!mainEl.classList.contains("noright")});
@@ -822,7 +831,7 @@ $("#hideRight").onclick=()=>setPanels(panelsOpen().left,false);
 $("#showRight").onclick=()=>setPanels(panelsOpen().left,true);
 $("#miniTool").onclick=()=>{ const f=$("#flyout"); f.hidden=!f.hidden; $("#miniTool").setAttribute("aria-expanded",String(!f.hidden)); };
 $("#flyout").addEventListener("click",e=>{ const b=e.target.closest("[data-ft]"); if(!b) return; setTool(b.dataset.ft); $("#flyout").hidden=true; });
-try{ const pp=JSON.parse(localStorage.getItem("simulimmo-logo-panels")||"null"); if(pp) setPanels(pp.left!==false, pp.right!==false); }catch(_){}
+try{ const pp=JSON.parse(localStorage.getItem("atelier-logo-panels")||"null"); if(pp) setPanels(pp.left!==false, pp.right!==false); }catch(_){}
 
 /* ---------- Pointer interaction ---------- */
 let drag=null, spaceDown=false; const pointers=new Map(); let pinch=null;
@@ -1016,7 +1025,7 @@ function applyGrid(){
 $("#gridOn").onchange=e=>{ grid.on=e.target.checked; applyGrid(); savePrefs(); };
 $("#snapOn").onchange=e=>{ grid.snap=e.target.checked; applyGrid(); savePrefs(); };
 $("#gridSize").onchange=e=>{ grid.size=+e.target.value; applyGrid(); savePrefs(); };
-function savePrefs(){ try{ localStorage.setItem("simulimmo-logo-prefs", JSON.stringify(grid)); }catch(_){} }
+function savePrefs(){ try{ localStorage.setItem("atelier-logo-prefs", JSON.stringify(grid)); }catch(_){} }
 
 /* ---------- Toast & confirm ---------- */
 let toastT; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
@@ -1025,8 +1034,8 @@ function confirmBox(title,text,yes){ return new Promise(res=>{ const d=$("#confi
 
 $("#undo").onclick=undo; $("#redo").onclick=redo;
 $("#reset").onclick=async()=>{
-  if(!await confirmBox("Revenir au logo d'origine ?","Les formes reprennent leur dessin d'origine. Les annotations sont conservées, et « Annuler » permet de revenir en arrière.","Revenir à l'origine")) return;
-  const b=snapshot(); wordText="Simulimmo"; layers=clone(ORIGIN); pals=[{id:"main",name:"Principale",colors:[]}]; groups=[]; curPal="main"; ensureZones(); sel={layer:null,node:null}; commit(b); toast("Logo d'origine rétabli.");
+  if(!await confirmBox("Revenir à l'exemple ?","Le dessin est remplacé par le logo d'exemple. Les annotations sont conservées, et « Annuler » permet de revenir en arrière.","Revenir à l'exemple")) return;
+  const b=snapshot(); wordText=GLYPHS.word; layers=clone(ORIGIN); pals=[{id:"main",name:"Principale",colors:[]}]; groups=[]; curPal="main"; ensureZones(); sel={layer:null,node:null}; commit(b); toast("Logo d'exemple rétabli (Annuler pour revenir).");
 };
 
 /* ---------- Export ---------- */
@@ -1045,22 +1054,27 @@ function svgDoc(ls, box, title){
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box.x0} ${box.y0} ${w} ${h}" width="${w}" height="${h}">\n  <title>${esc(title)}</title>\n${defs?"  <defs>"+defs+"</defs>\n":""}${parts.join("\n")}\n</svg>\n`;
 }
 /* kind: full | mark | word | layer:<id> ; crop: tight bounding box */
-const slug=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"groupe";
+const slug=(s,fb="groupe")=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||fb;
+/* file prefix and title come from the brand name (or the typed word) */
+const filePfx=()=>slug(brandLabel(),"logo");
 function exportSpec(kind, crop){
+  const P=filePfx(), T=brandLabel();
   if(kind.startsWith("group:")){
     const G=groupById(kind.slice(6)), ls=layers.filter(l=>l.grp===(G&&G.id) && l.visible);
-    if(!G||!ls.length) return {name:"simulimmo-groupe.svg", svg:svgDoc([], {x0:0,y0:0,x1:256,y1:256}, "Simulimmo")};
-    return {name:"simulimmo-"+slug(G.name)+".svg", svg:svgDoc(ls, boxOf(ls, crop?0:16), "Simulimmo — "+G.name)};
+    if(!G||!ls.length) return {name:P+"-groupe.svg", svg:svgDoc([], {x0:0,y0:0,x1:256,y1:256}, T)};
+    return {name:P+"-"+slug(G.name)+".svg", svg:svgDoc(ls, boxOf(ls, crop?0:16), T+" — "+G.name)};
   }
   if(kind.startsWith("layer:")){
     const L=layerById(kind.slice(6));
-    return {name:"simulimmo-calque-"+L.id+".svg", svg:svgDoc([L], crop?boxOf([L],0):groupBox(L.group), "Simulimmo — "+L.name)};
+    return {name:P+"-calque-"+L.id+".svg", svg:svgDoc([L], crop?boxOf([L],0):groupBox(L.group), T+" — "+L.name)};
   }
   const ls=layers.filter(l=>l.visible && (kind==="full" || l.group===kind));
   const box = !ls.length ? {x0:0,y0:0,x1:256,y1:256} : crop ? boxOf(ls,0) : kind==="full" ? fullBox() : groupBox(kind);
-  const names={full:["simulimmo-logo.svg","Simulimmo"], mark:["simulimmo-symbole.svg","Simulimmo — symbole"], word:["simulimmo-mot.svg","Simulimmo — mot"]};
+  const names={full:[P+"-logo.svg",T], mark:[P+"-symbole.svg",T+" — symbole"], word:[P+"-mot.svg",T+" — mot"]};
   return {name:names[kind][0], svg:svgDoc(ls, box, names[kind][1])};
 }
+/* typefaces used by the word and text blocks, for the read-me */
+function usedFonts(){ const ids=[...new Set(layers.map(l=>l.font).filter(Boolean))]; return ids.map(id=>{ const f=fontById(id); return f?f.name.replace(/\s*\(actuelle\)/,""):id==="instrument"?"Instrument Serif":id; }); }
 function buildSVG(mode){ return exportSpec(mode,false).svg; }
 function exKind(){ const m=document.querySelector("input[name=exm]:checked").value; return m==="layer" ? "layer:"+$("#exLayer").value : m==="group" ? "group:"+$("#exGroup").value : m; }
 const exFmt=()=>document.querySelector("input[name=exf]:checked").value;
@@ -1118,12 +1132,14 @@ async function buildZip(crop){
   const JSZip=await loadJSZip(), zip=new JSZip();
   for(const k of ["full","mark","word"]){ const s=exportSpec(k,crop); zip.file(s.name, s.svg); }
   layers.forEach((L,i)=>{ const s=exportSpec("layer:"+L.id,crop); zip.file((L.group==="mark"?"calques-symbole/":"calques-mot/")+s.name, s.svg); });
-  zip.file("LISEZMOI.txt", "Exports du logo Simulimmo\n\n- simulimmo-logo.svg : symbole et mot\n- simulimmo-symbole.svg : symbole seul (256 x 256)\n- simulimmo-mot.svg : mot seul\n- calques-symbole/ et calques-mot/ : un fichier par calque"+(crop?", recadré au plus près.\n":", à sa place d'origine (les fichiers d'un même dossier se superposent).\n")+"\nLe mot est dessiné avec Instrument Serif (licence SIL OFL 1.1).\n");
+  const P=filePfx(), F=usedFonts();
+  zip.file("LISEZMOI.txt", "Exports du logo "+brandLabel()+"\n\n- "+P+"-logo.svg : symbole et mot\n- "+P+"-symbole.svg : symbole seul\n- "+P+"-mot.svg : mot seul\n- calques-symbole/ et calques-mot/ : un fichier par calque"+(crop?", recadré au plus près.\n":", à sa place d'origine (les fichiers d'un même dossier se superposent).\n")+
+    (F.length?"\nPolice"+(F.length>1?"s":"")+" : "+F.join(", ")+" (licences libres SIL OFL 1.1 ou Apache 2.0, converties en contours).\n":"")+"\nCréé avec l'Atelier du Logo par John Apple.\n");
   return zip.generateAsync({type:"blob"});
 }
 $("#exZip").onclick=async()=>{
   $("#exMsg").textContent="Préparation de l'archive…";
-  try{ const blob=await buildZip($("#exCrop").checked); await caps.downloads.save({filename:"simulimmo-logo-exports.zip", data:blob}); $("#exMsg").textContent="Archive enregistrée : simulimmo-logo-exports.zip"; }
+  try{ const blob=await buildZip($("#exCrop").checked), zn=filePfx()+"-logo-exports.zip"; await caps.downloads.save({filename:zn, data:blob}); $("#exMsg").textContent="Archive enregistrée : "+zn; }
   catch(err){ $("#exMsg").textContent = err&&err.message==="jszip" ? "Impossible de charger l'outil d'archive : exportez les fichiers un par un." : dlError(err); }
 };
 window.__buildZip=buildZip;
@@ -1160,7 +1176,7 @@ function renderNoteEditor(){
   el.dataset.for=n.id;
   el.innerHTML=`<h2>Bulle ${n.n}</h2>
     <label class="muted" for="noteText">Note</label>
-    <textarea id="noteText" placeholder="Ex. : arrondir davantage le coin du carreau laiton…">${esc(n.text)}</textarea>
+    <textarea id="noteText" placeholder="Ex. : arrondir davantage les coins du cadre…">${esc(n.text)}</textarea>
     <div class="row" style="margin-top:8px">
       <button id="recBtn">${rec?"Arrêter":"Enregistrer une note vocale"}</button>
       <label class="muted" style="cursor:pointer;text-decoration:underline"><input type="file" id="audioFile" accept="audio/*,video/webm,video/mp4" capture style="display:none">ou importer un fichier audio</label>
@@ -1322,7 +1338,7 @@ function ensureZones(){
     if(i<0){ if(P.colors.length<MAXZ){ P.colors.push(l.fill.toUpperCase()); i=P.colors.length-1; } else i=0; }
     l.zone=i;
   }
-  pals.forEach(P=>{ if(!P.colors.length) P.colors.push(C.night); });
+  pals.forEach(P=>{ if(!P.colors.length) P.colors.push(EX.ink); });
   palette=curPalObj().colors;
   syncFills();
 }
@@ -1424,7 +1440,7 @@ function drawSV(){ const g=pkC.getContext("2d"), w=pkC.width, h=pkC.height;
   g.fillStyle=hsvToHex(hsv.h,1,1); g.fillRect(0,0,w,h);
   let a=g.createLinearGradient(0,0,w,0); a.addColorStop(0,"#fff"); a.addColorStop(1,"rgba(255,255,255,0)"); g.fillStyle=a; g.fillRect(0,0,w,h);
   a=g.createLinearGradient(0,0,0,h); a.addColorStop(0,"rgba(0,0,0,0)"); a.addColorStop(1,"#000"); g.fillStyle=a; g.fillRect(0,0,w,h);
-  const x=hsv.s*w, y=(1-hsv.v)*h; g.strokeStyle=hsv.v>.5?"#13213C":"#fff"; g.lineWidth=2; g.beginPath(); g.arc(x,y,6,0,7); g.stroke(); }
+  const x=hsv.s*w, y=(1-hsv.v)*h; g.strokeStyle=hsv.v>.5?"#1D1D1F":"#fff"; g.lineWidth=2; g.beginPath(); g.arc(x,y,6,0,7); g.stroke(); }
 const curPaint=()=>pick?palette[pick.i]:null;
 function stopColor(){ const p=curPaint(); if(!p) return "#000000"; if(typeof p==="string") return p; return p.c?p.c[pick.stop]:p.p[pick.stop].c; }
 function setStopColor(hex){ const p=curPaint(); if(typeof p==="string") palette[pick.i]=hex; else if(p.c) p.c[pick.stop]=hex; else p.p[pick.stop].c=hex; }
@@ -1640,19 +1656,43 @@ function loadFonts(){
 const letterIdx=id=>{ const m=/^lettre-(\d+)$/.exec(id); return m?+m[1]-1:-1; };
 const wordLayers=()=>layers.filter(l=>l.group==="word"&&letterIdx(l.id)>=0).sort((a,b)=>letterIdx(a.id)-letterIdx(b.id));
 function selLetters(){ return selLayers().filter(id=>{ const L=layerById(id); return L&&L.group==="word"&&letterIdx(id)>=0; }); }
-// letters can be swapped one by one only while the word is the 9-letter Latin "Simulimmo"
-function perLetterOK(){ const w=wordLayers(); return wordText==="Simulimmo" && textTarget().kind==="word" && w.length===9 && w.every(l=>!l.font || (FONTS||[]).some(f=>f.id===l.font&&f.perLetter) || l.font==="instrument"); }
+/* the character a letter layer draws (stored since the word is typed by the user; older layers: from the name) */
+function letterCh(L){ if(typeof L.ch==="string"&&L.ch) return L.ch; const m=/^Lettre (.+) · \d+$/u.exec(L.name||""); return m&&[...m[1]].length===1?m[1]:null; }
+/* letters can be swapped one by one while the word is Latin outlines (one layer per character) in per-letter typefaces */
+function perLetterOK(){ const w=wordLayers(); return textTarget().kind==="word" && w.length>0 && !liveOf(w) && scriptOf(wordText)==="latn" && w.every(l=>letterCh(l) && (!l.font || l.font==="instrument" || !FONTS || (fontById(l.font)||{}).perLetter)); }
 function renderFontSec(){
   if(textTarget().kind==="block"){ $("#fontHint").textContent="Police du bloc de texte sélectionné"; return; }
   const n=selLetters().length; $("#fontHint").textContent = n ? "Police de "+(n>1?n+" lettres sélectionnées":"la lettre sélectionnée") : "Police du mot (sélectionnez des lettres pour les modifier seules)";
 }
+/* Previews show the user's own text: the word, the text block, or the selected letters.
+   Each typeface's glyph file is loaded when its line scrolls into view (see watchPreviews). */
 const previewCache=new Map();
-function fontPreview(f, idxs){
-  const key=f.id+"|"+idxs.join(","); if(previewCache.has(key)) return previewCache.get(key);
-  const ls=(idxs.length?idxs.map(i=>f.letters[i]):f.letters).filter(Boolean); if(!ls.length) return "";
-  const b=bounds(ls.map(g=>({subs:g.subs})));
-  const svg=`<svg viewBox="${b.x0-4} ${b.y0-4} ${b.x1-b.x0+8} ${b.y1-b.y0+8}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ls.map(g=>`<path d="${pathD(g.subs)}" fill="${C.night}"/>`).join("")}</svg>`;
+function previewText(idxs){
+  const tt=textTarget();
+  if(tt.kind==="block") return tt.g.text.str;
+  if(idxs.length){ const w=wordLayers(); return idxs.map(i=>w[i]&&letterCh(w[i])||"").join(""); }
+  return wordText;
+}
+function fontPreview(f, str){
+  str=[...String(str||"").trim()].slice(0,28).join("");
+  if(!f.gkey || scriptOf(str||"a")!=="latn") return `<span class="fsample">${esc(f.text||"")}</span>`;
+  const G=window.__G&&window.__G[f.gkey];
+  if(!G) return `<span class="fsample fload" data-gk="${esc(f.gkey)}">…</span>`;
+  const key=f.id+"|"+str; if(previewCache.has(key)) return previewCache.get(key);
+  const ls=str?layoutText(str, f, G, 0, 0, 1).letters:[];
+  const svg = !ls.length ? `<span class="fsample">${esc(f.text||"")}</span>` : (()=>{ const b=bounds(ls.map(g=>({subs:g.subs}))), pad=(b.y1-b.y0)*0.06;
+    return `<svg viewBox="${b.x0-pad} ${b.y0-pad} ${b.x1-b.x0+2*pad} ${b.y1-b.y0+2*pad}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ls.map(g=>`<path d="${pathD(g.subs)}" fill="${C.night}"/>`).join("")}</svg>`; })();
   previewCache.set(key,svg); return svg;
+}
+let previewObs=null;
+function watchPreviews(menu, str){
+  if(previewObs) previewObs.disconnect();
+  const fill=el=>{ const b=el.closest("[data-f]"); const f=b&&FONTS[+b.dataset.f]; if(!f) return;
+    loadGlyphs(f.gkey).then(()=>{ if(el.isConnected) el.outerHTML=fontPreview(f, str); }).catch(()=>{ if(el.isConnected) el.textContent=f.text||""; }); };
+  const els=[...menu.querySelectorAll(".fload")];
+  if(!("IntersectionObserver" in window)){ els.forEach(fill); return; }
+  previewObs=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ previewObs.unobserve(e.target); fill(e.target); } }), {root:menu, rootMargin:"120px"});
+  els.forEach(el=>previewObs.observe(el));
 }
 function renderFontMenu(){
   const m=$("#fontMenu");
@@ -1662,7 +1702,7 @@ function renderFontMenu(){
   const idxs = fontScope==="word" ? [] : sl.map(letterIdx).sort((a,b)=>a-b);
   const curFonts=new Set((fontScope==="word"?wordLayers().map(l=>l.id):sl).map(id=>(layerById(id)||{}).font||"instrument"));
   const q=fontFilter.trim().toLowerCase();
-  const tgt=textTarget(), customText = tgt.kind==="block" || wordText!=="Simulimmo";
+  const tgt=textTarget(), ptxt=previewText(idxs);
   const list=FONTS.map((f,i)=>({f,i})).filter(({f})=>(fontScope==="word"||f.perLetter) && (!q || (f.name+" "+f.cat).toLowerCase().includes(q)));
   const cats=[...new Set(list.map(x=>x.f.cat))];
   const keepFocus=document.activeElement&&document.activeElement.id==="fontFind";
@@ -1670,54 +1710,51 @@ function renderFontMenu(){
       <label class="chk"><input type="radio" name="fscope" value="sel" ${fontScope==="sel"?"checked":""} ${sl.length&&okL?"":"disabled"}> Lettres sélectionnées${sl.length?" ("+sl.length+")":""}</label>
       <label class="chk"><input type="radio" name="fscope" value="word" ${fontScope==="word"?"checked":""}> ${tgt.kind==="block"?"Bloc de texte":"Mot entier"}</label>
       <input type="search" id="fontFind" placeholder="Filtrer : manuscrite, arabe, kanji…" value="${esc(fontFilter)}" aria-label="Filtrer les polices"></div>
-    ${!okL&&sl.length?`<p class="muted" style="margin:4px">Le mot n'est plus en alphabet latin à 9 lettres : choisissez d'abord une police latine pour le mot entier.</p>`:""}`+
-    cats.map(c=>`<div class="fcat">${esc(c)}</div>`+list.filter(x=>x.f.cat===c).map(({f,i})=>`<button class="fontitem${curFonts.size===1&&curFonts.has(f.id)?" cur":""}" data-f="${i}"><span class="fn">${esc(f.name)}${f.perLetter?"":" · mot entier"}</span>${fontPreview(f,idxs)}</button>`).join("")).join("")+
+    ${!okL&&sl.length?`<p class="muted" style="margin:4px">Le mot n'est pas en alphabet latin (ou sa police ne se change pas lettre par lettre) : choisissez d'abord une police latine pour le mot entier.</p>`:""}`+
+    cats.map(c=>`<div class="fcat">${esc(c)}</div>`+list.filter(x=>x.f.cat===c).map(({f,i})=>`<button class="fontitem${curFonts.size===1&&curFonts.has(f.id)?" cur":""}" data-f="${i}"><span class="fn">${esc(f.name)}${f.perLetter?"":" · mot entier"}</span>${fontPreview(f,ptxt)}</button>`).join("")).join("")+
     (list.length?"":`<p class="muted" style="margin:6px">Aucune police ne correspond.</p>`)+
-    `<p class="muted" style="margin:6px 4px">Polices libres (SIL OFL ou Apache 2.0) converties en contours. Les écritures non latines remplacent le mot entier (translittération). Annuler pour revenir.</p>`;
+    `<p class="muted" style="margin:6px 4px">Polices libres (SIL OFL ou Apache 2.0) converties en contours. Les écritures non latines s'appliquent au mot entier : tapez votre texte dans cette écriture (bouton clavier). Annuler pour revenir.</p>`;
   m.querySelectorAll("input[name=fscope]").forEach(r=>r.onchange=()=>{ fontScope=r.value; renderFontMenu(); });
   const fi=$("#fontFind"); fi.oninput=()=>{ fontFilter=fi.value; renderFontMenu(); }; if(keepFocus){ fi.focus(); fi.setSelectionRange(fi.value.length,fi.value.length); }
   m.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>applyFont(FONTS[+b.dataset.f], fontScope==="word"?null:selLetters()));
+  watchPreviews(m, ptxt);
 }
 $("#fontBtn").onclick=()=>{ const m=$("#fontMenu"); m.hidden=!m.hidden; $("#fontBtn").classList.toggle("on",!m.hidden); $("#fontBtn").setAttribute("aria-expanded",String(!m.hidden)); if(!m.hidden){ fontScope=selLetters().length?"sel":"word"; renderFontMenu(); } };
 document.addEventListener("pointerdown",e=>{ const m=$("#fontMenu"); if(!m.hidden && !e.target.closest("#fontSec") && !e.target.closest("#cv") && !e.target.closest("#layers")){ m.hidden=true; $("#fontBtn").classList.remove("on"); } });
-/* Selected letters: replaced one by one, neighbours keep their gaps (following letters shift by the width change).
-   Whole word: the word is rebuilt from the typeface (any number of glyph clusters), keeping its place, colour zone, group, opacity and blend. */
-function applyFont(f, ids){
+/* Whole word or text block: rebuilt from the typeface with its current text, keeping place, size, colour zone, group, opacity and blend.
+   Selected letters: each one is re-shaped from the typeface's glyph file on the word's baseline; following letters shift by the width change. */
+async function applyFont(f, ids){
   const tt=textTarget();
-  // a text block, or a word whose text is no longer "Simulimmo": rebuild the text in the new typeface
-  if(!ids && (tt.kind==="block" || wordText!=="Simulimmo")){
-    const str=tt.kind==="block"?tt.g.text.str:wordText;
-    setText(tt, str, f).then(ok=>{ if(ok){ renderFontMenu(); toast("Police « "+f.name+" » appliquée (Annuler pour revenir)."); } }); return; }
-  const before=snapshot(), word=wordLayers(); if(!word.length) return;
   if(!ids){
-    const ob=bounds(word), nb=bounds(f.letters.map(g=>({subs:g.subs})));
-    const dx=ob.x0-nb.x0, dy=(ob.y0+ob.y1)/2-(nb.y0+nb.y1)/2, first=word[0];
-    const at=layers.indexOf(first);
-    const fresh=f.letters.map((g,i)=>{ const L={visible:true, locked:false, id:"lettre-"+(i+1), name:(g.ch==="—"?"Barre":"Lettre "+g.ch)+" · "+(i+1), group:"word", fill:first.fill, zone:first.zone, font:f.id, subs:clone(g.subs)};
-      if(first.grp) L.grp=first.grp; if(first.opacity!==undefined) L.opacity=first.opacity; if(first.blend) L.blend=first.blend;
-      L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,dy))); return stamp(L, f.ty+dy); });
-    const rest=layers.filter(l=>!word.includes(l)); const pos=rest.indexOf(layers.slice(at).find(l=>!word.includes(l)));
-    layers = pos<0 ? [...rest, ...fresh] : [...rest.slice(0,pos), ...fresh, ...rest.slice(pos)];
-    wordText=f.upper?"SIMULIMMO":"Simulimmo"; if(!f.gkey) wordText="Simulimmo";
-  } else {
-    const targets=new Set(ids); let shift=0;
-    for(const L of word){
-      const ob=bounds([L]);
-      if(targets.has(L.id)){ const g=f.letters[letterIdx(L.id)]; if(!g) continue;
-        const gb=bounds([{subs:g.subs}]); const nx=ob.x0+shift-gb.x0, ny=(ob.y1)-(gb.y1);
-        L.subs=clone(g.subs); L.subs.forEach(s=>s.forEach(n=>moveNode(n,nx,ny))); L.font=f.id; stamp(L, f.ty+ny);
-        shift+= (gb.x1-gb.x0)-(ob.x1-ob.x0);
-      } else if(shift){ L.subs.forEach(s=>s.forEach(n=>moveNode(n,shift,0))); }
+    const str=tt.kind==="block"?tt.g.text.str:wordText;
+    const ok=await setText(tt, str, f); if(ok){ renderFontMenu(); toast("Police « "+f.name+" » appliquée (Annuler pour revenir)."); } return; }
+  if(!f.gkey || !f.perLetter || !perLetterOK()){ toast("Cette police s'applique au mot entier."); return; }
+  let G; try{ G=await loadGlyphs(f.gkey); }catch(_){ toast("Glyphes de « "+f.name+" » introuvables. Rechargez la page."); return; }
+  const before=snapshot(), word=wordLayers(), m=textMetrics(word), targets=new Set(ids), missing=[]; let shift=0;
+  for(const L of word){
+    const ob=bounds([L]);
+    if(targets.has(L.id)){
+      const ch=letterCh(L), g=ch&&layoutText(ch, f, G, 0, m.baseline, f.k*m.s).letters[0];
+      if(g){ const gb=bounds([{subs:g.subs}]), nx=ob.x0+shift-gb.x0;
+        L.subs=g.subs; L.subs.forEach(s=>s.forEach(n=>moveNode(n,nx,0))); L.font=f.id; L.ch=ch; stamp(L, m.baseline);
+        shift+=(gb.x1-gb.x0)-(ob.x1-ob.x0); continue; }
+      missing.push(ch||"?");
     }
+    if(shift) L.subs.forEach(s=>s.forEach(n=>moveNode(n,shift,0)));
   }
-  fixSel(); commit(before); renderFontMenu(); toast("Police « "+f.name+" » appliquée"+(ids?" à "+ids.length+" lettre(s)":" au mot")+" (Annuler pour revenir).");
+  fixSel(); commit(before); renderFontMenu();
+  toast(missing.length ? "Caractères absents de « "+f.name+" » : "+missing.join(" ") : "Police « "+f.name+" » appliquée à "+ids.length+" lettre(s) (Annuler pour revenir).");
 }
 
 /* ---------- Text: edit the word, and free text blocks (Texte tool) ----------
    Latin and Cyrillic typefaces carry a glyph file (glyphs/<key>.js: outlines in font units, advances, kerning),
    loaded on demand. Each generated letter remembers its baseline (bl) and box at creation (gy) so a moved or
    scaled word keeps its place and size when its text or typeface changes. */
-let wordText="Simulimmo";
+let wordText=GLYPHS.word;
+/* The brand the user is designing for (asked on first open). Export names and titles derive from it. */
+let brand={name:"", tagline:"", keywords:[]};
+function validBrand(v){ return v&&typeof v.name==="string"&&v.name.length<=80&&typeof v.tagline==="string"&&v.tagline.length<=160&&Array.isArray(v.keywords)&&v.keywords.length<=12&&v.keywords.every(k=>typeof k==="string"&&k.length<=40); }
+const brandLabel=()=>brand.name.trim()||wordText.trim()||"Logo";
 const glyphLoads={};
 function loadGlyphs(key){
   if(window.__G&&window.__G[key]) return Promise.resolve(window.__G[key]);
@@ -1784,6 +1821,7 @@ async function setText(target, str, f, opts={}){
   const first=old[0]||target.proto||{fill:palette[0],zone:0};
   const pfx=target.kind==="word"?"lettre-":target.g.id+"-";
   const fresh=letters.map((g,i)=>{ const L={visible:first.visible!==false, locked:false, id:pfx+(i+1), name:(g.ch==="—"?"Barre":(target.kind==="word"?"Lettre ":"")+g.ch)+" · "+(i+1), group:first.group||"word", fill:first.fill, zone:first.zone||0, font:f.id, subs:g.subs};
+    if(g.ch!=="—") L.ch=g.ch;
     if(first.grp) L.grp=first.grp; if(target.kind==="block") L.grp=target.g.id; if(first.opacity!==undefined) L.opacity=first.opacity; if(first.blend) L.blend=first.blend;
     L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,0))); return stamp(L, m.baseline); });
   const at=old.length?layers.indexOf(old[0]):layers.length;
@@ -2071,23 +2109,23 @@ $("#txtIn").addEventListener("keydown",e=>{
 
 /* ---------- Persistence (db + assets, local fallback) ---------- */
 const caps={db:null, assets:null, downloads:null, comments:null};
-const LS_KEY="simulimmo-logo-v1";
+const LS_KEY="atelier-logo-v1";
 function setStatus(txt, err){ const s=$("#status"); s.classList.toggle("err",!!err); s.querySelector("span").textContent=txt; }
-const palDoc=()=>({v:2, pals, groups, wt:wordText});
+const palDoc=()=>({v:2, pals, groups, wt:wordText, brand});
 function loadPalDoc(v){ if(Array.isArray(v)){ if(validPalette(v)){ pals=[{id:"main",name:"Principale",colors:v}]; } return true; }
-  if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; return true; } return false; }
-function localSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("simulimmo-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
+  if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; if(validBrand(v.brand)) brand=v.brand; return true; } return false; }
+function localSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
 function localLoad(){ try{ const v=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return v; }catch(_){ return null; } }
 const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,palette:0};
 /* Claude's edits: atelier/patch holds only the changed layers, merged by id */
 function applyPatch(d){
   if(!d || !Number.isFinite(d.at)) return;
-  let seen=0; try{ seen=+localStorage.getItem("simulimmo-logo-patch")||0; }catch(_){}
+  let seen=0; try{ seen=+localStorage.getItem("atelier-logo-patch")||0; }catch(_){}
   if(d.at<=seen || d.at<=lastAt.patch) return;
   let v; try{ v=JSON.parse(d.layers); }catch(_){ return; }
   if(!Array.isArray(v) || !v.length || !v.every(l=>l && typeof l.id==="string" && validLayers([Object.assign({visible:true,locked:false,name:"x",group:"mark",fill:"#000000"},l)]))) return;
   if(drag){ setTimeout(()=>applyPatch(d),1000); return; }
-  lastAt.patch=d.at; try{ localStorage.setItem("simulimmo-logo-patch",String(d.at)); }catch(_){}
+  lastAt.patch=d.at; try{ localStorage.setItem("atelier-logo-patch",String(d.at)); }catch(_){}
   const before=snapshot();
   for(const p of v){ const i=layers.findIndex(l=>l.id===p.id); if(i>=0 && p.vector){ const keep=layers[i]; layers[i]=Object.assign({}, keep, {subs:p.subs, name:p.name||keep.name}); delete layers[i].kind; delete layers[i].live; continue; }
     if(i>=0){ const keepZone=p.fill===undefined && p.zone===undefined; layers[i]=Object.assign({}, layers[i], p); if(!keepZone && p.zone===undefined) delete layers[i].zone; } }
@@ -2096,7 +2134,7 @@ function applyPatch(d){
   setClaudeUndo({before, note:d.note?String(d.note).slice(0,140):"", at:d.at});
 }
 /* Persistent "undo Claude's change" banner */
-const CU_KEY="simulimmo-logo-claude-undo";
+const CU_KEY="atelier-logo-claude-undo";
 function setClaudeUndo(v){ try{ v?localStorage.setItem(CU_KEY,JSON.stringify(v)):localStorage.removeItem(CU_KEY); }catch(_){} renderClaudeBar(); }
 function getClaudeUndo(){ try{ return JSON.parse(localStorage.getItem(CU_KEY)||"null"); }catch(_){ return null; } }
 function renderClaudeBar(){
@@ -2120,7 +2158,7 @@ function applyRemote(what, d){
     lastAt.shape=d.at; const before=snapshot(); if(JSON.stringify(layers)===JSON.stringify(v)) return;
     layers=v; ensureZones(); fixSel(); undoStack.push(before); redoStack.length=0; localSave(); renderAll(); toast("Le dessin a été mis à jour par Claude (Annuler pour revenir).");
   } else if(what==="palette"){
-    if(pick || saveTimers.palette || saving.palette) return; if(!loadPalDoc(v)) return; lastAt.palette=d.at; try{ localStorage.setItem("simulimmo-logo-palette",JSON.stringify(palDoc())); }catch(_){} ensureZones(); renderAll();
+    if(pick || saveTimers.palette || saving.palette) return; if(!loadPalDoc(v)) return; lastAt.palette=d.at; try{ localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); }catch(_){} ensureZones(); renderAll();
   } else {
     if(!validNotes(v)) return;
     if(saveTimers.notes || saving.notes || (document.activeElement && document.activeElement.id==="noteText")){ setTimeout(()=>applyRemote(what,d),1500); return; }
@@ -2149,9 +2187,9 @@ async function doSave(what){
 async function initPersistence(){
   const loc=localLoad();
   if(loc){ if(validLayers(loc.layers)) layers=loc.layers; if(validNotes(loc.notes)) notes=loc.notes; }
-  try{ const pl=JSON.parse(localStorage.getItem("simulimmo-logo-palette")||"null"); if(pl) loadPalDoc(pl); }catch(_){}
+  try{ const pl=JSON.parse(localStorage.getItem("atelier-logo-palette")||"null"); if(pl) loadPalDoc(pl); }catch(_){}
   ensureZones();
-  try{ const p=JSON.parse(localStorage.getItem("simulimmo-logo-prefs")||"null"); if(p&&[1,2,4,8,16].includes(p.size)) grid={on:!!p.on,snap:!!p.snap,size:p.size}; }catch(_){}
+  try{ const p=JSON.parse(localStorage.getItem("atelier-logo-prefs")||"null"); if(p&&[1,2,4,8,16].includes(p.size)) grid={on:!!p.on,snap:!!p.snap,size:p.size}; }catch(_){}
   applyGrid(); renderAll();
   if(!(window.claude && typeof window.claude.use==="function")){ sendState="off"; renderSendBox(); setStatus(loc?"Enregistré dans ce navigateur":"Prêt · sauvegarde dans ce navigateur"); return; }
   setStatus("Connexion au stockage…");

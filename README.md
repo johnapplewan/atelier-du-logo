@@ -2,7 +2,7 @@
 
 Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. On l'ouvre comme artifact dans une conversation, on dessine, on pose des bulles pour demander des retouches, et Claude modifie le logo directement dans l'outil.
 
-> Statut : copie de travail de l'atelier conçu pour Simulimmo, en cours de nettoyage (voir « Reste à faire »).
+> Statut : en cours de transformation en outil diffusable (voir la liste « To do » de `CLAUDE.md`). L'atelier s'ouvre sur un logo d'exemple neutre (« Marque ») : tapez le nom de votre marque dans « Texte du mot » et toutes les polices se redessinent avec.
 
 ## Fonctions
 
@@ -22,10 +22,9 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 |---|---|
 | `app/` | Ce qui est publié comme artifact : `index.html` (généré), `fonts.js`, `glyphs/`, `dict-*.js` |
 | `src/template.html` | Source de l'application |
-| `build.js` | `npm run build` : `src/template.html` + `tools/word/glyphs.json` → `app/index.html` |
-| `tools/word/` | Contours du mot par défaut (opentype.js) |
-| `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` → `fonts.js`, `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
-| `tests/` | Scripts Playwright sur `app/index.html` (Chromium) |
+| `build.js` | `npm run build` : `src/template.html` + le mot par défaut, dessiné depuis `app/glyphs/instrument.js` → `app/index.html` |
+| `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` puis `trim.cjs` → `fonts.js` (métadonnées seules), `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
+| `tests/` | Tests Playwright sur `app/index.html` (Chromium) : `npm test` |
 
 ## Licences
 

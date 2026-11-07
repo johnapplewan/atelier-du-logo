@@ -1,63 +1,108 @@
-const {chromium}=require('playwright');
-(async()=>{
-const b=await chromium.launch(); const ctx=await b.newContext({viewport:{width:1440,height:900}}); const p=await ctx.newPage();
-const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
-await p.route(/fonts\.(googleapis|gstatic)/, r=>r.abort());
-await p.goto('file://'+require('path').resolve(__dirname,'../app/index.html')); await p.waitForTimeout(500);
-const dir=__dirname;
-const n=await p.locator('#art path').count(); console.log('paths rendered',n);
-await p.screenshot({path:dir+'/s1.png'});
-// helper world->screen
-const ws=async(x,y)=>p.evaluate(([x,y])=>{const r=document.querySelector('#cv').getBoundingClientRect(),v=__atelier.view;return {x:r.left+v.tx+x*v.k,y:r.top+v.ty+y*v.k}},[x,y]);
-// select brass tile with points tool
-await p.keyboard.press('p');
-let pt=await ws(165,165); await p.mouse.click(pt.x,pt.y);
-console.log('sel',JSON.stringify(__=await p.evaluate(()=>__atelier.sel)));
-// drag node 0 of brass tile (154,134) to (154,120)
-pt=await ws(154,134); await p.mouse.move(pt.x,pt.y); await p.mouse.down(); const t2=await ws(150,118); await p.mouse.move(t2.x,t2.y,{steps:5}); await p.mouse.up();
-let L=await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0]);
-console.log('moved node0',L[0].x,L[0].y,'count',L.length);
-// add point: click on right edge segment between node2 (196,154) and node3 (196,176): x=196,y=165
-pt=await ws(196,165); await p.mouse.click(pt.x,pt.y);
-L=await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0]);
-console.log('after add count',L.length, JSON.stringify(await p.evaluate(()=>__atelier.sel.node)));
-// delete with Delete key
-await p.keyboard.press('Delete');
-L=await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0]);
-console.log('after delete count',L.length);
-// undo / redo
-await p.keyboard.press('Control+z'); console.log('undo count',(await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0].length)));
-await p.keyboard.press('Control+Shift+z'); console.log('redo count',(await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0].length)));
-await p.screenshot({path:dir+'/s2.png'});
-// bubble
-await p.keyboard.press('b'); pt=await ws(90,90); await p.mouse.click(pt.x,pt.y);
-await p.fill('#noteText','Arrondir le carreau laiton'); await p.locator('#noteText').blur(); await p.waitForTimeout(800);
-console.log('notes',JSON.stringify(await p.evaluate(()=>__atelier.notes.map(n=>[n.n,n.text]))), 'list items',await p.locator('#notes .note').count());
-// layer visibility toggle on letter 1
-await p.locator('.layer[data-id="lettre-1"] [data-act=vis]').click(); console.log('visible letter1', await p.evaluate(()=>__atelier.layers.find(l=>l.id==='lettre-1').visible));
-await p.locator('.layer[data-id="lettre-1"] [data-act=vis]').click();
-// export
-await p.click('#exportBtn'); await p.check('input[value=full]'); const svg=await p.inputValue('#svgcode');
-console.log('svg head',svg.slice(0,140).replace(/\n/g,' '),'paths',(svg.match(/<path/g)||[]).length);
-await p.screenshot({path:dir+'/s3.png'});
-await p.click('#exClose');
-// persistence: reload
-await p.waitForTimeout(800); await p.reload(); await p.waitForTimeout(500);
-console.log('after reload notes',await p.evaluate(()=>__atelier.notes.length),'node0',JSON.stringify(await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0][0])));
-// reset
-await p.click('#reset'); await p.click('#cfYes'); console.log('reset node0',JSON.stringify(await p.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-bd').subs[0][0])));
-// tablet touch
-const tctx=await b.newContext({viewport:{width:1024,height:1366},hasTouch:true,isMobile:true}); const tp=await tctx.newPage(); tp.on('pageerror',e=>errs.push('tab:'+e.message));
-await tp.goto('file://'+require('path').resolve(__dirname,'../app/index.html')); await tp.waitForTimeout(500);
-await tp.locator('[data-tool=points]').tap();
-const tws=async(x,y)=>tp.evaluate(([x,y])=>{const r=document.querySelector('#cv').getBoundingClientRect(),v=__atelier.view;return {x:r.left+v.tx+x*v.k,y:r.top+v.ty+y*v.k}},[x,y]);
-let q=await tws(90,90); await tp.touchscreen.tap(q.x,q.y);
-q=await tws(80,60);
-// touch drag via CDP
-const cdp=await tctx.newCDPSession(tp);
-const tdisp=(type,x,y)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x,y}]});
-await tdisp('touchStart',q.x,q.y); for(let i=1;i<=5;i++) await tdisp('touchMove',q.x,q.y-i*4); await tdisp('touchEnd');
-console.log('tablet sel',JSON.stringify(await tp.evaluate(()=>__atelier.sel)),'node0',JSON.stringify(await tp.evaluate(()=>__atelier.layers.find(l=>l.id==='carreau-hg').subs[0][0])));
-await tp.screenshot({path:dir+'/s4.png'});
-console.log('errors',errs);
-await b.close();})();
+// Editing: example document, pen tool, undo/redo, bubbles, visibility, export, persistence, reset, fonts, touch.
+const { chromium, assert, open, worldToScreen, layer, check, done } = require("./helpers");
+
+(async () => {
+  const browser = await chromium.launch();
+  const { page: p, errors } = await open(browser);
+  const ws = worldToScreen(p);
+
+  // neutral example: frame, disc, dot + the word "Marque"
+  const ids = await p.evaluate(() => __atelier.layers.map(l => l.id));
+  check("example document", () => assert.deepStrictEqual(ids, ["cadre", "disque", "point", "lettre-1", "lettre-2", "lettre-3", "lettre-4", "lettre-5", "lettre-6"]));
+  const word = await p.evaluate(() => __atelier.layers.filter(l => l.group === "word").map(l => l.ch).join(""));
+  check("word is Marque, letters remember their character", () => assert.strictEqual(word, "Marque"));
+  const rendered = await p.locator("#art path").count();
+  check("all layers rendered", () => assert.strictEqual(rendered, 9));
+  await p.screenshot({ path: __dirname + "/s1.png" });
+
+  // pen: select the frame and move its first node (84,28) up by 14
+  await p.keyboard.press("p");
+  let q = await ws(45, 200); await p.mouse.click(q.x, q.y);
+  const selLayer = (await p.evaluate(() => __atelier.sel)).layer;
+  check("frame selected", () => assert.strictEqual(selLayer, "cadre"));
+  q = await ws(84, 28); await p.mouse.move(q.x, q.y); await p.mouse.down();
+  q = await ws(84, 14); await p.mouse.move(q.x, q.y, { steps: 5 }); await p.mouse.up();
+  let L = (await layer(p, "cadre")).subs[0];
+  check("node dragged", () => { assert.strictEqual(L.length, 8); assert.ok(Math.abs(L[0].x - 84) < 0.6 && Math.abs(L[0].y - 14) < 0.6, JSON.stringify(L[0])); });
+
+  // add a node on the (now slanted) top edge, delete it, undo, redo
+  q = await ws(128, 21); await p.mouse.click(q.x, q.y);
+  const added = (await layer(p, "cadre")).subs[0].length;
+  await p.keyboard.press("Delete");
+  const deleted = (await layer(p, "cadre")).subs[0].length;
+  await p.keyboard.press("Control+z"); const undone = (await layer(p, "cadre")).subs[0].length;
+  await p.keyboard.press("Control+Shift+z"); const redone = (await layer(p, "cadre")).subs[0].length;
+  check("add / delete / undo / redo node", () => assert.deepStrictEqual([added, deleted, undone, redone], [9, 8, 9, 8]));
+
+  // bubble
+  await p.keyboard.press("b"); q = await ws(90, 200); await p.mouse.click(q.x, q.y);
+  await p.fill("#noteText", "Arrondir le cadre"); await p.locator("#noteText").blur(); await p.waitForTimeout(700);
+  const notes = await p.evaluate(() => __atelier.notes.map(n => [n.n, n.text]));
+  check("bubble saved", () => assert.deepStrictEqual(notes, [[1, "Arrondir le cadre"]]));
+
+  // visibility
+  await p.locator('.layer[data-id="lettre-1"] [data-act=vis]').click();
+  const hidden = !(await layer(p, "lettre-1")).visible;
+  await p.locator('.layer[data-id="lettre-1"] [data-act=vis]').click();
+  check("hide / show a letter", () => assert.ok(hidden));
+
+  // export: names and title come from the word (no brand entered yet)
+  await p.click("#exportBtn"); await p.check("input[value=full]");
+  const svg = await p.inputValue("#svgcode"), save = await p.textContent("#exSave");
+  check("export title and paths", () => { assert.match(svg, /<title>Marque<\/title>/); assert.strictEqual((svg.match(/<path/g) || []).length, 9); });
+  check("export file name from the word", () => assert.match(save, /marque-logo\.svg/));
+  await p.click("#exClose");
+
+  // persistence, with neutral keys only
+  await p.waitForTimeout(800); await p.reload(); await p.waitForTimeout(500);
+  const keys = await p.evaluate(() => Object.keys(localStorage));
+  const after = await p.evaluate(() => [__atelier.notes.length, __atelier.layers.find(l => l.id === "cadre").subs[0][0]]);
+  check("reload keeps notes and curves", () => { assert.strictEqual(after[0], 1); assert.ok(Math.abs(after[1].y - 14) < 0.6); });
+  check("neutral localStorage keys", () => { assert.ok(keys.includes("atelier-logo-v1"), keys.join()); assert.ok(!keys.some(k => /simulimmo/i.test(k)), keys.join()); });
+
+  // reset to the example
+  await p.click("#reset"); await p.click("#cfYes");
+  const reset0 = (await layer(p, "cadre")).subs[0][0];
+  check("reset", () => assert.deepStrictEqual(reset0, { x: 84, y: 28, i: { x: 53.07, y: 28 }, o: null }));
+
+  // fonts: previews show the user's word, whole-word and per-letter swaps
+  await p.fill("#txtIn", "Atelier Nova"); await p.press("#txtIn", "Enter"); await p.waitForTimeout(400);
+  const w2 = await p.evaluate(() => __atelier.layers.filter(l => l.group === "word").map(l => l.ch).join(""));
+  check("typed word re-shaped", () => assert.strictEqual(w2, "AtelierNova"));
+  await p.click("#fontBtn"); await p.waitForSelector("#fontMenu .fontitem svg", { timeout: 5000 });
+  const prevLetters = await p.evaluate(() => document.querySelector('#fontMenu .fontitem svg').querySelectorAll("path").length);
+  check("font preview draws the typed word", () => assert.strictEqual(prevLetters, 11));
+  const mont = await p.evaluate(() => [...document.querySelectorAll("#fontMenu .fontitem")].findIndex(b => b.querySelector(".fn").textContent.trim() === "Montserrat"));
+  await p.locator("#fontMenu .fontitem").nth(mont).click(); await p.waitForTimeout(600);
+  const fonts = await p.evaluate(() => [...new Set(__atelier.layers.filter(l => l.group === "word").map(l => l.font))]);
+  check("whole word in Montserrat", () => assert.deepStrictEqual(fonts, ["montserrat"]));
+  // per letter: select the first two letters, apply Playfair Display
+  await p.click("#fontBtn");
+  await p.click('.layer[data-id="lettre-1"] .nm'); await p.click('.layer[data-id="lettre-2"] .nm', { modifiers: ["Shift"] });
+  await p.click("#fontBtn"); await p.waitForTimeout(200);
+  await p.check("input[name=fscope][value=sel]");
+  const play = await p.evaluate(() => [...document.querySelectorAll("#fontMenu .fontitem")].findIndex(b => b.querySelector(".fn").textContent.trim() === "Playfair Display"));
+  await p.locator("#fontMenu .fontitem").nth(play).click(); await p.waitForTimeout(600);
+  const per = await p.evaluate(() => __atelier.layers.filter(l => l.group === "word").map(l => l.font + ":" + l.ch));
+  check("per-letter swap on any word", () => assert.deepStrictEqual(per.slice(0, 3), ["playfair:A", "playfair:t", "montserrat:e"]));
+  await p.click("#exportBtn"); await p.check("input[value=full]");
+  const save2 = await p.textContent("#exSave");
+  check("export name follows the typed word", () => assert.match(save2, /atelier-nova-logo\.svg/));
+  await p.click("#exClose");
+
+  // tablet: tap a node and drag it by touch
+  const { ctx: tctx, page: tp, errors: terr } = await open(browser, { context: { viewport: { width: 1024, height: 1366 }, hasTouch: true, isMobile: true } });
+  const tws = worldToScreen(tp);
+  await tp.locator("[data-tool=points]").tap();
+  q = await tws(45, 200); await tp.touchscreen.tap(q.x, q.y);
+  q = await tws(84, 28);
+  const cdp = await tctx.newCDPSession(tp);
+  const touch = (type, x, y) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] });
+  await touch("touchStart", q.x, q.y); for (let i = 1; i <= 5; i++) await touch("touchMove", q.x, q.y - i * 4); await touch("touchEnd");
+  const tnode = (await layer(tp, "cadre")).subs[0][0];
+  check("touch drag moves a node", () => assert.ok(tnode.y < 27, JSON.stringify(tnode)));
+  await tp.screenshot({ path: __dirname + "/s4.png" });
+
+  done(errors.concat(terr));
+  await browser.close();
+})();

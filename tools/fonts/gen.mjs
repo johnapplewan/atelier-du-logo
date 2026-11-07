@@ -1,4 +1,4 @@
-// Converts the word "Simulimmo" (or its transliteration) into outlines for each typeface.
+// Measures each typeface on a reference word (scale "k") and bakes outlines. Then run trim.cjs: the app shapes the user's text from app/glyphs, so the baked word is dropped.
 // Shaping with HarfBuzz (handles Arabic joining, Devanagari conjuncts, Thai, CJK); one layer per cluster.
 import * as hb from 'harfbuzzjs'; import fs from 'fs';
 const E='node_modules/@expo-google-fonts/';

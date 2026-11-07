@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "node build.js",
-    "test": "node tests/test.js && node tests/patchtest.js && node tests/t11.js"
+    "test": "node tests/test.js && node tests/t11.js && node tests/patchtest.js && node tests/mock.js"
   },
   "devDependencies": {
     "playwright": "^1.56.0"
