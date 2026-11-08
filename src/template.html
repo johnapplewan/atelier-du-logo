@@ -305,6 +305,18 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .plrow{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 6px;border-radius:7px}.plrow:hover{background:#F1F1EF}
 .plsw{width:34px;height:26px;flex:none;display:flex}.plsw svg{width:100%;height:100%}
 @media (max-width:760px){.projbody{grid-template-columns:1fr}.colls{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap}}
+.split{display:inline-flex}.split #undo{border-radius:8px 0 0 8px}.split #histBtn{border-radius:0 8px 8px 0;border-left:0;padding:6px 7px}
+.histpanel{position:fixed;z-index:30;width:360px;max-width:94vw;max-height:70vh;display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px rgba(20,20,25,.18);padding:10px}
+.histpanel[hidden]{display:none}
+.hhead{display:flex;align-items:center;gap:8px}.hhead .sp{flex:1}
+.histpanel>p{margin:6px 0 8px;font-size:12px}
+#histList{list-style:none;margin:0;padding:0;overflow:auto;outline:0}
+#histList li{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:7px;font-size:13px}
+#histList li:hover{background:#EEF0FB}
+#histList li label{display:flex;align-items:center;gap:7px;flex:1;min-width:0;cursor:pointer}
+#histList .hl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#histList li.off .hl{text-decoration:line-through;color:var(--muted)}
+#histList .ht{font-size:11.5px;color:var(--muted);flex:none}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
 @media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
@@ -320,7 +332,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
   <span id="projName" class="projname"></span>
   <div id="status" role="status"><i></i><span>Chargement…</span></div>
   <div class="group">
-    <button id="undo" title="Annuler (Ctrl+Z)">Annuler</button>
+    <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
     <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
     <button id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
@@ -376,6 +388,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
         <g id="art"></g>
         <g id="ovl"></g>
         <g id="pins"></g>
+        <g id="histHi" pointer-events="none"></g>
       </g>
     </svg>
     <div class="mini" id="miniLeft">
@@ -523,6 +536,12 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
     </div>
   </div>
 </dialog>
+<div id="histPanel" class="histpanel" hidden role="dialog" aria-label="Historique du projet">
+  <div class="hhead"><b>Historique du projet</b><span id="histCount" class="muted"></span><span class="sp"></span><button class="ib" id="histClose" aria-label="Fermer l'historique">×</button></div>
+  <p class="muted">Décochez une modification pour la retirer, recochez-la pour la rétablir. Survolez une ligne pour voir sur le dessin ce qu'elle touche.</p>
+  <ul id="histList" tabindex="-1"></ul>
+</div>
+<dialog id="choiceDlg"><h2 id="chTitle"></h2><p id="chText"></p><div class="row" id="chBtns" style="justify-content:flex-end"></div></dialog>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -572,7 +591,6 @@ let selNote = null;
 let tool = "move";
 let view = {k:1, tx:0, ty:0};
 let grid = {on:false, snap:false, size:4};
-const undoStack = [], redoStack = [];
 
 function validLayers(v){
   if(!Array.isArray(v)) return false;   // an empty page is a valid document
@@ -649,19 +667,106 @@ function bounds(ls){
 const snapV = v => (grid.snap ? Math.round(v/grid.size)*grid.size : r2(v));
 const layerById = id => layers.find(l=>l.id===id);
 
-/* ---------- History ---------- */
+/* ---------- History ----------
+   Every change is an entry {id, label, at, on, d}: d holds only what changed, layer by layer (JSON before / after),
+   plus the layer order and the palettes, groups and current palette. Entries can be switched off and on in any order:
+   a property is put back only if it still holds the value this entry gave it, so later changes are never overwritten
+   (they are reported instead). Ctrl+Z switches off the latest entry still on; Ctrl+Maj+Z switches it back on.
+   The history is saved with the project. */
 function snapshot(){ return JSON.stringify({L:layers,P:pals,G:groups,C:curPal}); }
 function restoreSnap(str){ const v=JSON.parse(str);
   if(Array.isArray(v)){ layers=v; }
   else { layers=v.L; if(validPals(v.P)) pals=v.P; else if(validPalette(v.P)) pals=[{id:"main",name:"Principale",colors:v.P}]; groups=validGroups(v.G)?v.G:[]; if(typeof v.C==="string") curPal=v.C; }
   ensureZones(); }
-function commit(before){
-  if(before === snapshot()) return;
-  undoStack.push(before); if(undoStack.length>200) undoStack.shift();
-  redoStack.length = 0; changed();
+const stable=o=>o===undefined?"undefined":JSON.stringify(o,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.keys(v).sort().reduce((r,x)=>(r[x]=v[x],r),{}):v);
+let hist=[], redoIds=[], histN=0;
+function diffSnap(bs, as){
+  const b=JSON.parse(bs), a=JSON.parse(as), d={ents:{}, pos:{}, order:null, doc:{}};
+  const bm=new Map(b.L.map((l,i)=>[l.id,[l,i]])), am=new Map(a.L.map((l,i)=>[l.id,[l,i]]));
+  for(const id of new Set([...bm.keys(),...am.keys()])){ const x=bm.get(id), y=am.get(id), sx=x?stable(x[0]):null, sy=y?stable(y[0]):null;
+    if(sx!==sy){ d.ents[id]=[sx,sy]; d.pos[id]=[x?x[1]:-1, y?y[1]:-1]; } }
+  const ob=b.L.map(l=>l.id), oa=a.L.map(l=>l.id); if(stable(ob)!==stable(oa)) d.order=[ob,oa];
+  for(const k of ["P","G","C"]) if(stable(b[k])!==stable(a[k])) d.doc[k]=[stable(b[k]),stable(a[k])];
+  return d; }
+const KEY_LABEL={subs:"Forme",fill:"Couleur",zone:"Couleur",fx:"Style",visible:"Visibilité",locked:"Verrou",name:"Nom",opacity:"Opacité",blend:"Fusion",grp:"Groupe",font:"Police",ch:"Texte",kind:"Texte",live:"Texte",tile:"Motif"};
+function autoLabel(d){
+  const ids=Object.keys(d.ents), nm=s=>{ try{ return JSON.parse(s).name; }catch(_){ return "?"; } };
+  const add=ids.filter(id=>!d.ents[id][0]), del=ids.filter(id=>!d.ents[id][1]), mod=ids.filter(id=>d.ents[id][0]&&d.ents[id][1]);
+  const who=(list,side)=>list.length===1?"« "+nm(d.ents[list[0]][side])+" »":list.length+" calques";
+  if(add.length&&!del.length&&!mod.length) return "Ajout : "+who(add,1);
+  if(del.length&&!add.length&&!mod.length) return "Suppression : "+who(del,0);
+  if(mod.length&&!add.length&&!del.length){ const kinds=new Set(); mod.forEach(id=>{ const x=JSON.parse(d.ents[id][0]), y=JSON.parse(d.ents[id][1]);
+      for(const k of new Set([...Object.keys(x),...Object.keys(y)])) if(stable(x[k])!==stable(y[k])&&k!=="bl"&&k!=="gy") kinds.add(KEY_LABEL[k]||k); });
+    if(d.doc.P&&kinds.size===1&&kinds.has("Couleur")) return "Palette";
+    return [...kinds].slice(0,3).join(", ")+" · "+who(mod,1); }
+  if(ids.length) return (add.length?add.length+" ajouté"+(add.length>1?"s":"")+", ":"")+(del.length?del.length+" supprimé"+(del.length>1?"s":"")+", ":"")+(mod.length?mod.length+" modifié"+(mod.length>1?"s":""):"").replace(/, $/,"");
+  if(d.order) return "Ordre des calques";
+  if(d.doc.P) return "Palette"; if(d.doc.G) return "Groupes"; return "Modification";
 }
-function undo(){ if(!undoStack.length) return; redoStack.push(snapshot()); restoreSnap(undoStack.pop()); fixSel(); changed(); }
-function redo(){ if(!redoStack.length) return; undoStack.push(snapshot()); restoreSnap(redoStack.pop()); fixSel(); changed(); }
+/* add an entry for the change from `before` to now (no re-render) */
+function record(before, label){
+  const after=snapshot(); if(before===after) return null;
+  const d=diffSnap(before, after), e={id:"h"+Date.now().toString(36)+(++histN), label:String(label||autoLabel(d)).slice(0,90), at:Date.now(), on:true, d};
+  hist.push(e); if(hist.length>300) hist.shift(); redoIds.length=0; renderHistory(); return e; }
+function commit(before, label){ if(record(before, label)) changed(); }
+/* switch an entry off (put back its "before" values) or on (its "after" values), without touching later changes */
+function toggleEntry(e, on){
+  const from=on?0:1, to=on?1:0, kept=[];
+  const parse=s=>s===null?null:JSON.parse(s);
+  for(const [id,pair] of Object.entries(e.d.ents)){
+    const cur=layerById(id), cj=cur?stable(cur):null, have=pair[from], want=pair[to];
+    if(cj===have){ if(want===null){ layers=layers.filter(l=>l.id!==id); }
+      else if(cur){ layers[layers.indexOf(cur)]=parse(want); }
+      else { const W=parse(want), i=e.d.pos[id][to]; layers.splice(Math.max(0,Math.min(i,layers.length)),0,W); } continue; }
+    if(cur&&have&&want){ const H=parse(have), W=parse(want); let skipped=false;
+      for(const k of new Set([...Object.keys(H),...Object.keys(W)])){ if(stable(H[k])===stable(W[k])) continue;
+        if(stable(cur[k])===stable(H[k])){ if(W[k]===undefined) delete cur[k]; else cur[k]=clone(W[k]); } else if(k!=="bl"&&k!=="gy"&&k!=="fill") skipped=true; }
+      if(skipped) kept.push(cur.name); continue; }
+    kept.push(parse(have||want).name);
+  }
+  if(e.d.order){ const curO=layers.map(l=>l.id); if(stable(curO)===stable(e.d.order[from])){ const pos=new Map(e.d.order[to].map((id,i)=>[id,i])); layers.sort((x,y)=>(pos.has(x.id)?pos.get(x.id):1e9)-(pos.has(y.id)?pos.get(y.id):1e9)); } }
+  for(const [k,pair] of Object.entries(e.d.doc)){ const cur=stable(k==="P"?pals:k==="G"?groups:curPal);
+    if(cur===pair[from]){ const v=parse(pair[to]); if(k==="P"&&validPals(v)) pals=v; else if(k==="G"&&validGroups(v)) groups=v; else if(k==="C"&&typeof v==="string") curPal=v; }
+    else kept.push(k==="P"?"palette":k==="G"?"groupes":"palette affichée"); }
+  e.on=on; ensureZones(); fixSel(); return kept;
+}
+function reportKept(kept){ if(kept.length) toast("Gardé tel quel car modifié ensuite : "+[...new Set(kept)].slice(0,4).join(", ")+(kept.length>4?"…":"")); }
+function undo(){ const e=[...hist].reverse().find(x=>x.on); if(!e) return; const kept=toggleEntry(e,false); redoIds.push(e.id); changed(); renderHistory(); reportKept(kept); }
+function redo(){ let e=null; while(redoIds.length&&!e){ const id=redoIds.pop(); e=hist.find(x=>x.id===id&&!x.on)||null; } if(!e) return; const kept=toggleEntry(e,true); changed(); renderHistory(); reportKept(kept); }
+const canUndo=()=>hist.some(x=>x.on), canRedo=()=>redoIds.some(id=>hist.some(x=>x.id===id&&!x.on));
+function validHist(v){ return Array.isArray(v)&&v.length<=300&&v.every(e=>e&&typeof e.id==="string"&&typeof e.label==="string"&&typeof e.on==="boolean"&&e.d&&e.d.ents&&typeof e.d.ents==="object"&&e.d.pos&&e.d.doc); }
+/* --- the history panel (long press or right click on "Annuler") --- */
+let histHover=null;
+function relTime(t){ const s=Math.round((Date.now()-t)/1000); return s<60?"à l'instant":s<3600?Math.floor(s/60)+" min":s<86400?Math.floor(s/3600)+" h":new Date(t).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); }
+function openHistory(){ const p=$("#histPanel"); p.hidden=false; renderHistory(); const b=$("#undo").getBoundingClientRect(); p.style.top=(b.bottom+6)+"px"; p.style.left=Math.max(8,Math.min(innerWidth-p.offsetWidth-8,b.left-120))+"px"; $("#histList").focus(); }
+function closeHistory(){ $("#histPanel").hidden=true; histHover=null; renderHistHi(); }
+function renderHistory(){
+  updateButtons(); const p=$("#histPanel"); if(!p||p.hidden) return;
+  $("#histList").innerHTML=hist.length?hist.slice().reverse().map(e=>`<li class="${e.on?"":"off"}" data-h="${e.id}"><label><input type="checkbox" ${e.on?"checked":""} data-hc="${e.id}" aria-label="${e.on?"Décocher":"Recocher"} : ${esc(e.label)}"><span class="hl">${esc(e.label)}</span></label><span class="ht">${relTime(e.at)}</span></li>`).join("")
+    :`<li class="muted" style="padding:10px">Aucune modification pour l'instant.</li>`;
+  $("#histCount").textContent=hist.length?hist.filter(e=>e.on).length+" / "+hist.length+" actives":"";
+}
+function renderHistHi(){ const g=$("#histHi"); if(!g) return; const e=histHover&&hist.find(x=>x.id===histHover);
+  if(!e){ g.innerHTML=""; return; } const k=view.k||1;
+  g.innerHTML=Object.keys(e.d.ents).map(id=>{ const L=layerById(id)||(()=>{ const s=e.d.ents[id][0]||e.d.ents[id][1]; return s?JSON.parse(s):null; })(); if(!L||!L.subs.length) return "";
+    const b=bounds([L]); return `<rect x="${b.x0-4/k}" y="${b.y0-4/k}" width="${b.x1-b.x0+8/k}" height="${b.y1-b.y0+8/k}" fill="rgba(79,91,213,.08)" stroke="${C.brass}" stroke-width="${1.5/k}" stroke-dasharray="${5/k} ${3/k}" rx="${4/k}"/>`; }).join(""); }
+async function histToggle(id, on){
+  const e=hist.find(x=>x.id===id); if(!e||e.on===on) return;
+  const later=hist.slice(hist.indexOf(e)+1).filter(x=>x.on);
+  let mode="one";
+  if(!on && later.length){
+    mode=await choiceBox("Décocher « "+e.label+" » ?", "Les "+later.length+" modification"+(later.length>1?"s":"")+" faite"+(later.length>1?"s":"")+" ensuite peuvent rester en place : seules les propriétés que celle-ci a changées reviennent en arrière (celles modifiées ensuite sont gardées).",
+      [["one","Seulement cette modification"],["after","Celle-ci et les "+later.length+" suivante"+(later.length>1?"s":"")],["cancel","Annuler"]]);
+    if(mode==="cancel"){ renderHistory(); return; } }
+  let kept=[];
+  if(mode==="after"){ for(const x of later.reverse()) kept=kept.concat(toggleEntry(x,false)); }
+  kept=kept.concat(toggleEntry(e,on)); redoIds.length=0; changed(); renderHistory(); renderHistHi(); reportKept(kept);
+  toast((on?"Rétablie : ":"Décochée : ")+e.label+(mode==="after"?" (et les suivantes)":"")+(kept.length?" · éléments gardés : "+[...new Set(kept)].slice(0,3).join(", "):""));
+}
+function choiceBox(title, text, choices){ return new Promise(res=>{ const d=$("#choiceDlg"); $("#chTitle").textContent=title; $("#chText").textContent=text;
+  $("#chBtns").innerHTML=choices.map(([v,t],i)=>`<button data-ch="${v}" class="${i===0?"primary":""}">${esc(t)}</button>`).join("");
+  let done=false; const fin=v=>{ if(done) return; done=true; d.close(); res(v); };
+  $("#chBtns").onclick=ev=>{ const b=ev.target.closest("[data-ch]"); if(b) fin(b.dataset.ch); }; d.onclose=()=>fin("cancel"); d.showModal(); }); }
 function selLayers(){
   const ids=(sel.layers||[]).filter(id=>layerById(id));
   if(sel.layer && layerById(sel.layer) && !ids.includes(sel.layer)) ids.push(sel.layer);
@@ -760,7 +865,7 @@ function renderPins(){
   }).join("");
 }
 function renderAll(){ renderPalette(); renderFontSec(); renderTextRow(); renderDirRow(); if(!$("#fontMenu").hidden) renderFontMenu(); renderArt(); renderOverlay(); renderPins(); renderLayers(); renderInspector(); renderNotes(); renderNoteEditor(); updateButtons(); }
-function updateButtons(){ $("#undo").disabled=!undoStack.length; $("#redo").disabled=!redoStack.length; }
+function updateButtons(){ $("#undo").disabled=!canUndo(); $("#histBtn").disabled=!hist.length; $("#redo").disabled=!canRedo(); }
 
 const ICON = {
   eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -1194,7 +1299,18 @@ let toastT; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList
 function confirmBox(title,text,yes){ return new Promise(res=>{ const d=$("#confirmDlg"); $("#cfTitle").textContent=title; $("#cfText").textContent=text; $("#cfYes").textContent=yes;
   const done=v=>{ d.close(); $("#cfYes").onclick=$("#cfNo").onclick=null; res(v); }; $("#cfYes").onclick=()=>done(true); $("#cfNo").onclick=()=>done(false); d.onclose=()=>res(false); d.showModal(); }); }
 
-$("#undo").onclick=undo; $("#redo").onclick=redo;
+let undoLong=false, undoT=null;
+$("#undo").onclick=()=>{ if(undoLong){ undoLong=false; return; } undo(); };
+$("#undo").addEventListener("pointerdown",()=>{ undoLong=false; clearTimeout(undoT); undoT=setTimeout(()=>{ undoLong=true; openHistory(); },480); });
+for(const ev of ["pointerup","pointerleave","pointercancel"]) $("#undo").addEventListener(ev,()=>clearTimeout(undoT));
+$("#undo").addEventListener("contextmenu",e=>{ e.preventDefault(); clearTimeout(undoT); openHistory(); });
+$("#histBtn").onclick=()=>{ $("#histPanel").hidden?openHistory():closeHistory(); };
+$("#histClose").onclick=closeHistory;
+$("#histList").addEventListener("change",e=>{ const id=e.target.dataset.hc; if(id) histToggle(id, e.target.checked); });
+$("#histList").addEventListener("mouseover",e=>{ const li=e.target.closest("[data-h]"); const id=li&&li.dataset.h; if(id!==histHover){ histHover=id||null; renderHistHi(); } });
+$("#histList").addEventListener("mouseleave",()=>{ histHover=null; renderHistHi(); });
+document.addEventListener("pointerdown",e=>{ if(!$("#histPanel").hidden && !e.target.closest("#histPanel,#histBtn,#undo,#choiceDlg")) closeHistory(); });
+$("#redo").onclick=redo;
 
 /* ---------- Export ---------- */
 const GROUP_BOX={};
@@ -1904,7 +2020,7 @@ async function applyFont(f, ids){
     }
     if(shift) L.subs.forEach(s=>s.forEach(n=>moveNode(n,shift,0)));
   }
-  fixSel(); commit(before); renderFontMenu();
+  fixSel(); commit(before, "Police « "+f.name+" » · "+ids.length+" lettre"+(ids.length>1?"s":"")); renderFontMenu();
   toast(missing.length ? "Caractères absents de « "+f.name+" » : "+missing.join(" ") : "Police « "+f.name+" » appliquée à "+ids.length+" lettre(s) (Annuler pour revenir).");
 }
 
@@ -1991,7 +2107,7 @@ async function setText(target, str, f, opts={}){
   layers = pos<0 ? [...rest, ...fresh] : [...rest.slice(0,pos), ...fresh, ...rest.slice(pos)];
   if(target.kind==="word") wordText=str; else { target.g.text={str, font:f.id}; if(target.g.name.startsWith("Texte")) target.g.name="Texte « "+str.slice(0,24)+" »"; }
   sel={layer:fresh[0].id,node:null,layers:fresh.map(l=>l.id)};
-  fixSel(); commit(before);
+  fixSel(); commit(before, (target.kind==="word"?"Mot":"Texte")+" « "+str.slice(0,30)+" » · "+f.name);
   if(missing.length) toast("Caractères absents de « "+f.name+" » : "+missing.join(" ")); 
   return true;
 }
@@ -2427,7 +2543,7 @@ function impAdd(){
   const placed=vecPlace(imp.res, imp.src, imp.o.tile), b=snapshot(), id=newLayerId("image");
   const L={visible:true, locked:false, id, name:imp.o.tile?"Motif importé":imp.o.thin?"Signature":"Image vectorisée", group:"mark", fill:imp.o.ink?imp.res.ink:primary(palette[0]||EX.ink), subs:placed.subs};
   if(placed.tile) L.tile=placed.tile;
-  layers.push(L); ensureZones(); sel={layer:id,node:null,layers:[id]}; commit(b); $("#impDlg").close(); fit();
+  layers.push(L); ensureZones(); sel={layer:id,node:null,layers:[id]}; commit(b, "Import : "+L.name); $("#impDlg").close(); fit();
   toast((imp.o.tile?"Motif ajouté : exportez-le en mosaïque depuis Exporter.":"Image vectorisée ajoutée : la Plume modifie ses points.")+" (Annuler pour revenir)");
 }
 for(const id of ["#impFile","#impCam"]) $(id).addEventListener("change",e=>{ impLoad(e.target.files[0]); e.target.value=""; });
@@ -2623,9 +2739,9 @@ const STYLES={
 };
 /* apply to layers (by id): one undo step. kind: "fx:<id>" | "tr:<id>" | "st:<id>" */
 function applyStyle(ids, kind, amount){
-  const b=snapshot(), newSel=styleLayers(ids, kind, amount), [k,id]=kind.split(":");
-  sel={layer:newSel[0]||null,node:null,layers:newSel}; commit(b);
-  const nm=k==="fx"?FX[id].n:k==="tr"?TRANSFORMS[id].n:STYLES[id].n; toast("Style « "+nm+" » appliqué (Annuler pour revenir).");
+  const b=snapshot(), newSel=styleLayers(ids, kind, amount), [k,id]=kind.split(":"), nm=k==="fx"?FX[id].n:k==="tr"?TRANSFORMS[id].n:STYLES[id].n;
+  sel={layer:newSel[0]||null,node:null,layers:newSel}; commit(b, "Style « "+nm+" »");
+  toast("Style « "+nm+" » appliqué (Annuler pour revenir).");
 }
 /* the styling itself, without undo step (also used to build the logo concepts) */
 function styleLayers(ids, kind, amount){
@@ -2982,7 +3098,7 @@ $("#startDlg").addEventListener("click",e=>{
 });
 async function applyStart(choice, info, shape){
   brand={name:info.name, tagline:info.tagline, keywords:info.keywords, letters:info.letters||""};
-  const b0=snapshot(), u0=undoStack.length;
+  const b0=snapshot(), h0=hist.length;
   if(choice!=="keep"){
     groups=[]; curPal="main"; pals=[{id:"main",name:"Principale",colors:[]}]; sel={layer:null,node:null};
     layers = choice==="example" ? clone(ORIGIN) : [];
@@ -2997,8 +3113,8 @@ async function applyStart(choice, info, shape){
       else if(choice!=="example") wordText=brand.name;
     }
   }
-  undoStack.length=Math.min(undoStack.length,u0); redoStack.length=0;
-  if(b0!==snapshot()) undoStack.push(b0);
+  hist.length=Math.min(hist.length,h0); redoIds.length=0;
+  record(b0, "Départ : "+({word:"le nom seul",shape:"forme et nom",image:"image",proposal:"concept de logo",blank:"page vierge",example:"logo d'exemple"}[choice]||choice));
   syncFills(); fixSel(); renderAll(); scheduleSave("shape"); scheduleSave("palette"); fit();
 }
 $("#stGo").onclick=async()=>{
@@ -3079,7 +3195,7 @@ const P={
 let curProject=null, collections=[], projFilter="all", projQuery="", projReady=false;
 const newPid=()=>"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const emptyBrand=()=>({name:"",tagline:"",keywords:[],letters:""});
-function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand)}; }
+function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist)}; }
 function validDoc(d){ return d && validLayers(d.layers) && (d.notes===undefined||validNotes(d.notes)) && (d.pals===undefined||validPals(d.pals)) && (d.groups===undefined||validGroups(d.groups)); }
 function thumbSVG(ls){
   const vis=(ls||layers).filter(l=>l.visible!==false); if(!vis.length) return "";
@@ -3091,7 +3207,7 @@ function loadDoc(d){
   layers=validLayers(d.layers)?clone(d.layers):[]; notes=validNotes(d.notes)?clone(d.notes):[];
   pals=validPals(d.pals)?clone(d.pals):[{id:"main",name:"Principale",colors:[]}]; groups=validGroups(d.groups)?clone(d.groups):[];
   curPal=typeof d.curPal==="string"?d.curPal:"main"; wordText=typeof d.wordText==="string"?d.wordText:""; brand=validBrand(d.brand)?clone(d.brand):emptyBrand();
-  undoStack.length=0; redoStack.length=0; sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
+  hist=validHist(d.hist)?clone(d.hist):[]; redoIds=[]; sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
   ensureZones(); fixSel(); setClaudeUndo(null);
   const ed=$("#noteEditor"); if(ed) ed.dataset.for="";
   renderAll(); renderPins(); renderNotes(); renderNoteEditor(); updateButtons(); fit();
@@ -3115,8 +3231,9 @@ async function initProjects(){
     if(!cur){ cur={id:newPid(), name:brand.name||"Sans titre", collection:"", created:Date.now(), updated:Date.now()}; await P.setMeta("current",cur.id); }
     // the browser cache (or the db) holds the live drawing; if both are empty, the project's own copy is the drawing
     else if(!localLoad() && !lastAt.shape && validDoc(cur.doc)) loadDoc(cur.doc);
+    if(cur.doc&&validHist(cur.doc.hist)&&!hist.length) hist=cur.doc.hist;
     curProject=Object.assign({}, cur); delete curProject.doc; delete curProject.thumb;
-    projReady=true; await projectFlush(); renderProjName();
+    projReady=true; renderHistory(); await projectFlush(); renderProjName();
   }catch(_){ setStatus("Projets indisponibles dans ce navigateur (le dessin reste enregistré)", true); }
 }
 async function openProject(id){
@@ -3175,7 +3292,7 @@ function pasteItems(items, sameProject){
     if(c.group==="word"){ c.group="mark"; }   // pasted letters become drawing: the word stays the project's own
     c.zone=zoneForPaint(it.paint); c.fill=primary(it.paint); added.push(c);
   }
-  layers.push(...added); ensureZones(); sel={layer:added[added.length-1].id,node:null,layers:added.map(l=>l.id)}; commit(b);
+  layers.push(...added); ensureZones(); sel={layer:added[added.length-1].id,node:null,layers:added.map(l=>l.id)}; commit(b, "Collage : "+(added.length>1?added.length+" calques":"« "+added[0].name+" »"));
   return added.length;
 }
 async function pasteLayers(){
@@ -3300,7 +3417,7 @@ function applyPatch(d){
   for(const p of v){ const i=layers.findIndex(l=>l.id===p.id); if(i>=0 && p.vector){ const keep=layers[i]; layers[i]=Object.assign({}, keep, {subs:p.subs, name:p.name||keep.name}); delete layers[i].kind; delete layers[i].live; continue; }
     if(i>=0){ const keepZone=p.fill===undefined && p.zone===undefined; layers[i]=Object.assign({}, layers[i], p); if(!keepZone && p.zone===undefined) delete layers[i].zone; } }
   ensureZones(); fixSel(); if(snapshot()===before) return;
-  undoStack.push(before); redoStack.length=0; renderAll(); scheduleSave("shape");
+  record(before, "Claude"+(d.note?" : "+String(d.note).slice(0,70):"")); renderAll(); scheduleSave("shape");
   setClaudeUndo({before, note:d.note?String(d.note).slice(0,140):"", at:d.at});
 }
 /* Persistent "undo Claude's change" banner */
@@ -3316,7 +3433,7 @@ $("#claudeUndo").onclick=()=>{
   const v=getClaudeUndo(); if(!v) return;
   const b=snapshot(); try{ restoreSnap(v.before); }catch(_){ setClaudeUndo(null); toast("Version précédente introuvable."); return; }
   if(!validLayers(layers)){ restoreSnap(b); setClaudeUndo(null); toast("Version précédente introuvable."); return; }
-  fixSel(); commit(b); setClaudeUndo(null); toast("Modification de Claude annulée : ta version est revenue.");
+  fixSel(); commit(b, "Retour avant la modification de Claude"); setClaudeUndo(null); toast("Modification de Claude annulée : ta version est revenue.");
 };
 $("#claudeKeep").onclick=()=>setClaudeUndo(null);
 function applyRemote(what, d){
@@ -3326,7 +3443,7 @@ function applyRemote(what, d){
     if(!validLayers(v)) return;
     if(drag || saveTimers.shape || saving.shape){ setTimeout(()=>applyRemote(what,d),1500); return; }
     lastAt.shape=d.at; const before=snapshot(); if(JSON.stringify(layers)===JSON.stringify(v)) return;
-    layers=v; ensureZones(); fixSel(); undoStack.push(before); redoStack.length=0; localSave(); renderAll(); toast("Le dessin a été mis à jour par Claude (Annuler pour revenir).");
+    layers=v; ensureZones(); fixSel(); record(before, "Mise à jour par Claude"); localSave(); renderAll(); toast("Le dessin a été mis à jour par Claude (Annuler pour revenir).");
   } else if(what==="palette"){
     if(pick || saveTimers.palette || saving.palette) return; if(!loadPalDoc(v)) return; lastAt.palette=d.at; try{ localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); }catch(_){} ensureZones(); renderAll();
   } else {

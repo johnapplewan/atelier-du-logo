@@ -16,6 +16,10 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 
 - Layer effects are data (`L.fx = [{t, a, c?}]`, max 4) rendered by `applyFx` inside `layerSVG`, so canvas, previews and exports match. Transformations rewrite curves into new layers (own group + palette). When Claude edits a styled layer through a patch, keep its `fx` unless asked.
 
+## History
+
+- `hist` entries store per-layer diffs (`d.ents[id] = [before, after]` as stable JSON, plus order and palettes). `toggleEntry` puts a property back only if it still holds this entry's value, so later changes are never overwritten. Use `commit(before, label)` with a clear French label for new actions; Claude's patches are recorded as "Claude : <note>". The history is saved in the project (`doc.hist`).
+
 ## Storage
 
 - Projects and collections live on the user's device (IndexedDB `atelier-logo`, localStorage fallback); files `.atelier.json` (`format: "atelier-logo"`) carry projects between devices.
