@@ -15,7 +15,7 @@ const { chromium, assert, open, worldToScreen, check, done } = require("./helper
 
   await p.keyboard.press("b"); const q = await ws(156, 100); await p.mouse.click(q.x, q.y);
   await p.fill("#noteText", "Point plus petit"); await p.locator("#noteText").blur();
-  await p.click("#sendAll"); await p.waitForTimeout(300);
+  await p.click("#sendAll"); await p.waitForFunction(() => __sent.length > 0 && __store["atelier/notes"], null, { timeout: 10000 }).catch(() => {});
   const sent = await p.evaluate(() => __sent);
   check("bubble sent to Claude with its layer", () => { assert.strictEqual(sent.length, 1); assert.match(JSON.stringify(sent[0]), /Point plus petit/); assert.match(JSON.stringify(sent[0]), /\[point\]/); });
   const notesSaved = await p.evaluate(() => !!__store["atelier/notes"]);

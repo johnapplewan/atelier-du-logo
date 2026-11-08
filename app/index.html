@@ -1726,9 +1726,11 @@ function renderSendBox(){
   const reason={off:"L'envoi direct n'est pas disponible dans cette vue : copiez la demande et collez-la dans la conversation.",
     no_session:"Aucune session Claude n'écoute cette page pour l'instant : copiez la demande et collez-la dans la conversation.",
     writers_only:"Seul un éditeur de la page peut envoyer à Claude : copiez la demande.", checking:"Vérification…"}[sendState];
-  el.innerHTML=`<div class="row"><button id="sendAll" class="primary" ${!open.length||sendState!=="available"?"disabled":""}>Envoyer à Claude${open.length?" ("+open.length+")":""}</button>
+  const html=`<div class="row"><button id="sendAll" class="primary" ${!open.length||sendState!=="available"?"disabled":""}>Envoyer à Claude${open.length?" ("+open.length+")":""}</button>
     <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button></div>
     <p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
+  // same content: keep the buttons (replacing them under a click would swallow it)
+  if(el.__html===html) return; el.__html=html; el.innerHTML=html;
   $("#sendAll").onclick=()=>sendToClaude(open);
   $("#copyReq").onclick=async()=>{ try{ await navigator.clipboard.writeText(requestText(open)); $("#sendMsg").textContent="Demande copiée : collez-la dans la conversation avec Claude."; }catch(_){ $("#sendMsg").textContent="Copie refusée par le navigateur."; } };
 }
