@@ -351,6 +351,20 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .bpages{flex:1;overflow:auto;padding:20px;background:#E9E9E6;display:flex;flex-direction:column;align-items:center;gap:20px}
 .bpage{width:min(100%,820px);box-shadow:0 2px 10px rgba(0,0,0,.15);background:#fff;flex:none}.bpage svg{display:block;width:100%;height:100%}
 @media (max-width:760px){.bthemes{grid-template-columns:repeat(2,1fr)}.btype{grid-template-columns:1fr}}
+.fontdlg{max-width:min(1060px,96vw);width:100%}
+.fmbody{display:grid;grid-template-columns:240px 1fr;gap:16px;margin:12px 0;min-height:420px;max-height:66vh}
+.fmside{display:flex;flex-direction:column;gap:8px;overflow:auto}.fmside select{padding:6px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.fmlist{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.fmlist button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:8px;background:#fff;border-radius:10px;text-align:left}
+.fmlist button.on{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}.fmlist svg{height:26px;width:auto;max-width:100%}.fmlist span{font-size:12.5px}
+.fmedit{overflow:auto}.fmedit input#fmName{font:600 16px Inter,system-ui,sans-serif;padding:5px 8px;border:1px solid var(--line);border-radius:8px}
+.fmgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}
+.fmgrid button{display:flex;flex-direction:column;align-items:center;padding:4px;background:#fff;border-radius:8px}
+.fmgrid svg{width:100%;height:46px}.fmgrid span{font-size:10.5px;color:var(--muted)}
+.glyphbar{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:8;display:flex;gap:8px;align-items:center;background:var(--paper);border:1px solid var(--brass);border-radius:12px;padding:6px 10px;box-shadow:0 4px 18px rgba(20,20,25,.12);max-width:94%;flex-wrap:wrap}
+.glyphbar[hidden]{display:none}.glyphbar .sp{flex:1}.glyphbar .gch{font:28px/1 "Instrument Serif",Georgia,serif;min-width:28px;text-align:center}
+.glyphbar input{width:70px;padding:3px 6px;border:1px solid var(--line);border-radius:6px}
+body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-events:none}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
 @media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
@@ -435,6 +449,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
       <div class="flyout" id="flyout" hidden></div>
     </div>
     <button class="mini-open right" id="showRight" title="Rouvrir le panneau droit" aria-label="Rouvrir le panneau droit">‹</button>
+    <div class="glyphbar" id="glyphBar" hidden></div>
     <div class="claudebar" id="claudeBar" hidden>
       <span id="claudeMsg"></span>
       <button id="claudeUndo" class="primary">Annuler la modification de Claude</button>
@@ -590,6 +605,19 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
   <div class="row bvbar"><b>Charte graphique</b><select id="bookFmt" aria-label="Format des pages"><option value="a4">A4 portrait</option><option value="a4l">A4 paysage</option><option value="slides">Slides 16:9</option></select>
     <span class="muted" id="bookMsg" role="status"></span><span class="sp"></span><button id="bookEdit">Modifier les réponses</button><button id="bookZip">Pack de fichiers (.zip)</button><button id="bookPdf" class="primary">Exporter en PDF</button><button id="bookClose">Fermer</button></div>
   <div class="bpages" id="bookPages"></div>
+</dialog>
+<dialog id="fontDlg" class="fontdlg" aria-labelledby="fmTitle">
+  <div class="row"><h2 id="fmTitle">Mes polices</h2><span class="muted">Importer, dupliquer, dessiner et exporter vos propres polices. Elles restent sur cet appareil et voyagent avec vos fichiers de projet.</span></div>
+  <div class="fmbody">
+    <div class="fmside">
+      <button id="fmNew" class="primary">Nouvelle police vierge</button>
+      <label class="filebtn">Importer une police (TTF, OTF, WOFF)<input type="file" id="fmFile" accept=".ttf,.otf,.woff,font/ttf,font/otf,font/woff"></label>
+      <select id="fmDup" aria-label="Dupliquer une police de l'atelier"></select>
+      <div class="fmlist" id="fmList"></div>
+    </div>
+    <div class="fmedit" id="fmEdit"></div>
+  </div>
+  <div class="row" style="justify-content:flex-end"><button id="fmClose">Fermer</button></div>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -916,6 +944,7 @@ function renderOverlay(){
     penPath.forEach((n,i)=>{ for(const key of ["i","o"]) if(n[key]) h += `<line x1="${n.x}" y1="${n.y}" x2="${n[key].x}" y2="${n[key].y}" stroke="${C.brass}" stroke-width="${0.8/k}" pointer-events="none"/><circle cx="${n[key].x}" cy="${n[key].y}" r="${3/k}" fill="#fff" stroke="${C.brass}" stroke-width="${1/k}" pointer-events="none"/>`;
       h += `<rect x="${n.x-4/k}" y="${n.y-4/k}" width="${8/k}" height="${8/k}" fill="${i===0&&near?C.brass:"#fff"}" stroke="${C.brass}" stroke-width="${1.3/k}" pointer-events="none"/>`; }); }
   if(drag && drag.type==="pencil" && drag.pts.length>1) h += `<polyline points="${drag.pts.map(p=>r2(p.x)+","+r2(p.y)).join(" ")}" fill="none" stroke="${C.night}" stroke-width="${Math.max(1/k, drawPrefs.size*(drawPrefs.mode==="brush"?0.8:1))}" stroke-linecap="round" stroke-linejoin="round" opacity=".55" pointer-events="none"/>`;
+  if(glyphMode) h=glyphGuides(k)+h;
   ovl.innerHTML = h;
 }
 function renderPins(){
@@ -2103,13 +2132,163 @@ $("#drawOpts").addEventListener("input",e=>{ const k=e.target.dataset.do; if(!k)
   if(k==="handles"){ showAllHandles=e.target.checked; renderOverlay(); } else if(k==="pressure") drawPrefs.pressure=e.target.checked; else { drawPrefs[k]=+e.target.value; const sp=e.target.nextElementSibling; if(sp&&sp.tagName==="SPAN") sp.textContent=e.target.value; }
   saveDrawPrefs(); });
 
+/* ---------- My typefaces: import, duplicate, create, edit glyphs, export OTF ----------
+   A typeface here is a glyph set in the app's own format ({upem, adv, gl: SVG path per character in font units,
+   y down, kern, metrics}) plus an entry in the font list (category "Mes polices"). Glyph sets are kept on the device
+   (IndexedDB meta "fonts") and travel inside .atelier.json files with the projects that use them.
+   Glyphs are drawn in the workshop itself: "glyph mode" swaps the drawing for one glyph (with guides), saves nothing to
+   the project, and writes the outlines back into the typeface. opentype.js (MIT, app/vendor) reads and writes font files. */
+const GLYPH_SET=[..." !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ÀÂÄÆÇÈÉÊËÎÏÔŒÙÛÜŸàâäæçèéêëîïôœùûüÿ«»’–—€°"];
+let customFonts=[];   // {id, name, gkey, k, G, from}
+function loadOpentype(){ if(window.opentype) return Promise.resolve(window.opentype);
+  return new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src="vendor/opentype.min.js"; sc.onload=()=>ok(window.opentype); sc.onerror=()=>ko(new Error("opentype")); document.head.appendChild(sc); }); }
+function fontEntry(cf){ return {id:cf.id, name:cf.name, cat:"Mes polices", text:"Abc", license:cf.from||"Police personnelle", perLetter:true, k:cf.k, gkey:cf.gkey, custom:true}; }
+function registerCustom(cf){ window.__G=window.__G||{}; window.__G[cf.gkey]=cf.G; previewCache.clear();
+  if(FONTS){ const i=FONTS.findIndex(f=>f.id===cf.id), e=fontEntry(cf); if(i>=0) FONTS[i]=e; else FONTS.push(e); } }
+function mergeCustomFonts(){ customFonts.forEach(registerCustom); }
+async function saveCustomFonts(){ try{ await P.setMeta("fonts", customFonts); }catch(_){ toast("Espace de l'appareil plein : la police n'a pas pu être enregistrée."); } }
+async function initCustomFonts(){ try{ const v=await P.meta("fonts"); if(Array.isArray(v)) customFonts=v.filter(validCustom); mergeCustomFonts(); }catch(_){} }
+function validCustom(cf){ return cf&&typeof cf.id==="string"&&/^custom-[\w-]{1,60}$/.test(cf.id)&&typeof cf.name==="string"&&cf.name.length<=80&&cf.G&&Number.isFinite(cf.G.upem)&&cf.G.adv&&cf.G.gl&&Number.isFinite(cf.k); }
+const newFontId=name=>"custom-"+slug(name,"police")+"-"+Date.now().toString(36);
+/* metrics read from the outlines when the file gives none */
+function glyphBox(G,ch){ if(!G.gl[ch]) return null; const subs=parseGlyph(G.gl[ch],0); if(!subs.length) return null; return bounds([{subs}]); }
+function fillMetrics(G){ const m=G.m||{}, b=c=>glyphBox(G,c);
+  m.cap=m.cap||(b("H")?-b("H").y0:G.upem*0.7); m.x=m.x||(b("x")?-b("x").y0:G.upem*0.5); m.asc=m.asc||(b("d")?-b("d").y0:G.upem*0.78); m.desc=m.desc||(b("p")?b("p").y1:G.upem*0.22);
+  G.m=m; return G; }
+/* the scale that gives a typeface the same capital height as the others on the word line */
+const kFor=G=>r2(0.218959*1000*0.66/(fillMetrics(G).m.cap||G.upem*0.7)*1e4)/1e4;
+async function importFontFile(file){
+  const ot=await loadOpentype(); let font;
+  try{ font=ot.parse(await file.arrayBuffer()); }catch(err){ toast(/woff2|wOF2/i.test(String(err))||/\.woff2$/i.test(file.name)?"Le format WOFF2 n'est pas lu : utilisez TTF, OTF ou WOFF.":"Ce fichier n'est pas une police lisible (TTF, OTF ou WOFF)."); return null; }
+  const upem=font.unitsPerEm||1000, G={upem, adv:{}, gl:{}, kern:{}, m:{asc:font.ascender, desc:-font.descender}};
+  const glyphs={};
+  for(const ch of GLYPH_SET){ const g=font.charToGlyph(ch); if(!g||g.index===0&&ch!==" ") continue; glyphs[ch]=g; G.adv[ch]=Math.round(g.advanceWidth||0);
+    const d=g.getPath(0,0,upem).toPathData(1); if(d) G.gl[ch]=d.replace(/([MLQCZ])/g," $1 ").trim(); }
+  const letters=Object.keys(glyphs).filter(c=>/[\p{L}\p{N}.,'’-]/u.test(c));
+  for(const a of letters) for(const b of letters){ const v=font.getKerningValue(glyphs[a],glyphs[b]); if(v) G.kern[a+b]=Math.round(v); }
+  fillMetrics(G);
+  const nm=((font.names.fullName&&(font.names.fullName.fr||font.names.fullName.en))||file.name.replace(/\.\w+$/,"")).slice(0,60);
+  const id=newFontId(nm), cf={id, name:nm, gkey:id, k:kFor(G), G, from:"Importée ("+file.name.slice(0,40)+")"};
+  customFonts.push(cf); await loadFonts(); registerCustom(cf); await saveCustomFonts(); return cf;
+}
+async function duplicateFont(fontId){
+  await loadFonts(); const f=fontById(fontId); if(!f||!f.gkey) return null;
+  const src=await loadGlyphs(f.gkey), G=fillMetrics(clone(src)), nm=(f.name.replace(/\s*\(.*\)$/,"")+" (ma version)").slice(0,60);
+  const id=newFontId(nm), cf={id, name:nm, gkey:id, k:f.k||kFor(G), G, from:"D'après "+f.name+" ("+(f.license||"licence libre")+")"};
+  customFonts.push(cf); registerCustom(cf); await saveCustomFonts(); return cf;
+}
+async function newBlankFont(name){
+  const G={upem:1000, adv:{" ":250}, gl:{}, kern:{}, m:{cap:700, x:500, asc:780, desc:220}};
+  for(const ch of GLYPH_SET) if(ch!==" ") G.adv[ch]=600;
+  const nm=(name||"Ma police").slice(0,60), id=newFontId(nm), cf={id, name:nm, gkey:id, k:kFor(G), G, from:"Créée dans l'atelier"};
+  await loadFonts(); customFonts.push(cf); registerCustom(cf); await saveCustomFonts(); return cf;
+}
+async function exportOtf(cf){
+  const ot=await loadOpentype(), G=cf.G, glyphs=[new ot.Glyph({name:".notdef", unicode:0, advanceWidth:Math.round(G.upem*0.5), path:new ot.Path()})];
+  for(const ch of GLYPH_SET){ if(G.adv[ch]===undefined) continue; const path=new ot.Path();
+    for(const s of (G.gl[ch]?parseGlyph(G.gl[ch],0):[])){ path.moveTo(s[0].x,-s[0].y);
+      for(let j=1;j<=s.length;j++){ const a=s[j-1], b=s[j%s.length]; if(!a.o&&!b.i) path.lineTo(b.x,-b.y); else { const p=segPts(a,b); path.curveTo(p[1].x,-p[1].y,p[2].x,-p[2].y,b.x,-b.y); } }
+      path.close(); }
+    glyphs.push(new ot.Glyph({name:ch===" "?"space":"uni"+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,"0"), unicode:ch.codePointAt(0), advanceWidth:Math.round(G.adv[ch]), path})); }
+  const fam=cf.name.replace(/[^\w\s-]/g,"").trim()||"Ma police";
+  const font=new ot.Font({familyName:fam, styleName:"Regular", unitsPerEm:G.upem, ascender:Math.round(G.m.asc), descender:-Math.round(G.m.desc), glyphs,
+    designer:"Atelier du Logo par John Apple", description:cf.from||""});
+  const blob=new Blob([font.toArrayBuffer()],{type:"font/otf"}), name=slug(cf.name,"police")+".otf";
+  await saveBlob(name, blob); toast("Police exportée : "+name+" (installable sur l'ordinateur)."); return blob;
+}
+/* ---- glyph mode: draw one glyph in the workshop ---- */
+const GS=0.32, GOX=60, GOY=380;   // world = units * GS, origin (left side bearing 0, baseline) at (GOX, GOY)
+let glyphMode=null;
+function glyphLayersFor(cf,ch){ const G=cf.G, subs=G.gl[ch]?parseGlyph(G.gl[ch],0):[];
+  const T=p=>p&&{x:r2(GOX+p.x*GS), y:r2(GOY+p.y*GS)};
+  return subs.length?[{visible:true,locked:false,id:"glyphe",name:"Glyphe « "+ch+" »",group:"mark",fill:"#1D1D1F",zone:0,subs:subs.map(s=>s.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i)||null,o:T(n.o)||null})))}]:[]; }
+function glyphFromLayers(){ // every visible drawing layer of the glyph, lines turned into outlines
+  const out=[]; for(const L of layers.filter(l=>l.visible!==false&&l.subs.length)){ let subs=L.subs;
+    if(L.open){ const tmp=clone(L); strokeToShapeRaw(tmp); subs=tmp.subs; }
+    for(const s of subs) out.push(s); }
+  const U=p=>p&&{x:r2((p.x-GOX)/GS), y:r2((p.y-GOY)/GS)};
+  return pathD(out.map(s=>s.map(n=>({x:U(n).x,y:U(n).y,i:U(n.i),o:U(n.o)})))).replace(/([MLCZ])/g," $1 ").trim(); }
+function strokeToShapeRaw(L){ const w=L.sw||4, out=[];
+  for(const s of L.subs){ const pts=[]; for(let j=0;j<s.length-1;j++){ const p=segPts(s[j],s[j+1]); for(let t=0;t<1;t+=1/12) pts.push(bez(p,t)); } pts.push(s[s.length-1]);
+    const o=fitNodes(rdpClosed(brushOutline(pts, pts.map(()=>w)), Math.max(0.15,w*0.04)), 0.2); out.push(area3(o)<0?o.reverse():o); }
+  L.subs=out; delete L.open; delete L.sw; }
+function enterGlyph(cf, ch){
+  if(!glyphMode){ glyphMode={saved:{layers, pals, groups, curPal, wordText, hist, redoIds, sel, notes, selNote}}; }
+  glyphMode.cf=cf; glyphMode.ch=ch;
+  layers=glyphLayersFor(cf,ch); pals=[{id:"main",name:"Glyphe",colors:["#1D1D1F"]}]; groups=[]; curPal="main"; hist=[]; redoIds=[]; notes=[]; selNote=null; sel={layer:null,node:null};
+  document.body.classList.add("glyphing"); for(const id of ["#projBtn","#bookBtn","#startBtn","#exportBtn"]) $(id).disabled=true;
+  ensureZones(); renderAll(); renderPins(); renderNotes(); renderGlyphBar(); fitGlyph(); setTool(layers.length?"points":"pen");
+}
+function fitGlyph(){ const cf=glyphMode.cf, G=cf.G, adv=G.adv[glyphMode.ch]||G.upem*0.6, r=cv.getBoundingClientRect();
+  const b={x0:GOX-40, y0:GOY-(G.m.asc+60)*GS, x1:GOX+adv*GS+40, y1:GOY+(G.m.desc+60)*GS}, k=Math.min((r.width-80)/(b.x1-b.x0),(r.height-80)/(b.y1-b.y0));
+  view.k=k; view.tx=r.width/2-(b.x0+b.x1)/2*k; view.ty=r.height/2-(b.y0+b.y1)/2*k; applyView(); }
+function storeGlyph(){ if(!glyphMode) return; const {cf,ch}=glyphMode, d=glyphFromLayers();
+  if(d) cf.G.gl[ch]=d; else delete cf.G.gl[ch];
+  const adv=+$("#gbAdv").value; if(Number.isFinite(adv)&&adv>=0) cf.G.adv[ch]=Math.round(adv);
+  if(ch==="H"||ch==="x"||ch==="d"||ch==="p"){ const m=cf.G.m, b=glyphBox(cf.G,ch); if(b){ if(ch==="H") m.cap=-b.y0; if(ch==="x") m.x=-b.y0; if(ch==="d") m.asc=-b.y0; if(ch==="p") m.desc=b.y1; } }
+  registerCustom(cf); }
+async function leaveGlyph(save){
+  if(!glyphMode) return; if(save){ storeGlyph(); await saveCustomFonts(); }
+  const cf=glyphMode.cf, s=glyphMode.saved; glyphMode=null;
+  ({layers, pals, groups, curPal, wordText, hist, redoIds, sel, notes, selNote}=s);
+  document.body.classList.remove("glyphing"); for(const id of ["#projBtn","#bookBtn","#startBtn","#exportBtn"]) $(id).disabled=false;
+  $("#glyphBar").hidden=true; ensureZones(); renderAll(); renderPins(); renderNotes(); renderHistory(); fit(); setTool("move");
+  // the word (or a text block) drawn in this typeface follows the new glyphs
+  if(save && wordLayers().some(l=>l.font===cf.id)){ await setText(textTarget().kind==="word"?textTarget():{kind:"word",layers:wordLayers()}, wordText, fontById(cf.id)); toast("Mot redessiné avec la nouvelle version de « "+cf.name+" »."); }
+  else if(save) toast("Glyphes enregistrés dans « "+cf.name+" ».");
+  openFontManager(cf.id);
+}
+function renderGlyphBar(){ const b=$("#glyphBar"), {cf,ch}=glyphMode, i=GLYPH_SET.indexOf(ch);
+  b.hidden=false; b.innerHTML=`<b>${esc(cf.name)}</b><span class="gch">${esc(ch)}</span><label>Chasse <input id="gbAdv" type="number" min="0" max="${cf.G.upem*3}" value="${cf.G.adv[ch]??Math.round(cf.G.upem*0.6)}"></label>
+    <button id="gbPrev" ${i<=0?"disabled":""} title="Glyphe précédent">‹ ${esc(GLYPH_SET[i-1]||"")}</button><button id="gbNext" ${i>=GLYPH_SET.length-1?"disabled":""} title="Glyphe suivant">${esc(GLYPH_SET[i+1]||"")} ›</button>
+    <span class="sp"></span><button id="gbCancel">Annuler</button><button id="gbDone" class="primary">Enregistrer et terminer</button>`;
+  $("#gbAdv").oninput=()=>renderOverlay();
+  $("#gbPrev").onclick=async()=>{ storeGlyph(); await saveCustomFonts(); enterGlyph(cf, GLYPH_SET[i-1]); };
+  $("#gbNext").onclick=async()=>{ storeGlyph(); await saveCustomFonts(); enterGlyph(cf, GLYPH_SET[i+1]); };
+  $("#gbCancel").onclick=()=>leaveGlyph(false); $("#gbDone").onclick=()=>leaveGlyph(true); }
+function glyphGuides(k){ if(!glyphMode) return ""; const G=glyphMode.cf.G, m=G.m, adv=+(($("#gbAdv")||{}).value)||G.adv[glyphMode.ch]||0, x1=GOX+adv*GS, X0=GOX-60, X1=x1+60;
+  const line=(y,lab,dash)=>`<line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="#4F5BD5" stroke-width="${1/k}" ${dash?`stroke-dasharray="${4/k} ${3/k}"`:""} opacity=".7" pointer-events="none"/><text x="${X0}" y="${y-3/k}" font-size="${10/k}" fill="#4F5BD5" font-family="Inter,sans-serif" pointer-events="none">${lab}</text>`;
+  return line(GOY,"ligne de base")+line(GOY-m.x*GS,"hauteur d'x",1)+line(GOY-m.cap*GS,"capitales",1)+line(GOY-m.asc*GS,"ascendantes",1)+line(GOY+m.desc*GS,"descendantes",1)+
+    `<rect x="${GOX}" y="${GOY-(m.asc+40)*GS}" width="${Math.max(0,adv*GS)}" height="${(m.asc+m.desc+80)*GS}" fill="rgba(79,91,213,.05)" stroke="#4F5BD5" stroke-width="${1/k}" stroke-dasharray="${2/k} ${3/k}" pointer-events="none"/>`; }
+/* ---- font manager ---- */
+let fmCur=null;
+async function openFontManager(selectId){ await loadFonts(); mergeCustomFonts(); fmCur=selectId||fmCur||(customFonts[0]&&customFonts[0].id)||null; $("#fontDlg").showModal(); renderFontManager(); }
+function renderFontManager(){
+  const cf=customFonts.find(c=>c.id===fmCur)||null, base=(FONTS||[]).filter(f=>f.gkey&&!f.custom&&!f.strike);
+  $("#fmList").innerHTML=customFonts.length?customFonts.map(c=>`<button data-fm="${esc(c.id)}" class="${c.id===fmCur?"on":""}">${fontPreview(fontEntry(c), c.name.slice(0,18))}<span>${esc(c.name)}</span></button>`).join(""):`<p class="muted">Aucune police personnelle pour l'instant.</p>`;
+  $("#fmDup").innerHTML=`<option value="">Dupliquer une police de l'atelier…</option>`+base.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("");
+  const el=$("#fmEdit");
+  if(!cf){ el.innerHTML=`<p class="empty">Importez une police, dupliquez-en une de l'atelier pour la modifier, ou créez la vôtre à partir d'une grille vide. Chaque glyphe se dessine ensuite avec la Plume, le Crayon et les Formes.</p>`; return; }
+  const done=GLYPH_SET.filter(c=>c===" "||cf.G.gl[c]).length;
+  el.innerHTML=`<div class="row"><input id="fmName" value="${esc(cf.name)}" maxlength="60" aria-label="Nom de la police"><span class="muted">${esc(cf.from||"")} · ${done} / ${GLYPH_SET.length} glyphes dessinés</span></div>
+    <div class="row"><button id="fmUse" class="primary">Appliquer au mot</button><button id="fmOtf">Exporter en .otf</button><button id="fmCopy">Dupliquer</button><button id="fmDel" class="danger">Supprimer</button></div>
+    <p class="muted" style="margin:6px 0">Cliquez un glyphe pour le dessiner ou le retoucher.</p>
+    <div class="fmgrid">${GLYPH_SET.filter(c=>c!==" ").map(c=>{ const d=cf.G.gl[c], adv=cf.G.adv[c]||cf.G.upem*0.6, m=cf.G.m;
+      return `<button data-glyph="${esc(c)}" title="${esc(c)}"><svg viewBox="${-cf.G.upem*0.1} ${-(m.asc+cf.G.upem*0.08)} ${adv+cf.G.upem*0.2} ${m.asc+m.desc+cf.G.upem*0.16}">${d?`<path d="${d}" fill="#1D1D1F"/>`:""}</svg><span>${esc(c)}</span></button>`; }).join("")}</div>`;
+}
+$("#fontDlg").addEventListener("click", async e=>{ const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.fm){ fmCur=b.dataset.fm; renderFontManager(); return; }
+  const cf=customFonts.find(c=>c.id===fmCur);
+  if(b.dataset.glyph&&cf){ $("#fontDlg").close(); enterGlyph(cf, b.dataset.glyph); return; }
+  if(b.id==="fmNew"){ const cf2=await newBlankFont("Ma police "+(customFonts.length+1)); fmCur=cf2.id; renderFontManager(); toast("Police vierge créée : cliquez un glyphe pour le dessiner."); return; }
+  if(b.id==="fmUse"&&cf){ $("#fontDlg").close(); const t=textTarget(); const ok=await setText(t, t.kind==="block"?t.g.text.str:(wordText||brand.name||"Marque"), fontById(cf.id)); if(ok) toast("Police « "+cf.name+" » appliquée."); return; }
+  if(b.id==="fmOtf"&&cf){ try{ await exportOtf(cf); }catch(err){ toast(err&&err.message==="opentype"?"Outil de police indisponible.":dlError(err)); } return; }
+  if(b.id==="fmCopy"&&cf){ const c2=clone(cf); c2.name=(cf.name+" (copie)").slice(0,60); c2.id=c2.gkey=newFontId(c2.name); customFonts.push(c2); registerCustom(c2); await saveCustomFonts(); fmCur=c2.id; renderFontManager(); return; }
+  if(b.id==="fmDel"&&cf){ if(!await confirmBox("Supprimer « "+cf.name+" » ?","Les dessins déjà faits avec cette police restent intacts (ce sont des contours).","Supprimer")) { if(!$("#fontDlg").open) $("#fontDlg").showModal(); return; }
+    customFonts=customFonts.filter(c=>c!==cf); if(FONTS){ const i=FONTS.findIndex(f=>f.id===cf.id); if(i>=0) FONTS.splice(i,1); } await saveCustomFonts(); fmCur=null; if(!$("#fontDlg").open) $("#fontDlg").showModal(); renderFontManager(); return; }
+  if(b.id==="fmClose"){ $("#fontDlg").close(); } });
+$("#fontDlg").addEventListener("change", async e=>{
+  if(e.target.id==="fmDup"&&e.target.value){ const cf=await duplicateFont(e.target.value); if(cf){ fmCur=cf.id; renderFontManager(); toast("Copie modifiable créée : « "+cf.name+" »."); } }
+  if(e.target.id==="fmFile"&&e.target.files[0]){ const f=e.target.files[0]; e.target.value=""; const cf=await importFontFile(f); if(cf){ fmCur=cf.id; renderFontManager(); toast("Police importée : « "+cf.name+" »."); } }
+  if(e.target.id==="fmName"){ const cf=customFonts.find(c=>c.id===fmCur); if(cf){ cf.name=e.target.value.trim().slice(0,60)||cf.name; registerCustom(cf); await saveCustomFonts(); renderFontManager(); } } });
+
 /* ---------- Fonts: "F" menu (56 typefaces, loaded on demand from fonts.js) ---------- */
 let FONTS=null, fontsLoading=null, fontScope="sel", fontFilter="";
 function loadFonts(){
   if(FONTS) return Promise.resolve(FONTS);
-  if(window.FONTS){ FONTS=window.FONTS; return Promise.resolve(FONTS); }
+  if(window.FONTS){ FONTS=window.FONTS; mergeCustomFonts(); return Promise.resolve(FONTS); }
   if(!fontsLoading) fontsLoading=new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src="fonts.js";
-    sc.onload=()=>{ FONTS=window.FONTS||[]; ok(FONTS); }; sc.onerror=()=>{ fontsLoading=null; ko(new Error("fonts")); }; document.head.appendChild(sc); });
+    sc.onload=()=>{ FONTS=window.FONTS||[]; mergeCustomFonts(); ok(FONTS); }; sc.onerror=()=>{ fontsLoading=null; ko(new Error("fonts")); }; document.head.appendChild(sc); });
   return fontsLoading;
 }
 const letterIdx=id=>{ const m=/^lettre-(\d+)$/.exec(id); return m?+m[1]-1:-1; };
@@ -2172,11 +2351,12 @@ function renderFontMenu(){
     ${!okL&&sl.length?`<p class="muted" style="margin:4px">Le mot n'est pas en alphabet latin (ou sa police ne se change pas lettre par lettre) : choisissez d'abord une police latine pour le mot entier.</p>`:""}`+
     cats.map(c=>`<div class="fcat">${esc(c)}</div>`+list.filter(x=>x.f.cat===c).map(({f,i})=>`<button class="fontitem${curFonts.size===1&&curFonts.has(f.id)?" cur":""}" data-f="${i}"><span class="fn">${esc(f.name)}${f.perLetter?"":" · mot entier"}</span>${fontPreview(f,ptxt)}</button>`).join("")).join("")+
     (list.length?"":`<p class="muted" style="margin:6px">Aucune police ne correspond.</p>`)+
-    `<p class="muted" style="margin:6px 4px">Polices libres (SIL OFL ou Apache 2.0) converties en contours. Les écritures non latines s'appliquent au mot entier : tapez votre texte dans cette écriture (bouton clavier). Annuler pour revenir.</p>`;
+    `<div class="row" style="margin:8px 4px 0"><button id="myFonts">Mes polices : importer, modifier, créer…</button></div><p class="muted" style="margin:6px 4px">Polices libres (SIL OFL ou Apache 2.0) converties en contours. Les écritures non latines s'appliquent au mot entier : tapez votre texte dans cette écriture (bouton clavier). Annuler pour revenir.</p>`;
   m.querySelectorAll("input[name=fscope]").forEach(r=>r.onchange=()=>{ fontScope=r.value; renderFontMenu(); });
   const fi=$("#fontFind"); fi.oninput=()=>{ fontFilter=fi.value; renderFontMenu(); }; if(keepFocus){ fi.focus(); fi.setSelectionRange(fi.value.length,fi.value.length); }
   m.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>applyFont(FONTS[+b.dataset.f], fontScope==="word"?null:selLetters()));
   watchPreviews(m, ptxt);
+  const mf=$("#myFonts"); if(mf) mf.onclick=()=>{ $("#fontMenu").hidden=true; $("#fontBtn").classList.remove("on"); openFontManager(); };
 }
 $("#fontBtn").onclick=()=>{ const m=$("#fontMenu"); m.hidden=!m.hidden; $("#fontBtn").classList.toggle("on",!m.hidden); $("#fontBtn").setAttribute("aria-expanded",String(!m.hidden)); if(!m.hidden){ fontScope=selLetters().length?"sel":"word"; renderFontMenu(); } };
 document.addEventListener("pointerdown",e=>{ const m=$("#fontMenu"); if(!m.hidden && !e.target.closest("#fontSec") && !e.target.closest("#cv") && !e.target.closest("#layers")){ m.hidden=true; $("#fontBtn").classList.remove("on"); } });
@@ -3674,7 +3854,7 @@ function loadDoc(d){
   scheduleSave("shape"); scheduleSave("notes"); scheduleSave("palette");
 }
 let projT=null, projSaving=null;
-function projectTouch(){ if(!projReady||!curProject) return; clearTimeout(projT); projT=setTimeout(projectFlush,700); }
+function projectTouch(){ if(!projReady||!curProject||glyphMode) return; clearTimeout(projT); projT=setTimeout(projectFlush,700); }
 async function projectFlush(){
   clearTimeout(projT); projT=null; if(!curProject) return;
   if(/^Sans titre/.test(curProject.name) && brand.name) curProject.name=brand.name;
@@ -3686,7 +3866,7 @@ function renderProjName(){ const el=$("#projName"); if(!el) return; el.textConte
 const collName=id=>(collections.find(c=>c.id===id)||{}).name||"";
 async function initProjects(){
   try{
-    await pstore(); collections=(await P.meta("collections"))||[];
+    await pstore(); collections=(await P.meta("collections"))||[]; await initCustomFonts();
     const all=await P.all(), curId=await P.meta("current"); let cur=all.find(p=>p.id===curId);
     if(!cur){ cur={id:newPid(), name:brand.name||"Sans titre", collection:"", created:Date.now(), updated:Date.now()}; await P.setMeta("current",cur.id); }
     // the browser cache (or the db) holds the live drawing; if both are empty, the project's own copy is the drawing
@@ -3770,8 +3950,8 @@ async function saveFile(name, text){
 }
 async function exportProjects(ids, label){
   await projectFlush(); const ps=(await P.all()).filter(p=>ids.includes(p.id));
-  const cols=collections.filter(c=>ps.some(p=>p.collection===c.id));
-  await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps}));
+  const cols=collections.filter(c=>ps.some(p=>p.collection===c.id)), used=new Set(ps.flatMap(p=>((p.doc&&p.doc.layers)||[]).map(l=>l.font)));
+  await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps, fonts:customFonts.filter(c=>used.has(c.id))}));
 }
 async function importFile(file){
   let v; try{ v=JSON.parse(await file.text()); }catch(_){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
@@ -3780,6 +3960,8 @@ async function importFile(file){
   for(const c of (Array.isArray(v.collections)?v.collections:[])){ if(!c||typeof c.name!=="string") continue;
     let ex=collections.find(x=>x.name===c.name); if(!ex){ ex={id:"c"+newPid(), name:c.name.slice(0,60)}; collections.push(ex); } cmap[c.id]=ex.id; }
   await P.setMeta("collections", collections);
+  let nf=0; for(const cf of (Array.isArray(v.fonts)?v.fonts:[])) if(validCustom(cf)&&!customFonts.some(c=>c.id===cf.id)){ customFonts.push(cf); registerCustom(cf); nf++; }
+  if(nf) await saveCustomFonts();
   const existing=new Set((await P.all()).map(p=>p.id)); let n=0;
   for(const p of v.projects){ if(!p||typeof p.name!=="string"||!validDoc(p.doc)) continue;
     const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:typeof p.thumb==="string"?p.thumb:""};
@@ -3871,7 +4053,7 @@ function applyPatch(d){
   if(d.at<=seen || d.at<=lastAt.patch) return;
   let v; try{ v=JSON.parse(d.layers); }catch(_){ return; }
   if(!Array.isArray(v) || !v.length || !v.every(l=>l && typeof l.id==="string" && validLayers([Object.assign({visible:true,locked:false,name:"x",group:"mark",fill:"#000000"},l)]))) return;
-  if(drag){ setTimeout(()=>applyPatch(d),1000); return; }
+  if(drag||glyphMode){ setTimeout(()=>applyPatch(d),1500); return; }
   lastAt.patch=d.at; try{ localStorage.setItem("atelier-logo-patch",String(d.at)); }catch(_){}
   const before=snapshot();
   for(const p of v){ const i=layers.findIndex(l=>l.id===p.id); if(i>=0 && p.vector){ const keep=layers[i]; layers[i]=Object.assign({}, keep, {subs:p.subs, name:p.name||keep.name}); delete layers[i].kind; delete layers[i].live; continue; }
@@ -3901,7 +4083,7 @@ function applyRemote(what, d){
   let v; try{ v=JSON.parse(d.data); }catch(_){ return; }
   if(what==="shape"){
     if(!validLayers(v)) return;
-    if(drag || saveTimers.shape || saving.shape){ setTimeout(()=>applyRemote(what,d),1500); return; }
+    if(drag || glyphMode || saveTimers.shape || saving.shape){ setTimeout(()=>applyRemote(what,d),1500); return; }
     lastAt.shape=d.at; const before=snapshot(); if(JSON.stringify(layers)===JSON.stringify(v)) return;
     layers=v; ensureZones(); fixSel(); record(before, "Mise à jour par Claude"); localSave(); renderAll(); toast("Le dessin a été mis à jour par Claude (Annuler pour revenir).");
   } else if(what==="palette"){
@@ -3914,6 +4096,7 @@ function applyRemote(what, d){
   }
 }
 function scheduleSave(what){
+  if(glyphMode) return;   // drawing a glyph: the project is set aside, nothing to save
   setStatus("Modifications non enregistrées…");
   clearTimeout(saveTimers[what]); saveTimers[what]=setTimeout(()=>{ saveTimers[what]=null; doSave(what); },600);
 }

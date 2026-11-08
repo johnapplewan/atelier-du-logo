@@ -20,6 +20,7 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 - **Dégradés** : linéaire, radial et 4 points.
 - **Palettes par zones** : pipette, suggestions, une palette par groupe.
 - **56 polices libres** : latin, cyrillique, arabe, hébreu, devanagari, thaï, CJK, hiéroglyphes, pictogrammes.
+- **Mes polices** (menu F) : importer une police TTF, OTF ou WOFF ; dupliquer une police de l'atelier pour la modifier ; créer sa police à partir d'une grille vide ; chaque glyphe se dessine dans l'atelier (Plume, Crayon, Formes) avec lignes de base, hauteurs et chasse ; export en .otf installable. Les polices restent sur l'appareil et voyagent avec les fichiers de projet.
 - **Clavier international** : clavier à l'écran, saisie pinyin et romaji, sens auto, de droite à gauche ou vertical.
 - **Bulles d'annotation** (texte et voix), envoyées à Claude. Les retouches de Claude arrivent avec un bandeau pour les annuler.
 - **Export** : SVG, PNG et JPG, par groupe ou par calque, en ZIP.
@@ -32,6 +33,7 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 | `src/template.html` | Source de l'application |
 | `build.js` | `npm run build` : `src/template.html` + le mot par défaut, dessiné depuis `app/glyphs/instrument.js` → `app/index.html` |
 | `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` puis `trim.cjs` → `fonts.js` (métadonnées seules), `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
+| `app/vendor/` | opentype.js (MIT) : lecture et écriture des fichiers de police |
 | `tests/` | Tests Playwright (Chromium) sur `app/` servi en local : `npm test` |
 
 ## Licences

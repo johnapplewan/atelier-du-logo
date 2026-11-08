@@ -51,7 +51,7 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
    - A skill (`SKILL.md`) that tells Claude how to open the workshop in a new conversation and how to work with it: read the bubbles, send patches.
    - A short user guide.
 6. **Pen and pencil.** (done) Bézier handles visible on demand (all handles toggle, Alt+drag pulls handles out of a node); a real pen tool that creates paths (click = corner, click-drag = curve, click the first point = close, Enter/Escape = open path); a freehand pencil (stylus pressure; "Trait" = editable stroke, "Pinceau" = filled brush shape), smoothed into editable curves. Open paths are stroked layers (`L.open`, `L.sw`).
-7. **Typefaces.** Import a TTF/OTF/WOFF; duplicate an existing typeface and edit its glyphs with the pen/pencil; create a typeface from a blank glyph grid; export as OTF (opentype.js, MIT, bundled).
+7. **Typefaces.** (done) Import a TTF/OTF/WOFF; duplicate an existing typeface and edit its glyphs with the pen/pencil; create a typeface from a blank glyph grid; export as OTF (opentype.js, MIT, bundled).
 8. **Standalone app.** Installable PWA that works offline (vendor JSZip and UI fonts), zip download + files ready for GitHub Pages; panels (tools, layers, selection, palette, notes) can be detached into windows on several screens, kept in sync (BroadcastChannel).
 9. **Claude connections** (outside the artifact): copy/paste with claude.ai (free; paste the reply back as a patch); MCP via a one-click Claude Desktop extension (local server on localhost: serves the app offline, bridges tools such as read bubbles, render preview, send patch; uses the user's plan, settings and skills); Anthropic API key for direct calls without a conversation (pay per use, key kept in the browser).
 
