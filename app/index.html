@@ -234,6 +234,16 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .starts button span{font-size:12px;color:var(--muted)}
 .starts button.on{border-color:var(--brass);background:#EEF0FB;color:var(--ink);box-shadow:inset 0 0 0 1px var(--brass)}
 .starts button[hidden]{display:none}
+.stprops[hidden]{display:none}
+.stprops{margin-top:10px}
+.props{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.props button{display:flex;flex-direction:column;gap:6px;align-items:stretch;padding:10px;background:#fff;border-radius:10px;min-width:0}
+.props button svg{display:block;width:100%;height:64px}
+.props button span{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.props button.on{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass);background:#fff;color:var(--ink)}
+.textlink{color:var(--brass);text-decoration:underline;text-underline-offset:3px;font-size:13.5px;margin-right:auto;padding:6px 2px;cursor:pointer}
+.textlink:hover{color:var(--ink)}
+@media (max-width:700px){.props{grid-template-columns:repeat(2,1fr)}}
 .stshapes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .stshapes[hidden]{display:none}
 .stshapes button{width:58px;height:58px;padding:8px;color:var(--ink)}
@@ -412,6 +422,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
     <label><span>Nom de la marque</span><input id="stName" type="text" maxlength="80" autocomplete="off" placeholder="Ex. : Atelier Nova"></label>
     <label><span>Slogan <span class="muted">(facultatif)</span></span><input id="stTag" type="text" maxlength="160" autocomplete="off" placeholder="Ex. : Des meubles qui durent"></label>
     <label><span>Mots-clés <span class="muted">(facultatif, séparés par des virgules)</span></span><input id="stKw" type="text" maxlength="400" autocomplete="off" placeholder="Ex. : artisanal, chaleureux, bois, minimal"></label>
+    <label><span>Lettres clés <span class="muted">(facultatif : 1 à 3 lettres pour un monogramme, sinon les initiales du nom)</span></span><input id="stLet" type="text" maxlength="3" autocomplete="off" placeholder="Ex. : AN"></label>
   </div>
   <h3>Point de départ</h3>
   <div class="starts" role="radiogroup" aria-label="Point de départ">
@@ -419,12 +430,13 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
     <button type="button" role="radio" data-start="word"><b>Le nom seul</b><span>Votre nom en lettres, la police se change ensuite</span></button>
     <button type="button" role="radio" data-start="shape"><b>Une forme et le nom</b><span>Cercle, arche, écusson… à modeler</span></button>
     <button type="button" role="radio" data-start="image"><b>Une image ou une photo</b><span>Dessin, signature, texture : vectorisé</span></button>
-    <button type="button" role="radio" data-start="blank"><b>Page vierge</b><span>Rien, juste les outils</span></button>
+    <button type="button" role="radio" data-start="proposal"><b>Proposition de logo</b><span>Créée à partir de vos mots-clés et lettres clés</span></button>
     <button type="button" role="radio" data-start="example"><b>Le logo d'exemple</b><span>Un symbole simple et votre nom</span></button>
   </div>
   <div class="stshapes" id="stShapes" hidden></div>
+  <div class="stprops" id="stProps" hidden></div>
   <p class="muted" id="stMsg" role="alert"></p>
-  <div class="row" style="justify-content:flex-end"><button id="stLater">Plus tard</button><button id="stGo" class="primary">Commencer</button></div>
+  <div class="row" style="justify-content:flex-end"><a href="#" id="stBlank" class="textlink" title="Commencer sans rien : juste les outils">Page vierge</a><button id="stLater">Plus tard</button><button id="stGo" class="primary">Commencer</button></div>
 </dialog>
 <dialog id="impDlg" class="impdlg" aria-labelledby="impTitle">
   <h2 id="impTitle">Importer une image ou une photo</h2>
@@ -1841,8 +1853,8 @@ async function applyFont(f, ids){
    scaled word keeps its place and size when its text or typeface changes. */
 let wordText=GLYPHS.word;
 /* The brand the user is designing for (asked on first open). Export names and titles derive from it. */
-let brand={name:"", tagline:"", keywords:[]};
-function validBrand(v){ return v&&typeof v.name==="string"&&v.name.length<=80&&typeof v.tagline==="string"&&v.tagline.length<=160&&Array.isArray(v.keywords)&&v.keywords.length<=12&&v.keywords.every(k=>typeof k==="string"&&k.length<=40); }
+let brand={name:"", tagline:"", keywords:[], letters:""};
+function validBrand(v){ return v&&typeof v.name==="string"&&v.name.length<=80&&(v.letters===undefined||(typeof v.letters==="string"&&v.letters.length<=6))&&typeof v.tagline==="string"&&v.tagline.length<=160&&Array.isArray(v.keywords)&&v.keywords.length<=12&&v.keywords.every(k=>typeof k==="string"&&k.length<=40); }
 const brandLabel=()=>brand.name.trim()||wordText.trim()||"Logo";
 const glyphLoads={};
 function loadGlyphs(key){
@@ -2383,12 +2395,120 @@ const START_SHAPES={
   ecusson:["Écusson",()=>[[{x:28,y:28,i:null,o:null},{x:228,y:28,i:null,o:null},{x:228,y:118,i:null,o:{x:228,y:178}},{x:128,y:228,i:{x:196,y:212},o:{x:60,y:212}},{x:28,y:118,i:{x:28,y:178},o:null}]]],
 };
 const WELCOME_SKIP="atelier-logo-welcome-later";
+/* ---------- Logo proposals from the keywords and key letters ----------
+   Keywords are matched (accents and case ignored) against moods; each mood brings colour trios [shape, letters, accent],
+   starting shapes and typefaces. Six proposals mix the best moods with three layouts:
+   "mono": shape + key letters inside + name · "letters": key letters as the symbol + name · "name": the name alone, first letter in the accent.
+   "Autres propositions" rotates the choices. Everything stays editable curves. */
+const MOODS={
+  nature:{w:"nature bio vert verte plante plantes jardin foret feuille eco ecologique organique terre naturel naturelle durable fleur fleurs",
+    c:[["#2F4A3A","#F3EFE4","#C9A15B"],["#3E5C3A","#F6F3EA","#A3B18A"]], s:["cercle","arche"], f:["fraunces","lora-i","youngserif"]},
+  luxe:{w:"luxe luxueux elegant elegante premium prestige chic raffine raffinee classique bijou bijoux joaillerie haut gamme",
+    c:[["#141414","#F5F1E8","#B8975A"],["#1E1B2E","#F4F0EA","#C5A572"]], s:["losange","ecusson"], f:["playfair","cinzel","cormorant-i","dmserif"]},
+  tech:{w:"tech technologie digital numerique innovation innovant moderne startup logiciel data donnees ia futur application app web",
+    c:[["#14162B","#FFFFFF","#5B5BF0"],["#0B2545","#EEF4F8","#13C4A3"]], s:["hexagone","carre"], f:["spacegrotesk","inter","montserrat","poppins"]},
+  artisan:{w:"artisanal artisanale artisan fait main atelier authentique tradition traditionnel local boulangerie cafe ceramique bois cuir savoir",
+    c:[["#3B2A22","#F7EFE6","#D07A4E"],["#4A3B2C","#F3EAD9","#B4693E"]], s:["arche","ecusson","cercle"], f:["ebgaramond","baskerville","dancing","caveat"]},
+  chaleur:{w:"chaleureux chaleureuse convivial conviviale famille familial doux douce accueillant cosy chaleur gourmand gourmande cuisine restaurant",
+    c:[["#5A2E1F","#FBF1E6","#E08A4F"],["#6B3A2A","#FFF4E8","#E9B44C"]], s:["cercle","arche"], f:["youngserif","fraunces","pacifico"]},
+  fun:{w:"fun joyeux joyeuse ludique enfant enfants jeu jeux couleur couleurs pop dynamique energie sport fete",
+    c:[["#FF5A5F","#FFF8E7","#2EC4B6"],["#3A86FF","#FFFBEA","#FFBE0B"]], s:["cercle","carre"], f:["poppins","pacifico","bebas","marker"]},
+  minimal:{w:"minimal minimaliste simple epure epuree sobre clair zen calme essentiel",
+    c:[["#1A1A1A","#FFFFFF","#7A7A7A"],["#2B2B2B","#F7F7F5","#E4572E"]], s:["carre","cercle"], f:["inter","josefin","raleway","montserrat"]},
+  mer:{w:"mer ocean eau plage bleu voyage voyages nautique surf piscine ile port",
+    c:[["#0F3550","#F2F4F2","#E0B05A"],["#14507A","#F4F8FA","#59C3C3"]], s:["cercle","arche"], f:["josefin","raleway","lora-i"]},
+  solide:{w:"force solide robuste construction batiment industrie industriel securite fiable confiance immobilier finance banque conseil juridique expert expertise",
+    c:[["#1F2A44","#F3F4F6","#C8102E"],["#22313F","#F5F5F2","#E3A72F"]], s:["ecusson","carre","hexagone"], f:["oswald","montserrat-caps","merriweather","bebas"]},
+  creatif:{w:"creatif creative art arts design musique culture studio photo photographie graphisme mode galerie",
+    c:[["#2B193D","#FAF6F0","#FF6B6B"],["#1D1D1F","#F7F3EE","#F2A541"]], s:["losange","arche"], f:["abril","dmserif","playfair-i","sedgwick"]},
+};
+const MOOD_DEFAULT=["minimal","luxe","tech","artisan"];
+const plainText=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+function rankMoods(keywords){
+  const words=plainText(keywords.join(" ")).split(/[^a-z0-9]+/).filter(Boolean);
+  const sc=Object.entries(MOODS).map(([k,m])=>{ const set=new Set(m.w.split(" ")); return [k, words.filter(w=>set.has(w)).length]; }).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const top=sc.map(x=>x[0]); for(const d of MOOD_DEFAULT) if(top.length<3 && !top.includes(d)) top.push(d);
+  return top;
+}
+function keyLetters(name, letters){
+  const L=[...String(letters||"").replace(/\s+/g,"")].slice(0,3).join("");
+  if(L) return L;
+  const parts=String(name).trim().split(/[\s\-_.']+/).filter(Boolean);
+  return (parts.length>1?parts.slice(0,2).map(p=>[...p][0]).join(""):[...(parts[0]||"A")][0]).toUpperCase();
+}
+const PROP_LAYOUTS=["mono","letters","name"];
+function makeProposals(info, round){
+  const moods=rankMoods(info.keywords), out=[];
+  for(let i=0;i<6;i++){
+    const k=moods[(i+round)%moods.length], m=MOODS[k], j=Math.floor((i+round)/moods.length)+round;
+    out.push({mood:k, colors:m.c[j%m.c.length], shape:m.s[(i+j)%m.s.length], font:m.f[(i+2*j)%m.f.length], layout:PROP_LAYOUTS[(i+round)%3]});
+  }
+  return out;
+}
+/* glyphs of a string, fitted into a box (monogram) or set on the word line (name) */
+async function glyphLetters(str, fontId, fit){
+  const f=fontById(fontId)||fontById("instrument"); const G=await loadGlyphs(f.gkey);
+  if(fit){ const {letters}=layoutText(str, f, G, 0, 0, 1); if(!letters.length) return {f,letters};
+    const b=bounds(letters.map(l=>({subs:l.subs}))), s=Math.min(fit.w/(b.x1-b.x0||1), fit.h/(b.y1-b.y0||1));
+    const ox=fit.cx-(b.x0+b.x1)/2*s, oy=fit.cy-(b.y0+b.y1)/2*s, T=p=>p&&{x:r2(ox+p.x*s),y:r2(oy+p.y*s)};
+    return {f, letters:letters.map(l=>({ch:l.ch, subs:l.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)})))}))}; }
+  const {letters}=layoutText(str, f, G, 0, GLYPHS.baseline, f.k); return {f, letters};
+}
+async function proposalLayers(p, info){
+  const [bg,fg,ac]=p.colors, out=[], mark=p.layout!=="name", Lt=keyLetters(info.name, info.letters);
+  const word=(id,name,ch,fill,font,subs,group)=>Object.assign({visible:true,locked:false,id,name,group,fill,font,subs},ch?{ch}:{});
+  if(p.layout==="mono"){
+    out.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[p.shape][0],group:"mark",fill:bg,subs:START_SHAPES[p.shape][1]()});
+    const box=p.shape==="arche"?{cx:128,cy:146,w:116,h:96}:p.shape==="ecusson"?{cx:128,cy:116,w:116,h:96}:p.shape==="losange"?{cx:128,cy:128,w:92,h:80}:{cx:128,cy:128,w:124,h:104};
+    const {f,letters}=await glyphLetters(Lt.toUpperCase(), p.font, box);
+    letters.forEach((g,i)=>out.push(word("mono-"+(i+1),"Monogramme "+g.ch,g.ch,fg,f.id,g.subs,"mark")));
+  } else if(p.layout==="letters"){
+    const {f,letters}=await glyphLetters(Lt.toUpperCase(), p.font, {cx:128,cy:128,w:200,h:180});
+    letters.forEach((g,i)=>out.push(word("mono-"+(i+1),"Monogramme "+g.ch,g.ch,i===letters.length-1&&letters.length>1?ac:bg,f.id,g.subs,"mark")));
+  }
+  const {f,letters}=await glyphLetters(info.name, p.font, null);
+  if(letters.length){ const nb=bounds(letters.map(l=>({subs:l.subs}))), dx=(mark?301:28)-nb.x0;
+    letters.forEach((g,i)=>{ const L=word("lettre-"+(i+1),(g.ch==="—"?"Barre":"Lettre "+g.ch)+" · "+(i+1),g.ch==="—"?null:g.ch,p.layout==="name"&&i===0?ac:bg,f.id,g.subs,"word");
+      L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,0))); stamp(L, GLYPHS.baseline); out.push(L); }); }
+  return out;
+}
+function proposalSVG(ls){
+  if(!ls.length) return "";
+  const b=bounds(ls), pad=16;
+  return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ls.map(l=>`<path d="${pathD(l.subs)}" fill="${l.fill}"/>`).join("")}</svg>`;
+}
+const prop={round:0, list:[], layers:[], pick:0, busy:0};
+function startInfo(){ return {name:$("#stName").value.trim().slice(0,80), tagline:$("#stTag").value.trim().slice(0,160),
+  keywords:$("#stKw").value.split(/[,;\n]/).map(k=>k.trim().slice(0,40)).filter(Boolean).slice(0,12), letters:$("#stLet").value.replace(/\s+/g,"").slice(0,3)}; }
+async function renderProposals(){
+  const el=$("#stProps"); if(startChoice!=="proposal"){ el.hidden=true; return; } el.hidden=false;
+  const info=startInfo(); if(!info.name){ el.innerHTML=`<p class="muted">Indiquez le nom de la marque pour voir les propositions.</p>`; return; }
+  const n=++prop.busy; el.setAttribute("aria-busy","true");
+  if(!prop.layers.length) el.innerHTML=`<p class="muted">Préparation des propositions…</p>`;
+  try{
+    await loadFonts(); const list=makeProposals(info, prop.round), lays=[];
+    for(const p of list) lays.push(await proposalLayers(p, info).catch(()=>[]));
+    if(n!==prop.busy) return;
+    prop.list=list; prop.layers=lays; if(prop.pick>=list.length) prop.pick=0;
+    const moodName={nature:"nature",luxe:"élégant",tech:"tech",artisan:"artisanal",chaleur:"chaleureux",fun:"joyeux",minimal:"minimal",mer:"mer",solide:"solide",creatif:"créatif"};
+    el.innerHTML=`<div class="props">${lays.map((ls,i)=>`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}" title="${esc(moodName[list[i].mood]+" · "+(fontById(list[i].font)||{}).name)}">${proposalSVG(ls)}<span>${esc(moodName[list[i].mood])} · ${esc((fontById(list[i].font)||{name:""}).name)}</span></button>`).join("")}</div>
+      <div class="row"><button type="button" id="stMore">Autres propositions</button><span class="muted">Inspirées de vos mots-clés${info.keywords.length?"":" (ajoutez-en pour des propositions plus ciblées)"} · tout reste modifiable.</span></div>`;
+  } finally { if(n===prop.busy) el.removeAttribute("aria-busy"); }
+}
+let propT=null;
+for(const id of ["#stName","#stKw","#stLet"]) $(id).addEventListener("input",()=>{ if(startChoice!=="proposal") return; clearTimeout(propT); propT=setTimeout(renderProposals,350); });
+$("#stProps").addEventListener("click",e=>{
+  const b=e.target.closest("[data-prop]"); if(b){ prop.pick=+b.dataset.prop; document.querySelectorAll("#stProps [data-prop]").forEach(x=>{ const on=+x.dataset.prop===prop.pick; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); }); return; }
+  if(e.target.closest("#stMore")){ prop.round++; prop.pick=0; renderProposals(); }
+});
+
 let startChoice="word", startShape="cercle";
 function shapeThumb(k){ return `<svg viewBox="20 20 216 216" aria-hidden="true"><path d="${pathD(START_SHAPES[k][1]())}" fill="currentColor"/></svg>`; }
 function isExample(){ return JSON.stringify(layers.map(l=>[l.id,l.subs]))===JSON.stringify(ORIGIN.map(l=>[l.id,l.subs])); }
 function openStart(){
   const d=$("#startDlg"), canKeep=layers.length>0 && !isExample();
-  $("#stName").value=brand.name||""; $("#stTag").value=brand.tagline||""; $("#stKw").value=(brand.keywords||[]).join(", ");
+  $("#stName").value=brand.name||""; $("#stTag").value=brand.tagline||""; $("#stKw").value=(brand.keywords||[]).join(", "); $("#stLet").value=brand.letters||"";
+  prop.round=0; prop.pick=0; prop.layers=[]; $("#stProps").innerHTML="";
   startChoice=canKeep?"keep":"word";
   $("#stKeep").hidden=!canKeep;
   $("#stShapes").innerHTML=Object.keys(START_SHAPES).map(k=>`<button type="button" data-shape="${k}" title="${START_SHAPES[k][0]}" aria-label="${START_SHAPES[k][0]}">${shapeThumb(k)}</button>`).join("");
@@ -2398,6 +2518,7 @@ function renderStart(){
   document.querySelectorAll("#startDlg [data-start]").forEach(b=>{ const on=b.dataset.start===startChoice; b.classList.toggle("on",on); b.setAttribute("aria-checked",String(on)); });
   document.querySelectorAll("#stShapes [data-shape]").forEach(b=>b.classList.toggle("on",b.dataset.shape===startShape));
   $("#stShapes").hidden=startChoice!=="shape";
+  if(startChoice==="proposal"){ if(!prop.layers.length) renderProposals(); else $("#stProps").hidden=false; } else $("#stProps").hidden=true;
   $("#stGo").textContent=startChoice==="image"?"Continuer : choisir l'image":"Commencer";
 }
 $("#startDlg").addEventListener("click",e=>{
@@ -2405,11 +2526,11 @@ $("#startDlg").addEventListener("click",e=>{
   const s=e.target.closest("[data-shape]"); if(s){ startShape=s.dataset.shape; renderStart(); }
 });
 async function applyStart(choice, info, shape){
-  brand={name:info.name, tagline:info.tagline, keywords:info.keywords};
+  brand={name:info.name, tagline:info.tagline, keywords:info.keywords, letters:info.letters||""};
   const b0=snapshot(), u0=undoStack.length;
   if(choice!=="keep"){
     groups=[]; curPal="main"; pals=[{id:"main",name:"Principale",colors:[]}]; sel={layer:null,node:null};
-    layers = choice==="example" ? clone(ORIGIN) : [];
+    layers = choice==="example" ? clone(ORIGIN) : choice==="proposal" ? clone(prop.layers[prop.pick]||[]) : [];
     if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
     ensureZones(); wordText=brand.name;
     if(choice==="word"||choice==="shape"||choice==="example"){
@@ -2425,12 +2546,19 @@ async function applyStart(choice, info, shape){
 $("#stGo").onclick=async()=>{
   const name=$("#stName").value.trim().slice(0,80);
   if(!name){ $("#stMsg").textContent="Indiquez le nom de la marque : il sert au logo et aux noms des fichiers."; $("#stName").focus(); return; }
-  const info={name, tagline:$("#stTag").value.trim().slice(0,160), keywords:$("#stKw").value.split(/[,;\n]/).map(k=>k.trim().slice(0,40)).filter(Boolean).slice(0,12)};
-  $("#stGo").disabled=true; try{ await applyStart(startChoice, info, startShape); } finally{ $("#stGo").disabled=false; }
+  const info=startInfo();
+  $("#stGo").disabled=true;
+  try{ if(startChoice==="proposal"){ clearTimeout(propT); await renderProposals(); if(!(prop.layers[prop.pick]||[]).length){ $("#stMsg").textContent="Les propositions n'ont pas pu être préparées. Rechargez la page."; return; } }
+    await applyStart(startChoice, info, startShape); } finally{ $("#stGo").disabled=false; }
   $("#startDlg").close(); try{ localStorage.removeItem(WELCOME_SKIP); }catch(_){}
   if(startChoice==="image") impOpen();
   else toast(startChoice==="keep"?"Marque enregistrée.":"C'est parti ! « Annuler » revient au dessin précédent.");
 };
+/* "Page vierge": a plain link next to "Plus tard"; the brand name is optional here */
+$("#stBlank").onclick=async e=>{ e.preventDefault(); const info=startInfo();
+  await applyStart("blank", info, startShape); $("#startDlg").close();
+  try{ info.name?localStorage.removeItem(WELCOME_SKIP):localStorage.setItem(WELCOME_SKIP,"1"); }catch(_){}
+  toast("Page vierge : choisissez un outil à gauche. « Annuler » revient au dessin précédent."); };
 $("#stLater").onclick=()=>{ try{ localStorage.setItem(WELCOME_SKIP,"1"); }catch(_){} $("#startDlg").close(); };
 $("#stName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#stGo").click(); } });
 $("#startBtn").onclick=openStart;

@@ -55,7 +55,29 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   check("shape + name", () => { assert.strictEqual(st[0], "forme-depart"); assert.strictEqual(st.length, 12); });
   const wx = await p.evaluate(() => Math.min(...__atelier.layers.filter(l => l.group === "word").flatMap(l => l.subs.flat().map(n => n.x))));
   check("name placed right of the shape", () => assert.ok(wx > 280, String(wx)));
-  await p.click("#startBtn"); await p.click('[data-start="blank"]'); await p.click("#stGo"); await p.waitForTimeout(400);
+  // logo proposals from keywords and key letters
+  await p.click("#startBtn"); await p.fill("#stKw", "bois, artisanal, chaleureux"); await p.fill("#stLet", "an");
+  await p.click('[data-start="proposal"]');
+  await p.waitForSelector("#stProps [data-prop] svg", { timeout: 15000 });
+  const props = await p.evaluate(() => [...document.querySelectorAll("#stProps [data-prop]")].map(b => b.querySelector("span").textContent));
+  check("six proposals, moods from the keywords", () => { assert.strictEqual(props.length, 6); assert.ok(props.some(t => /artisanal/.test(t)) && props.some(t => /chaleureux/.test(t)), props.join(" | ")); });
+  await p.locator("#stDlg, #startDlg").first().screenshot({ path: __dirname + "/s10.png" });
+  await p.click('#stProps [data-prop="0"]'); await p.click("#stGo"); await p.waitForTimeout(500);
+  const pr = await p.evaluate(() => ({ ids: __atelier.layers.map(l => l.id), mono: __atelier.layers.filter(l => /^mono-/.test(l.id)).map(l => l.ch).join(""),
+    word: __atelier.layers.filter(l => l.group === "word").map(l => l.ch).join(""), fills: [...new Set(__atelier.layers.map(l => l.fill))] }));
+  check("proposal applied: shape, monogram from the key letters, name", () => { assert.strictEqual(pr.ids[0], "forme-depart"); assert.strictEqual(pr.mono, "AN"); assert.strictEqual(pr.word.toLowerCase(), "ateliernova"); });
+  check("proposal colours come from the mood (not the example)", () => assert.ok(!pr.fills.includes("#22252B") && pr.fills.length >= 2, pr.fills.join()));
+  await p.click("#startBtn"); await p.click('[data-start="proposal"]'); await p.waitForSelector("#stProps [data-prop] svg");
+  const r0 = await p.evaluate(() => document.querySelector("#stProps").textContent); await p.click("#stMore"); await p.waitForTimeout(800);
+  const r1 = await p.evaluate(() => document.querySelector("#stProps").textContent);
+  check("'Autres propositions' changes the set", () => assert.notStrictEqual(r0, r1));
+  const letKept = await p.inputValue("#stLet");
+  check("key letters saved with the brand", () => assert.strictEqual(letKept, "an"));
+
+  // blank page: a plain link next to "Plus tard"
+  const tag = await p.evaluate(() => document.querySelector("#stBlank").tagName);
+  check("'Page vierge' is a link", () => assert.strictEqual(tag, "A"));
+  await p.click("#stBlank"); await p.waitForTimeout(400);
   const blank = await p.evaluate(() => __atelier.layers.length);
   check("blank page", () => assert.strictEqual(blank, 0));
   await p.fill("#txtIn", "Nova"); await p.press("#txtIn", "Enter"); await p.waitForTimeout(500);
