@@ -264,6 +264,39 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .impctl input[type=range]{flex:1;min-width:0}
 #exPatRow[hidden]{display:none}
 @media (max-width:700px){.impgrid,.impctl{grid-template-columns:1fr}.impgrid canvas,.impgrid svg{height:150px}}
+.projname{font-size:12.5px;font-weight:500;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:3px 8px;border:1px solid var(--line);border-radius:999px;background:#fff}
+.projname:empty{display:none}
+.projdlg{max-width:min(1120px,96vw);width:100%;padding:0}
+.projhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line)}
+.projhead h2{margin:0}.projhead .sp{flex:1}
+.projhead input[type=search]{padding:6px 9px;border:1px solid var(--line);border-radius:8px;min-width:220px;background:#fff}
+.projbody{display:grid;grid-template-columns:220px 1fr;min-height:420px;max-height:72vh}
+.colls{border-right:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:3px;overflow:auto}
+.colls button{text-align:left;border:0;background:none;display:flex;justify-content:space-between;gap:6px;padding:7px 9px;border-radius:8px}
+.colls button span{color:var(--muted);font-size:12px}
+.colls button.on{background:var(--night);color:var(--ivory)}.colls button.on span{color:#C9C9CF}
+.colls .collrow{display:flex;align-items:center}.colls .collrow>button:first-child{flex:1;min-width:0}
+.colls .collrow .ib{width:22px;height:22px;opacity:.55}.colls .collrow:hover .ib{opacity:1}
+.colls button.ghost{color:var(--brass);margin-top:6px}
+.colls .rename{margin:2px 0}
+.projmain{padding:12px 16px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.pcard{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;display:flex;flex-direction:column;gap:6px}
+.pcard.cur{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
+.pthumb{height:110px;padding:8px;background:var(--cream);border:0;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.pthumb svg{width:100%;height:100%}
+.pname{font:600 14px Inter,system-ui,sans-serif;border:1px solid transparent;border-radius:6px;padding:3px 5px;background:none}
+.pname:hover,.pname:focus{border-color:var(--line);background:#fff}
+.pmeta{font-size:12px;color:var(--muted);padding:0 5px}
+.pcard select{padding:4px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:12.5px}
+.pact{display:flex;flex-wrap:wrap;gap:4px}.pact button{padding:4px 8px;font-size:12px}
+.playerpick{border:1px solid var(--brass);border-radius:12px;padding:10px;background:#fff}
+.playerpick[hidden]{display:none}
+.playerpick .sp{flex:1}
+.pllist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;max-height:220px;overflow:auto;margin:8px 0}
+.plrow{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 6px;border-radius:7px}.plrow:hover{background:#F1F1EF}
+.plsw{width:34px;height:26px;flex:none;display:flex}.plsw svg{width:100%;height:100%}
+@media (max-width:760px){.projbody{grid-template-columns:1fr}.colls{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap}}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
 @media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
@@ -276,10 +309,12 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
     <div><h1>Atelier du Logo</h1><div class="sub">par John Apple · édition vectorielle</div></div>
   </div>
   <div class="spacer"></div>
+  <span id="projName" class="projname"></span>
   <div id="status" role="status"><i></i><span>Chargement…</span></div>
   <div class="group">
     <button id="undo" title="Annuler (Ctrl+Z)">Annuler</button>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
+    <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
     <button id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
@@ -321,7 +356,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
     </section>
     <section>
       <h2>Calques</h2>
-      <div class="row lbar" style="margin-bottom:6px"><button id="grpBtn" title="Grouper la sélection (Ctrl+G)">Grouper</button><button id="ungrpBtn" title="Dégrouper (Ctrl+Maj+G)">Dégrouper</button><button id="dupBtn" title="Dupliquer (Ctrl+D)">Dupliquer</button></div>
+      <div class="row lbar" style="margin-bottom:6px"><button id="grpBtn" title="Grouper la sélection (Ctrl+G)">Grouper</button><button id="ungrpBtn" title="Dégrouper (Ctrl+Maj+G)">Dégrouper</button><button id="dupBtn" title="Dupliquer (Ctrl+D)">Dupliquer</button><button id="copyBtn" title="Copier les calques sélectionnés, pour ce projet ou un autre (Ctrl+C)">Copier</button><button id="pasteBtn" title="Coller les calques copiés (Ctrl+V)">Coller</button></div>
       <ul class="layers" id="layers"></ul>
     </section>
   </aside>
@@ -466,6 +501,19 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
   </div>
   <p class="muted" id="impMsg" role="status"></p>
   <div class="row" style="justify-content:flex-end"><button id="impCancel">Annuler</button><button id="impAdd" class="primary" disabled>Ajouter au dessin</button></div>
+</dialog>
+<dialog id="projDlg" class="projdlg" aria-labelledby="projTitle">
+  <div class="projhead"><h2 id="projTitle">Mes projets</h2><span class="muted">Enregistrés sur cet appareil, dans ce navigateur. Pour les garder ailleurs : enregistrez-les dans un fichier.</span><span class="sp"></span>
+    <input type="search" id="projFind" placeholder="Rechercher un projet, un mot-clé" aria-label="Rechercher"><button id="projClose">Fermer</button></div>
+  <div class="projbody">
+    <nav class="colls" id="projColls" aria-label="Collections"></nav>
+    <div class="projmain">
+      <div class="row"><button class="primary" id="projNew">Nouveau projet</button><button id="projExport">Tout enregistrer dans un fichier</button>
+        <label class="filebtn">Ouvrir un fichier…<input type="file" id="projOpenFile" accept=".json,application/json"></label></div>
+      <div id="projLayers" class="playerpick" hidden></div>
+      <div class="pgrid" id="projGrid"></div>
+    </div>
+  </div>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -1091,6 +1139,8 @@ window.addEventListener("keydown", e=>{
   if(mod && e.key.toLowerCase()==="a" && tool==="points"){ const L=layerById(sel.layer); if(L){ e.preventDefault(); sel.multi=[]; L.subs.forEach((s,si)=>s.forEach((n,ni)=>sel.multi.push({l:L.id,s:si,n:ni}))); renderAll(); } return; }
   if(mod && e.key.toLowerCase()==="g"){ e.preventDefault(); e.shiftKey?ungroupSelected():groupSelected(); return; }
   if(mod && e.key.toLowerCase()==="d"){ e.preventDefault(); duplicateSelection(); return; }
+  if(mod && !e.shiftKey && e.key.toLowerCase()==="c"){ e.preventDefault(); copyLayers(); return; }
+  if(mod && !e.shiftKey && e.key.toLowerCase()==="v"){ e.preventDefault(); pasteLayers(); return; }
   if(mod && !e.altKey) return;
   if(e.key==="Escape" && pick){ closePicker(); return; }
   // rotation: R = +15°, Maj+R = −15°, [ ] = ∓15° (Alt: 1°)
@@ -2594,6 +2644,231 @@ function fillPatternSources(){
   if([...$("#exPatSrc").options].some(o=>o.value===cur)) $("#exPatSrc").value=cur; else if(tiles.length) $("#exPatSrc").value="l:"+tiles[0].id;
 }
 
+/* ---------- Projects and collections, saved on this device ----------
+   IndexedDB ("atelier-logo": projects by id, meta: current project, collections, layer clipboard); localStorage as a
+   fallback. The open project is the one the rest of the workshop edits (and shares with Claude through the db);
+   it is written back here a moment after each change. Projects can be duplicated, filed in collections (one per art
+   direction), exported to / opened from .atelier.json files, and layers copied from one project to another
+   (Ctrl+C / Ctrl+V, or "Calques…" on a project card), with their exact paints. */
+const PST={db:null, ls:false};
+const LSP="atelier-logo-store";
+function idbOpen(){ return new Promise((ok,ko)=>{ try{ const r=indexedDB.open("atelier-logo",1);
+  r.onupgradeneeded=()=>{ const d=r.result; if(!d.objectStoreNames.contains("projects")) d.createObjectStore("projects",{keyPath:"id"}); if(!d.objectStoreNames.contains("meta")) d.createObjectStore("meta"); };
+  r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); r.onblocked=()=>ko(new Error("blocked")); }catch(e){ ko(e); } }); }
+async function pstore(){ if(PST.db||PST.ls) return; try{ PST.db=await idbOpen(); }catch(_){ PST.ls=true; } }
+function lsAll(){ try{ return JSON.parse(localStorage.getItem(LSP)||"null")||{projects:{},meta:{}}; }catch(_){ return {projects:{},meta:{}}; } }
+function lsPut(v){ try{ localStorage.setItem(LSP,JSON.stringify(v)); return true; }catch(_){ return false; } }
+function idb(store, mode, fn){ return new Promise((ok,ko)=>{ const t=PST.db.transaction(store,mode), s=t.objectStore(store); let res; const r=fn(s); if(r) r.onsuccess=()=>{ res=r.result; };
+  t.oncomplete=()=>ok(res); t.onerror=()=>ko(t.error); t.onabort=()=>ko(t.error); }); }
+const P={
+  async all(){ await pstore(); return PST.db ? (await idb("projects","readonly",s=>s.getAll()))||[] : Object.values(lsAll().projects); },
+  async get(id){ await pstore(); return PST.db ? await idb("projects","readonly",s=>s.get(id)) : lsAll().projects[id]; },
+  async put(p){ await pstore(); if(PST.db) return idb("projects","readwrite",s=>s.put(p)); const v=lsAll(); v.projects[p.id]=p; if(!lsPut(v)) throw new Error("quota"); },
+  async del(id){ await pstore(); if(PST.db) return idb("projects","readwrite",s=>s.delete(id)); const v=lsAll(); delete v.projects[id]; lsPut(v); },
+  async meta(k){ await pstore(); return PST.db ? await idb("meta","readonly",s=>s.get(k)) : lsAll().meta[k]; },
+  async setMeta(k,val){ await pstore(); if(PST.db) return idb("meta","readwrite",s=>s.put(val,k)); const v=lsAll(); v.meta[k]=val; lsPut(v); },
+};
+let curProject=null, collections=[], projFilter="all", projQuery="", projReady=false;
+const newPid=()=>"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const emptyBrand=()=>({name:"",tagline:"",keywords:[],letters:""});
+function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand)}; }
+function validDoc(d){ return d && validLayers(d.layers) && (d.notes===undefined||validNotes(d.notes)) && (d.pals===undefined||validPals(d.pals)) && (d.groups===undefined||validGroups(d.groups)); }
+function thumbSVG(ls){
+  const vis=(ls||layers).filter(l=>l.visible!==false); if(!vis.length) return "";
+  const b=bounds(vis), pad=12;
+  return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg">${vis.map(l=>{ const r=layerSVG(l,{pfx:"th"}); return (r.defs?`<defs>${r.defs}</defs>`:"")+r.body; }).join("").replace(/<text[\s\S]*?<\/text>/g,"")}</svg>`;
+}
+/* load a project's drawing into the workshop (clears undo, selection and Claude's banner) */
+function loadDoc(d){
+  layers=validLayers(d.layers)?clone(d.layers):[]; notes=validNotes(d.notes)?clone(d.notes):[];
+  pals=validPals(d.pals)?clone(d.pals):[{id:"main",name:"Principale",colors:[]}]; groups=validGroups(d.groups)?clone(d.groups):[];
+  curPal=typeof d.curPal==="string"?d.curPal:"main"; wordText=typeof d.wordText==="string"?d.wordText:""; brand=validBrand(d.brand)?clone(d.brand):emptyBrand();
+  undoStack.length=0; redoStack.length=0; sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
+  ensureZones(); fixSel(); setClaudeUndo(null);
+  const ed=$("#noteEditor"); if(ed) ed.dataset.for="";
+  renderAll(); renderPins(); renderNotes(); renderNoteEditor(); updateButtons(); fit();
+  scheduleSave("shape"); scheduleSave("notes"); scheduleSave("palette");
+}
+let projT=null, projSaving=null;
+function projectTouch(){ if(!projReady||!curProject) return; clearTimeout(projT); projT=setTimeout(projectFlush,700); }
+async function projectFlush(){
+  clearTimeout(projT); projT=null; if(!curProject) return;
+  if(/^Sans titre/.test(curProject.name) && brand.name) curProject.name=brand.name;
+  const p=Object.assign({}, curProject, {updated:Date.now(), doc:docNow(), thumb:thumbSVG()});
+  projSaving=P.put(p).then(()=>{ curProject=p; renderProjName(); }).catch(()=>setStatus("Espace de stockage de l'appareil plein : exportez des projets dans un fichier", true));
+  return projSaving;
+}
+function renderProjName(){ const el=$("#projName"); if(!el) return; el.textContent=curProject?curProject.name:""; el.title=curProject?"Projet ouvert"+(collName(curProject.collection)?" · collection "+collName(curProject.collection):""):""; }
+const collName=id=>(collections.find(c=>c.id===id)||{}).name||"";
+async function initProjects(){
+  try{
+    await pstore(); collections=(await P.meta("collections"))||[];
+    const all=await P.all(), curId=await P.meta("current"); let cur=all.find(p=>p.id===curId);
+    if(!cur){ cur={id:newPid(), name:brand.name||"Sans titre", collection:"", created:Date.now(), updated:Date.now()}; await P.setMeta("current",cur.id); }
+    // the browser cache (or the db) holds the live drawing; if both are empty, the project's own copy is the drawing
+    else if(!localLoad() && !lastAt.shape && validDoc(cur.doc)) loadDoc(cur.doc);
+    curProject=Object.assign({}, cur); delete curProject.doc; delete curProject.thumb;
+    projReady=true; await projectFlush(); renderProjName();
+  }catch(_){ setStatus("Projets indisponibles dans ce navigateur (le dessin reste enregistré)", true); }
+}
+async function openProject(id){
+  if(curProject&&curProject.id===id) return;
+  await projectFlush(); const p=await P.get(id); if(!p||!validDoc(p.doc)){ toast("Projet illisible."); return; }
+  curProject=Object.assign({}, p); delete curProject.doc; delete curProject.thumb;
+  await P.setMeta("current", id); loadDoc(p.doc); renderProjName(); toast("Projet « "+p.name+" » ouvert.");
+}
+async function newProject(collection){
+  await projectFlush();
+  const p={id:newPid(), name:"Sans titre", collection:collection||"", created:Date.now(), updated:Date.now(), doc:{layers:[],notes:[],pals:[{id:"main",name:"Principale",colors:[EX.ink]}],groups:[],curPal:"main",wordText:"",brand:emptyBrand()}};
+  await P.put(p); curProject=Object.assign({},p); delete curProject.doc; await P.setMeta("current",p.id);
+  loadDoc(p.doc); renderProjName(); $("#projDlg").close(); openStart();
+}
+async function duplicateProject(id){
+  await projectFlush(); const p=await P.get(id); if(!p) return;
+  const c=Object.assign(clone(p), {id:newPid(), name:p.name+" (copie)", created:Date.now(), updated:Date.now()}); await P.put(c); renderProjects();
+  toast("Projet dupliqué : « "+c.name+" ».");
+}
+async function deleteProject(id){
+  const p=await P.get(id); if(!p) return;
+  if(!await confirmBox("Supprimer « "+p.name+" » ?","Le projet est effacé de cet appareil. Exportez-le d'abord dans un fichier si vous voulez le garder.","Supprimer")) return;
+  await P.del(id);
+  if(curProject&&curProject.id===id){ const rest=(await P.all()).sort((a,b)=>b.updated-a.updated); curProject=null;
+    if(rest.length){ await openProject(rest[0].id); } else { projReady=false; await newProjectSilently(); } }
+  renderProjects();
+}
+async function newProjectSilently(){ const p={id:newPid(), name:"Sans titre", collection:"", created:Date.now(), updated:Date.now()}; curProject=p; projReady=true; await P.setMeta("current",p.id); loadDoc({layers:[]}); await projectFlush(); }
+async function setProjectField(id, k, v){
+  if(curProject&&curProject.id===id){ curProject[k]=v; await projectFlush(); return; }
+  const p=await P.get(id); if(!p) return; p[k]=v; await P.put(p);
+}
+/* ---- layer clipboard across projects ---- */
+function paintFor(doc, L){ const g=L.grp&&(doc.groups||[]).find(x=>x.id===L.grp), ps=doc.pals||[], P0=ps.find(x=>x.id===(g&&g.pal||"main"))||ps[0];
+  return (P0&&Number.isInteger(L.zone)&&P0.colors[L.zone])||L.fill; }
+function clipItems(doc, ids){ return ids.map(id=>doc.layers.find(l=>l.id===id)).filter(Boolean).map(L=>({layer:clone(L), paint:clone(paintFor(doc,L))})); }
+async function copyLayers(){
+  const ids=selLayers(); if(!ids.length){ toast("Sélectionnez d'abord des calques à copier."); return; }
+  const clip={from:curProject?curProject.id:"", fromName:curProject?curProject.name:"", items:clipItems(docNow(), ids)};
+  window.__clip=clip; try{ await P.setMeta("clipboard",clip); }catch(_){}
+  toast(ids.length+" calque"+(ids.length>1?"s copiés":" copié")+" : Ctrl+V les colle ici ou dans un autre projet.");
+}
+function zoneForPaint(paint){
+  const P0=curPalObj(), key=JSON.stringify(paint); let i=P0.colors.findIndex(c=>JSON.stringify(c)===key);
+  if(i<0 && typeof paint==="string") i=P0.colors.findIndex(c=>primary(c).toLowerCase()===paint.toLowerCase());
+  if(i<0 && P0.colors.length<MAXZ && validPaint(paint)){ P0.colors.push(clone(paint)); i=P0.colors.length-1; }
+  return i<0?0:i;
+}
+function pasteItems(items, sameProject){
+  if(!items||!items.length) return 0;
+  const b=snapshot(), added=[], gmap={};
+  for(const it of items){
+    const c=clone(it.layer); c.id=newLayerId("copie"); c.visible=true; c.locked=false; delete c.grp;
+    if(sameProject) c.subs.forEach(s=>s.forEach(n=>moveNode(n,12,12)));
+    if(it.layer.grp){ if(!gmap[it.layer.grp]){ const g={id:"grp"+Date.now().toString(36)+(++dupN), name:"Calques collés", pal:null, open:true}; groups.push(g); gmap[it.layer.grp]=g.id; } c.grp=gmap[it.layer.grp]; }
+    if(c.group==="word"){ c.group="mark"; }   // pasted letters become drawing: the word stays the project's own
+    c.zone=zoneForPaint(it.paint); c.fill=primary(it.paint); added.push(c);
+  }
+  layers.push(...added); ensureZones(); sel={layer:added[added.length-1].id,node:null,layers:added.map(l=>l.id)}; commit(b);
+  return added.length;
+}
+async function pasteLayers(){
+  let clip=window.__clip; if(!clip){ try{ clip=await P.meta("clipboard"); }catch(_){} }
+  if(!clip||!clip.items||!clip.items.length){ toast("Rien à coller : copiez d'abord des calques (Ctrl+C)."); return; }
+  const n=pasteItems(clip.items, curProject&&clip.from===curProject.id);
+  toast(n+" calque"+(n>1?"s collés":" collé")+(clip.fromName&&(!curProject||clip.from!==curProject.id)?" depuis « "+clip.fromName+" »":"")+" (Annuler pour revenir).");
+}
+function flatThumb(L, fill){ const b=bounds([L]), pad=4; return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg"><path d="${pathD(L.subs)}" fill="${esc(fill)}"/></svg>`; }
+/* ---- files: one project or a whole collection ---- */
+async function saveFile(name, text){
+  const filename=name.replace(/[\\/:*?"<>|]+/g,"-")+".atelier.json";
+  if(caps.downloads){ try{ await caps.downloads.save({filename, data:text}); toast("Fichier enregistré : "+filename); return; }catch(err){ toast(dlError(err)); return; } }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:"application/json"})); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+async function exportProjects(ids, label){
+  await projectFlush(); const ps=(await P.all()).filter(p=>ids.includes(p.id));
+  const cols=collections.filter(c=>ps.some(p=>p.collection===c.id));
+  await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps}));
+}
+async function importFile(file){
+  let v; try{ v=JSON.parse(await file.text()); }catch(_){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
+  if(!v||v.format!=="atelier-logo"||!Array.isArray(v.projects)){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
+  const cmap={};
+  for(const c of (Array.isArray(v.collections)?v.collections:[])){ if(!c||typeof c.name!=="string") continue;
+    let ex=collections.find(x=>x.name===c.name); if(!ex){ ex={id:"c"+newPid(), name:c.name.slice(0,60)}; collections.push(ex); } cmap[c.id]=ex.id; }
+  await P.setMeta("collections", collections);
+  const existing=new Set((await P.all()).map(p=>p.id)); let n=0;
+  for(const p of v.projects){ if(!p||typeof p.name!=="string"||!validDoc(p.doc)) continue;
+    const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:typeof p.thumb==="string"?p.thumb:""};
+    if(!/^[\w-]+$/.test(q.id)) q.id=newPid(); await P.put(q); n++; }
+  renderProjects(); toast(n?n+" projet"+(n>1?"s importés":" importé")+".":"Aucun projet lisible dans ce fichier.");
+}
+/* ---- dialog ---- */
+async function openProjects(){ await projectFlush(); $("#projLayers").hidden=true; $("#projDlg").showModal(); renderProjects(); }
+async function renderProjects(){
+  if(!$("#projDlg").open) return;
+  const all=(await P.all()).sort((a,b)=>b.updated-a.updated), q=plainText(projQuery.trim());
+  const count=id=>all.filter(p=>id==="all"||(p.collection||"")===id).length;
+  $("#projColls").innerHTML=`<button data-coll="all" class="${projFilter==="all"?"on":""}">Tous les projets <span>${all.length}</span></button>`+
+    collections.map(c=>`<div class="collrow"><button data-coll="${esc(c.id)}" class="${projFilter===c.id?"on":""}">${esc(c.name)} <span>${count(c.id)}</span></button><button class="ib" data-crename="${esc(c.id)}" title="Renommer la collection" aria-label="Renommer la collection ${esc(c.name)}">✎</button><button class="ib" data-cdel="${esc(c.id)}" title="Supprimer la collection (les projets restent)" aria-label="Supprimer la collection ${esc(c.name)}">×</button></div>`).join("")+
+    `<button data-coll="" class="${projFilter===""?"on":""}">Sans collection <span>${count("")}</span></button>
+     <button id="collNew" class="ghost">+ Nouvelle collection</button>`;
+  const list=all.filter(p=>(projFilter==="all"||(p.collection||"")===projFilter) && (!q || plainText(p.name+" "+collName(p.collection)+" "+((p.doc&&p.doc.brand&&p.doc.brand.keywords)||[]).join(" ")).includes(q)));
+  const fmt=t=>new Date(t).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
+  $("#projGrid").innerHTML=list.length?list.map(p=>{ const cur=curProject&&p.id===curProject.id;
+    return `<article class="pcard${cur?" cur":""}" data-pid="${esc(p.id)}">
+      <button class="pthumb" data-open="${esc(p.id)}" title="${cur?"Projet ouvert":"Ouvrir"}">${p.thumb||'<span class="muted">Page vierge</span>'}</button>
+      <input class="pname" data-pname="${esc(p.id)}" value="${esc(p.name)}" maxlength="80" aria-label="Nom du projet">
+      <div class="pmeta">${cur?'<b>Ouvert</b> · ':""}${fmt(p.updated)} · ${(p.doc&&p.doc.layers||[]).length} calques</div>
+      <select data-pcoll="${esc(p.id)}" aria-label="Collection du projet"><option value="">Sans collection</option>${collections.map(c=>`<option value="${esc(c.id)}" ${p.collection===c.id?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
+      <div class="pact">${cur?"":`<button data-open="${esc(p.id)}" class="primary">Ouvrir</button><button data-takelayers="${esc(p.id)}" title="Copier des calques de ce projet dans le projet ouvert">Calques…</button>`}<button data-dup="${esc(p.id)}">Dupliquer</button><button data-file="${esc(p.id)}" title="Enregistrer ce projet dans un fichier">Fichier</button><button data-del="${esc(p.id)}" class="danger" aria-label="Supprimer ${esc(p.name)}">Supprimer</button></div>
+    </article>`; }).join(""):`<p class="empty">Aucun projet ici. « Nouveau projet » en crée un${projFilter!=="all"&&projFilter?" dans cette collection":""}.</p>`;
+  $("#projExport").textContent=projFilter==="all"?"Tout enregistrer dans un fichier":"Enregistrer la collection dans un fichier";
+}
+async function showLayerPicker(id){
+  await projectFlush(); const p=await P.get(id); if(!p) return; const el=$("#projLayers");
+  el.dataset.pid=id; el.hidden=false;
+  el.innerHTML=`<div class="row"><b>Calques de « ${esc(p.name)} »</b><span class="sp"></span><label class="chk"><input type="checkbox" id="plAll"> Tout</label></div>
+    <div class="pllist">${p.doc.layers.slice().reverse().map(L=>`<label class="plrow"><input type="checkbox" value="${esc(L.id)}"><span class="plsw">${flatThumb(L, primary(paintFor(p.doc,L)))}</span>${esc(L.name)}</label>`).join("")||'<p class="muted">Ce projet est vide.</p>'}</div>
+    <div class="row" style="justify-content:flex-end"><button id="plCancel">Annuler</button><button id="plAdd" class="primary">Ajouter au projet ouvert</button></div>`;
+  $("#plAll").onchange=e=>el.querySelectorAll(".pllist input").forEach(c=>c.checked=e.target.checked);
+  $("#plCancel").onclick=()=>{ el.hidden=true; };
+  $("#plAdd").onclick=()=>{ const ids=[...el.querySelectorAll(".pllist input:checked")].map(c=>c.value); if(!ids.length){ toast("Cochez des calques."); return; }
+    const n=pasteItems(clipItems(p.doc, ids), false); el.hidden=true; $("#projDlg").close(); toast(n+" calque"+(n>1?"s ajoutés":" ajouté")+" depuis « "+p.name+" » (Annuler pour revenir)."); };
+}
+$("#projDlg").addEventListener("click", async e=>{
+  const t=e.target.closest("button"); if(!t) return;
+  const d=t.dataset;
+  if(d.coll!==undefined){ projFilter=d.coll; renderProjects(); return; }
+  if(t.id==="collNew"){ const c={id:"c"+newPid(), name:"Nouvelle collection"}; collections.push(c); await P.setMeta("collections",collections); projFilter=c.id; await renderProjects(); renameCollection(c.id); return; }
+  if(d.crename){ renameCollection(d.crename); return; }
+  if(d.cdel){ const c=collections.find(x=>x.id===d.cdel); if(!c||!await confirmBox("Supprimer la collection « "+c.name+" » ?","Ses projets sont conservés, sans collection.","Supprimer la collection")) { $("#projDlg").open||$("#projDlg").showModal(); return; }
+    collections=collections.filter(x=>x.id!==c.id); await P.setMeta("collections",collections);
+    for(const p of (await P.all()).filter(p=>p.collection===c.id)) await setProjectField(p.id,"collection","");
+    if(projFilter===c.id) projFilter="all"; if(!$("#projDlg").open) $("#projDlg").showModal(); renderProjects(); return; }
+  if(d.open){ await openProject(d.open); $("#projDlg").close(); return; }
+  if(d.dup){ await duplicateProject(d.dup); return; }
+  if(d.del){ await deleteProject(d.del); if(!$("#projDlg").open) $("#projDlg").showModal(); renderProjects(); return; }
+  if(d.file){ const p=await P.get(d.file); if(p) await exportProjects([p.id], p.name); return; }
+  if(d.takelayers){ showLayerPicker(d.takelayers); return; }
+});
+function renameCollection(id){ const btn=document.querySelector(`#projColls [data-coll="${CSS.escape(id)}"]`), c=collections.find(x=>x.id===id); if(!btn||!c) return;
+  const inp=document.createElement("input"); inp.className="rename"; inp.value=c.name; inp.maxLength=60; btn.replaceWith(inp); inp.focus(); inp.select();
+  let done=false; const fin=async ok=>{ if(done) return; done=true; if(ok&&inp.value.trim()) c.name=inp.value.trim().slice(0,60); await P.setMeta("collections",collections); renderProjects(); renderProjName(); };
+  inp.onkeydown=e=>{ e.stopPropagation(); if(e.key==="Enter") fin(true); if(e.key==="Escape"){ e.preventDefault(); fin(false); } }; inp.onblur=()=>fin(true); }
+$("#projDlg").addEventListener("change", async e=>{ const d=e.target.dataset;
+  if(d.pname){ await setProjectField(d.pname,"name",e.target.value.trim().slice(0,80)||"Sans titre"); renderProjName(); renderProjects(); }
+  if(d.pcoll!==undefined){ await setProjectField(d.pcoll,"collection",e.target.value); renderProjects(); renderProjName(); } });
+$("#projDlg").addEventListener("keydown", e=>{ if(e.target.matches&&e.target.matches("input.pname")&&e.key==="Enter") e.target.blur(); });
+$("#projFind").addEventListener("input", e=>{ projQuery=e.target.value; renderProjects(); });
+$("#projNew").onclick=()=>newProject(projFilter==="all"?"":projFilter);
+$("#projExport").onclick=async()=>{ const all=await P.all(); const ids=all.filter(p=>projFilter==="all"||(p.collection||"")===projFilter).map(p=>p.id);
+  if(!ids.length){ toast("Aucun projet à enregistrer."); return; } await exportProjects(ids, projFilter==="all"?"atelier-projets":collName(projFilter)||"sans-collection"); };
+$("#projOpenFile").addEventListener("change", e=>{ const f=e.target.files[0]; e.target.value=""; if(f) importFile(f); });
+$("#projClose").onclick=()=>$("#projDlg").close();
+$("#projBtn").onclick=openProjects;
+$("#copyBtn").onclick=copyLayers; $("#pasteBtn").onclick=pasteLayers;
+window.addEventListener("pagehide", ()=>{ if(projT) projectFlush(); });
+window.__projects={P, get current(){ return curProject; }, flush:projectFlush, open:openProject};
+
 /* ---------- Persistence (db + assets, local fallback) ---------- */
 const caps={db:null, assets:null, downloads:null, comments:null};
 const LS_KEY="atelier-logo-v1";
@@ -2601,7 +2876,7 @@ function setStatus(txt, err){ const s=$("#status"); s.classList.toggle("err",!!e
 const palDoc=()=>({v:2, pals, groups, wt:wordText, brand});
 function loadPalDoc(v){ if(Array.isArray(v)){ if(validPalette(v)){ pals=[{id:"main",name:"Principale",colors:v}]; } return true; }
   if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; if(validBrand(v.brand)) brand=v.brand; return true; } return false; }
-function localSave(){ try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
+function localSave(){ projectTouch(); try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
 function localLoad(){ try{ const v=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return v; }catch(_){ return null; } }
 const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,palette:0};
 /* Claude's edits: atelier/patch holds only the changed layers, merged by id */
@@ -2704,7 +2979,7 @@ async function initPersistence(){
 
 /* ---------- Start ---------- */
 setTool("move");
-initPersistence().finally(maybeWelcome);
+initPersistence().finally(()=>initProjects().finally(maybeWelcome));
 renderClaudeBar();
 window.__atelier = { get layers(){return layers;}, get notes(){return notes;}, get view(){return view;}, buildSVG, get sel(){return sel;} };
 </script>

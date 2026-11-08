@@ -12,6 +12,11 @@
 
 Make the workshop a distributable tool. Anyone should be able to load it as an artifact, or through a skill, and design their logo and brand book with Claude.
 
+## Storage
+
+- Projects and collections live on the user's device (IndexedDB `atelier-logo`, localStorage fallback); files `.atelier.json` (`format: "atelier-logo"`) carry projects between devices.
+- The open project is the live drawing: cached in localStorage (`atelier-logo-v1`, `-palette`) and shared with Claude through the artifact db (`atelier/shape`, `atelier/notes`, `atelier/palette`, `atelier/patch`). Claude only ever edits the open project.
+
 ## To do (first pass)
 
 1. **Remove Simulimmo.**
