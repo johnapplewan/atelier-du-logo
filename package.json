@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "node build.js",
-    "test": "node tests/test.js && node tests/t11.js && node tests/patchtest.js && node tests/mock.js && node tests/start.js && node tests/projects.js && node tests/styles.js && node tests/history.js && node tests/book.js && node tests/draw.js && node tests/fonts.js && node tests/rulers.js"
+    "test": "node tests/test.js && node tests/t11.js && node tests/patchtest.js && node tests/mock.js && node tests/start.js && node tests/projects.js && node tests/styles.js && node tests/history.js && node tests/book.js && node tests/draw.js && node tests/fonts.js && node tests/rulers.js && node tests/app.js"
   },
   "devDependencies": {
     "playwright": "^1.56.0"

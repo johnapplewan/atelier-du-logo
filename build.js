@@ -73,3 +73,24 @@ function aboutLinks() {
 const about = aboutLinks();
 fs.writeFileSync(path.join(root, "app/index.html"), template.replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
 console.log("app/index.html written (default word: " + DEFAULT_WORD + ")");
+
+// ---------- Standalone app: offline file list + service worker ----------
+// files.json lists every file the app needs (used by sw.js to precache and by « Télécharger l'appli » to zip).
+// sw.js carries a version hash so a new build replaces the old cache.
+const crypto = require("crypto");
+function listApp(dir, base = "") {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => {
+    const rel = base + e.name;
+    if (e.name.startsWith(".")) return [];
+    return e.isDirectory() ? listApp(path.join(dir, e.name), rel + "/") : [rel];
+  });
+}
+const appDir = path.join(root, "app");
+const files = listApp(appDir).filter(f => !["sw.js", "files.json"].includes(f)).sort();
+const hash = crypto.createHash("sha1");
+for (const f of files) hash.update(f).update(fs.readFileSync(path.join(appDir, f)));
+const version = hash.digest("hex").slice(0, 12);
+fs.writeFileSync(path.join(appDir, "files.json"), JSON.stringify({ version, files: ["sw.js", "files.json", ...files] }, null, 1) + "\n");
+fs.writeFileSync(path.join(appDir, "sw.js"), fs.readFileSync(path.join(root, "src/sw.js"), "utf8")
+  .replace("__VERSION__", version).replace("__FILES__", JSON.stringify(["./", "sw.js", "files.json", ...files])));
+console.log("sw.js + files.json written (" + files.length + " files, version " + version + ")");

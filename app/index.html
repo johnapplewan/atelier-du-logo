@@ -4,8 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Atelier du Logo par John Apple</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="vendor/fonts/ui.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#1D1D1F">
 <style>
 :root{--night:#1D1D1F;--ivory:#FFFFFF;--brass:#4F5BD5;--cream:#F4F4F2;--paper:#FBFBFA;--line:#E3E3E0;--muted:#6B6B70;--ink:#1D1D1F;--danger:#B42318}
 *{box-sizing:border-box}
@@ -647,8 +650,11 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <h3>L'auteur</h3>
   <p id="abBio"></p>
   <div id="abSupport"></div>
+  <h3>Appli autonome</h3>
+  <p>L'atelier s'installe comme une application et fonctionne ensuite sans connexion. Vous pouvez aussi télécharger ses fichiers pour l'héberger vous-même (GitHub Pages, un serveur, une clé USB avec un petit serveur local).</p>
+  <div class="row" id="abApp"><button id="abInstall" class="primary" hidden>Installer l'appli</button><button id="abZip">Télécharger l'appli (zip)</button><span class="muted" id="abAppMsg"></span></div>
   <h3>Crédits</h3>
-  <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js (licence MIT). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
+  <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js et JSZip (licence MIT). Icônes et interface en Instrument Serif et Inter (OFL). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
   <div class="row" style="justify-content:flex-end"><button id="abClose">Fermer</button></div>
 </dialog>
 <dialog id="scDlg" class="scdlg" aria-labelledby="scTitle">
@@ -1592,8 +1598,10 @@ function refreshFmt(){ const f=exFmt(); document.querySelectorAll(".exfmt .rast"
 document.querySelectorAll("input[name=exf]").forEach(r=>r.onchange=refreshFmt);
 function loadJSZip(){
   if(window.JSZip) return Promise.resolve(window.JSZip);
-  return new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
-    sc.onload=()=>ok(window.JSZip); sc.onerror=()=>ko(new Error("jszip")); document.head.appendChild(sc); });
+  // bundled copy first (works offline), the CDN only if it is missing
+  const load=src=>new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src=src;
+    sc.onload=()=>window.JSZip?ok(window.JSZip):ko(new Error("jszip")); sc.onerror=()=>ko(new Error("jszip")); document.head.appendChild(sc); });
+  return load("vendor/jszip.min.js").catch(()=>load("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"));
 }
 async function buildZip(crop){
   const JSZip=await loadJSZip(), zip=new JSZip();
@@ -4197,6 +4205,49 @@ $("#abClose").onclick=()=>$("#aboutDlg").close();
 
 /* ---------- Persistence (db + assets, local fallback) ---------- */
 const caps={db:null, assets:null, downloads:null, comments:null};
+// outside the artifact (standalone app, GitHub Pages, local server): files are saved by the browser itself
+const localDownloads={ save:async({filename, data})=>{ const blob=data instanceof Blob?data:new Blob([data],{type:/\.svg$/.test(filename)?"image/svg+xml":"application/octet-stream"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); return {status:"saved"}; } };
+
+/* ---------- Standalone app ----------
+   Service worker (offline) only when the page is the top window on http(s): never inside the artifact frame.
+   « Installer l'appli » uses the browser's install prompt when it offers one; « Télécharger l'appli » zips the
+   files listed in files.json (written by build.js). */
+const topApp=window.top===window && /^https?:$/.test(location.protocol);
+let installPrompt=null;
+if(topApp && "serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); installPrompt=e; const b=$("#abInstall"); if(b) b.hidden=false; });
+$("#abInstall").onclick=async()=>{ if(!installPrompt) return; installPrompt.prompt(); const r=await installPrompt.userChoice.catch(()=>null); installPrompt=null; $("#abInstall").hidden=true;
+  $("#abAppMsg").textContent=r&&r.outcome==="accepted"?"Appli installée.":""; };
+async function buildAppZip(onStep){
+  const list=await (await fetch("files.json",{cache:"no-store"})).json();
+  const JSZip=await loadJSZip(), zip=new JSZip(), dir=zip.folder("atelier-du-logo");
+  let n=0; for(const f of list.files){ const r=await fetch(f,{cache:"no-store"}); if(!r.ok) throw new Error(f); dir.file(f, await r.arrayBuffer()); if(onStep) onStep(++n, list.files.length); }
+  dir.file("LISEZMOI.txt", APP_README);
+  return zip.generateAsync({type:"blob", compression:"DEFLATE"});
+}
+const APP_README=`Atelier du Logo par John Apple : appli autonome
+
+Ouvrir sur son ordinateur
+  Les navigateurs bloquent une partie des fonctions quand on ouvre index.html directement (file://).
+  Lancez un petit serveur local dans ce dossier, puis ouvrez l'adresse indiquée :
+    python3 -m http.server 8080      puis http://localhost:8080
+    ou : npx serve .
+  Une fois la page ouverte, « Installer l'appli » (menu du navigateur ou À propos) l'ajoute comme application,
+  utilisable ensuite sans connexion.
+
+Publier sur GitHub Pages
+  1. Créez un dépôt GitHub et déposez-y le contenu de ce dossier (index.html à la racine).
+  2. Settings > Pages > Source : « Deploy from a branch », branche main, dossier / (root).
+  3. L'atelier est en ligne à l'adresse https://<votre-compte>.github.io/<dépôt>/ et s'installe depuis là.
+
+Vos projets restent dans le navigateur de chaque appareil (fichiers .atelier.json pour les transporter).
+`;
+$("#abZip").onclick=async()=>{ const m=$("#abAppMsg"), b=$("#abZip"); b.disabled=true;
+  try{ const blob=await buildAppZip((i,t)=>{ m.textContent="Préparation… "+i+"/"+t; }); await saveBlob("atelier-du-logo-appli.zip", blob);
+    m.textContent="Appli téléchargée ("+Math.round(blob.size/1024/1024*10)/10+" Mo). Voir LISEZMOI.txt dans le zip."; }
+  catch(e){ m.textContent="Téléchargement impossible : "+(e.message||e); }
+  b.disabled=false; };
 const LS_KEY="atelier-logo-v1";
 function setStatus(txt, err){ const s=$("#status"); s.classList.toggle("err",!!err); s.querySelector("span").textContent=txt; }
 const palDoc=()=>({v:2, pals, groups, wt:wordText, brand, guides});
@@ -4280,7 +4331,7 @@ async function initPersistence(){
   ensureZones();
   try{ const p=JSON.parse(localStorage.getItem("atelier-logo-prefs")||"null"); if(p&&[1,2,4,8,16].includes(p.size)) grid={on:!!p.on,snap:!!p.snap,size:p.size}; }catch(_){}
   applyGrid(); renderAll();
-  if(!(window.claude && typeof window.claude.use==="function")){ sendState="off"; renderSendBox(); setStatus(loc?"Enregistré dans ce navigateur":"Prêt · sauvegarde dans ce navigateur"); return; }
+  if(!(window.claude && typeof window.claude.use==="function")){ caps.downloads=localDownloads; sendState="off"; renderSendBox(); setStatus(loc?"Enregistré dans ce navigateur":"Prêt · sauvegarde dans ce navigateur"); return; }
   setStatus("Connexion au stockage…");
   const timeout=setTimeout(()=>setStatus("Stockage en ligne injoignable pour l'instant · copie locale active", true),10000);
   try{

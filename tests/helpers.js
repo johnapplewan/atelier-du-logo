@@ -6,7 +6,7 @@ const assert = require("assert");
 // app/ is served over http://127.0.0.1 (a real origin: file:// pages can lose localStorage across reloads in Chromium)
 const http = require("http"), fs = require("fs");
 const ROOT = path.resolve(__dirname, "../app");
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css", ".json": "application/json", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml", ".png": "image/png", ".woff2": "font/woff2" };
 let server = null, APP = null;
 function serve() {
   if (server) return Promise.resolve(APP);
@@ -56,4 +56,4 @@ function done(errors) {
   if (failures) { console.log(failures + " failure(s)"); process.exitCode = 1; }
 }
 
-module.exports = { chromium, assert, open, worldToScreen, layer, check, done };
+module.exports = { chromium, assert, open, serve, worldToScreen, layer, check, done };

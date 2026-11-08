@@ -28,15 +28,26 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 - **Bulles d'annotation** (texte et voix), envoyées à Claude. Les retouches de Claude arrivent avec un bandeau pour les annuler.
 - **Export** : SVG, PNG et JPG, par groupe ou par calque, en ZIP.
 
+## Appli autonome
+
+L'atelier fonctionne aussi hors de Claude, comme une application installable utilisable sans connexion :
+
+- **En ligne sur GitHub Pages** : à chaque push sur `main`, `.github/workflows/pages.yml` publie `app/`. À activer une fois : Settings > Pages > Source : « GitHub Actions ».
+- **En zip** : À propos > « Télécharger l'appli (zip) » récupère tous les fichiers (avec un `LISEZMOI.txt`). Pour l'ouvrir : `python3 -m http.server 8080` dans le dossier, puis http://localhost:8080.
+- **Installer** : depuis la page servie en http(s), « Installer l'appli » (ou le menu du navigateur). Le service worker (`sw.js`, généré par `npm run build` avec `files.json`) met en cache tous les fichiers ; il ne s'active jamais dans l'artifact.
+- Hors artifact, les exports sont enregistrés directement par le navigateur ; les polices de l'interface et JSZip sont servis localement (`app/vendor/`).
+- **Liens de soutien** (À propos) : le lien PayPal est dans le code ; le numéro Wero n'y est jamais. Dans l'artifact, il se lit dans le doc `atelier/about` de la base (`{"wero": "…"}`, écriture réservée au propriétaire). Pour l'appli autonome, il vient de `about.local.json` (ignoré par git) ou de la variable `ATELIER_WERO` au moment de `npm run build`. Il est encodé dans la page et ne s'affiche qu'au clic sur « Afficher le numéro ».
+
 ## Arborescence
 
 | Dossier | Contenu |
 |---|---|
-| `app/` | Ce qui est publié comme artifact : `index.html` (généré), `fonts.js`, `glyphs/`, `dict-*.js` |
+| `app/` | Ce qui est publié (artifact et GitHub Pages) : `index.html`, `sw.js` et `files.json` (générés), `manifest.webmanifest`, `icons/`, `fonts.js`, `glyphs/`, `dict-*.js` |
 | `src/template.html` | Source de l'application |
 | `build.js` | `npm run build` : `src/template.html` + le mot par défaut, dessiné depuis `app/glyphs/instrument.js` → `app/index.html` |
 | `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` puis `trim.cjs` → `fonts.js` (métadonnées seules), `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
-| `app/vendor/` | opentype.js (MIT) : lecture et écriture des fichiers de police |
+| `app/vendor/` | opentype.js et JSZip (MIT), polices de l'interface Instrument Serif et Inter (OFL) |
+| `src/sw.js` | Source du service worker (hors ligne) |
 | `tests/` | Tests Playwright (Chromium) sur `app/` servi en local : `npm test` |
 
 ## Licences
