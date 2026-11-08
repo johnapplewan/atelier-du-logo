@@ -1038,6 +1038,24 @@ function renderLayers(){
   }
   ul.innerHTML=h;
 }
+/* delete layers: right click (or long press) in the list, or Suppr with the Calque tool, always after a confirmation */
+async function deleteLayers(ids){
+  ids=ids.filter(id=>layerById(id)); if(!ids.length) return;
+  const names=ids.map(id=>layerById(id).name), label=ids.length===1?"« "+names[0]+" »":ids.length+" calques";
+  if(!await confirmBox("Supprimer "+label+" ?", (ids.length>1?names.slice(0,6).join(", ")+(names.length>6?"…":"")+". ":"")+"« Annuler » ou l'historique permettent de revenir en arrière.", "Supprimer")) return;
+  const b=snapshot(), gone=new Set(ids);
+  layers=layers.filter(l=>!gone.has(l.id)); groups=groups.filter(g=>layers.some(l=>l.grp===g.id));
+  sel={layer:null,node:null,layers:[]}; ensureZones(); commit(b, "Suppression : "+label); toast(label.charAt(0).toUpperCase()+label.slice(1)+(ids.length>1?" supprimés":" supprimé")+" (Annuler pour revenir).");
+}
+function rowTargets(el){ const row=el.closest(".layer[data-id]"), gh=el.closest(".ghead[data-g]");
+  if(row){ const id=row.dataset.id; return selLayers().includes(id)?selLayers():[id]; }
+  if(gh) return layers.filter(l=>l.grp===gh.dataset.g).map(l=>l.id); return []; }
+$("#layers").addEventListener("contextmenu", e=>{ const ids=rowTargets(e.target); if(!ids.length) return; e.preventDefault();
+  if(!ids.every(id=>selLayers().includes(id))){ sel={layer:ids[ids.length-1],node:null,layers:ids}; renderAll(); } deleteLayers(ids); });
+let rowPress=null;   // long press on touch screens (no right click there)
+$("#layers").addEventListener("pointerdown", e=>{ if(e.pointerType==="mouse") return; const ids=rowTargets(e.target); if(!ids.length) return;
+  clearTimeout(rowPress); rowPress=setTimeout(()=>{ rowPress=null; window.__tp=true; setTimeout(()=>{ window.__tp=false; },400); deleteLayers(ids); },650); });
+for(const ev of ["pointerup","pointercancel","pointerleave","pointermove"]) $("#layers").addEventListener(ev, e=>{ if(ev==="pointermove"&&!(Math.abs(e.movementX)+Math.abs(e.movementY)>4)) return; clearTimeout(rowPress); });
 $("#layers").addEventListener("change", e=>{
   const sl=e.target.closest("[data-gact=pal]"); if(!sl) return; const G=groupById(sl.closest(".ghead").dataset.g); const b=snapshot();
   if(sl.value==="__new"){ let n=pals.length+1; while(pals.some(p=>p.name==="Palette "+n)) n++; const P={id:"p"+Date.now().toString(36), name:"Palette "+n, colors:clone(palOf(layers.find(l=>l.grp===G.id)).colors)}; pals.push(P); G.pal=P.id; curPal=P.id;
@@ -1438,7 +1456,7 @@ window.addEventListener("keydown", e=>{
     if(ids.length>1 && gs.size===1 && [...gs][0] && layers.filter(l=>l.grp===[...gs][0]).every(l=>ids.includes(l.id))) renameGroup([...gs][0]); else if(sel.layer) renameLayer(sel.layer); return; }
   if(e.key==="Tab"){ e.preventDefault(); const o=panelsOpen(), open=!(o.left||o.right); setPanels(open,open); return; }
   if(e.key===" "){ spaceDown=true; cv.classList.add("panning"); e.preventDefault(); return; }
-  if(e.key==="Delete"||e.key==="Backspace"){ if(tool==="points"&&sel.node){ e.preventDefault(); deleteNode(); } return; }
+  if(e.key==="Delete"||e.key==="Backspace"){ if(tool==="points"&&sel.node){ e.preventDefault(); deleteNode(); } else if(tool==="move"&&selLayers().length){ e.preventDefault(); deleteLayers(selLayers()); } return; }
   const k=e.key.toLowerCase();
   if(k==="v") setTool("move"); else if(k==="m") setTool("shape"); else if(k==="t") setTool("text"); else if(k==="a") setTool("points"); else if(k==="p") setTool("pen"); else if(k==="n") setTool("pencil"); else if(k==="b") setTool("bubble"); else if(k==="h") setTool("hand");
   else if(k==="0") fit(); else if(k==="+"||k==="=") zoomCenter(1.25); else if(k==="-") zoomCenter(0.8);
@@ -4134,7 +4152,7 @@ try{ rulersOn=!!localStorage.getItem("atelier-logo-rulers"); }catch(_){}
    during drags. "?" opens the directory, which also turns the on-screen help back on. */
 const SHORTCUTS=[
   ["Outils",[["V","Calque : sélectionner, déplacer, redimensionner"],["P","Plume : créer un tracé"],["N","Crayon : dessin à main levée"],["A","Points : modifier les points et les poignées"],["M","Formes"],["T","Texte"],["B","Bulle d'annotation"],["H ou Espace maintenu","Vue : déplacer la vue"]]],
-  ["Édition",[["Ctrl+Z / Ctrl+Maj+Z","Annuler / rétablir"],["Appui long sur Annuler","Historique du projet"],["Ctrl+C / Ctrl+V","Copier / coller des calques (entre projets aussi)"],["Ctrl+D","Dupliquer"],["Ctrl+G / Ctrl+Maj+G","Grouper / dégrouper"],["Suppr","Supprimer le point sélectionné"],["F2","Renommer"],["Flèches","Déplacer de 1 (Maj : 10, Alt : 0,1)"],["R / Maj+R","Pivoter de 15° (Alt : 1°)"],["[ et ]","Pivoter de −15° / +15°"]]],
+  ["Édition",[["Ctrl+Z / Ctrl+Maj+Z","Annuler / rétablir"],["Appui long sur Annuler","Historique du projet"],["Ctrl+C / Ctrl+V","Copier / coller des calques (entre projets aussi)"],["Ctrl+D","Dupliquer"],["Ctrl+G / Ctrl+Maj+G","Grouper / dégrouper"],["Suppr","Supprimer le point (outil Points) ou les calques sélectionnés (outil Calque)"],["Clic droit sur un calque","Supprimer le calque (appui long sur tablette)"],["F2","Renommer"],["Flèches","Déplacer de 1 (Maj : 10, Alt : 0,1)"],["R / Maj+R","Pivoter de 15° (Alt : 1°)"],["[ et ]","Pivoter de −15° / +15°"]]],
   ["Plume et points",[["Clic / clic-glisser","Point anguleux / courbe"],["Clic sur le 1er point","Fermer la forme"],["Entrée ou Échap","Terminer en tracé ouvert"],["Retour arrière","Retirer le dernier point"],["Alt + glisser un point","Sortir ses poignées"],["Double-clic sur un point","Anguleux ou lisse"],["Alt + glisser une poignée","Poignée opposée en miroir"],["Ctrl + glisser une poignée","Horizontale ou verticale"],["Maj pendant un glissé","Précision ×0,1"],["Ctrl+A","Tous les points du calque"]]],
   ["Vue",[["0","Ajuster à l'écran"],["+ / −","Zoomer / dézoomer"],["Ctrl + molette","Zoom"],["Tab","Masquer / afficher les panneaux"],["Ctrl+R","Règles et guides"],["?","Ce répertoire des raccourcis"]]],
 ];

@@ -90,6 +90,19 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   check("export name follows the brand name", () => assert.match(save2, /atelier-nova-logo\.svg/));
   await p.click("#exClose");
 
+  // delete layers: right click in the list, confirmation, undo; Suppr with the Calque tool
+  await p.click('.layer[data-id="point"] .nm', { button: "right" }); await p.waitForSelector("#confirmDlg[open]");
+  const askTxt = await p.textContent("#cfTitle"); await p.click("#cfNo");
+  const stillThere = await p.evaluate(() => __atelier.layers.some(l => l.id === "point"));
+  check("right click asks before deleting; Annuler keeps the layer", () => { assert.match(askTxt, /Supprimer « Point » \?/); assert.ok(stillThere); });
+  await p.click('.layer[data-id="point"] .nm', { button: "right" }); await p.click("#cfYes"); await p.waitForTimeout(100);
+  const gone = await p.evaluate(() => !__atelier.layers.some(l => l.id === "point"));
+  await p.keyboard.press("Control+z"); const back = await p.evaluate(() => __atelier.layers.some(l => l.id === "point"));
+  check("layer deleted after confirmation, undo brings it back", () => assert.ok(gone && back));
+  await p.keyboard.press("v"); await p.click('.layer[data-id="disque"] .nm'); await p.focus("body"); await p.keyboard.press("Delete"); await p.click("#cfYes"); await p.waitForTimeout(100);
+  const delKey = await p.evaluate(() => !__atelier.layers.some(l => l.id === "disque")); await p.keyboard.press("Control+z");
+  check("Suppr deletes the selected layer (Calque tool)", () => assert.ok(delKey));
+
   // "À propos": project, author, support buttons only when configured
   await p.click("#aboutBtn");
   const ab = await p.evaluate(() => [document.querySelector("#aboutDlg").open, /éditeur vectoriel/.test(document.querySelector("#aboutDlg").textContent), document.querySelector("#abSupport").innerHTML]);
