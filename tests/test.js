@@ -106,7 +106,9 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   // "À propos": project, author, support buttons only when configured
   await p.click("#aboutBtn");
   const ab = await p.evaluate(() => [document.querySelector("#aboutDlg").open, /éditeur vectoriel/.test(document.querySelector("#aboutDlg").textContent), document.querySelector("#abSupport").innerHTML]);
-  check("about: presentation shown, no support button while links are empty", () => { assert.ok(ab[0] && ab[1]); assert.strictEqual(ab[2], ""); });
+  check("about: presentation, contact link and PayPal button", () => { assert.ok(ab[0] && ab[1]); assert.match(ab[2], /paypal\.com\/donate/); });
+  const mail = await p.getAttribute("#abBio a.contact", "href");
+  check("about: contact e-mail as a mailto link", () => assert.strictEqual(mail, "mailto:contact.johnapple.fr@gmail.com"));
   // Wero as build.js encodes it: "~" + base64 of the reversed number, shown only after a click
   await p.evaluate(() => { setAbout({ paypal: "https://www.paypal.com/paypalme/exemple", wero: "~" + btoa("06 00 00 00 12".split("").reverse().join("")) }); renderAbout(); });
   const sup = await p.evaluate(() => [document.querySelector("#abSupport a.paypal").getAttribute("href"), /12/.test(document.querySelector("#abSupport").textContent)]);

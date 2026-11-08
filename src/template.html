@@ -4177,14 +4177,15 @@ applyHelp();
    The Wero number travels encoded and is only decoded when the visitor clicks "Afficher le numéro"
    (keeps it away from scrapers; anyone who clicks can of course read it). Empty = hidden. */
 const ABOUT={
-  bio:"Je m'appelle John Apple. J'ai créé l'Atelier du Logo pour que chacun puisse dessiner son logo et sa charte graphique avec de vraies courbes vectorielles, et travailler avec Claude comme avec un assistant de studio : vous dessinez, vous annotez, Claude propose, et vous gardez toujours la main. L'atelier est gratuit et vos projets restent sur votre appareil.",
-  paypal:"", wero:"",
+  bio:"Je m'appelle John Apple. J'ai créé l'Atelier du Logo pour que chacun puisse dessiner son logo et sa charte graphique avec de vraies courbes vectorielles, et travailler avec Claude comme avec un assistant de studio : vous dessinez, vous annotez, Claude propose, et vous gardez toujours la main. L'atelier est gratuit et vos projets restent sur votre appareil. Vous pouvez me contacter pour vous accompagner dans vos créations et vous former à la création graphique, audiovisuelle et aux outils d'IA.",
+  contact:"contact.johnapple.fr@gmail.com",
+  paypal:"https://www.paypal.com/donate/?hosted_button_id=P82W3646WTR54", wero:"",
 };
 const weroDecode=v=>{ if(!v) return ""; if(!/^~/.test(v)) return v; try{ return decodeURIComponent(escape(atob(v.slice(1)))).split("").reverse().join(""); }catch(_){ return ""; } };
-function setAbout(o){ if(!o) return; if(typeof o.paypal==="string") ABOUT.paypal=o.paypal.trim(); if(typeof o.wero==="string") ABOUT.wero=o.wero.trim(); }
+function setAbout(o){ if(!o) return; for(const k of ["paypal","wero"]) if(typeof o[k]==="string" && o[k].trim()) ABOUT[k]=o[k].trim(); }
 setAbout(window.__ABOUT);
 function renderAbout(){
-  $("#abBio").textContent=ABOUT.bio||"John Apple conçoit et développe l'Atelier du Logo.";
+  $("#abBio").innerHTML=esc(ABOUT.bio||"John Apple conçoit et développe l'Atelier du Logo.")+(ABOUT.contact?` <a class="contact" href="mailto:${esc(ABOUT.contact)}">${esc(ABOUT.contact)}</a>`:"");
   const sup=[]; if(/^https:\/\/(www\.)?(paypal\.me|paypal\.com)\//.test(ABOUT.paypal)) sup.push(`<a class="give paypal" href="${esc(ABOUT.paypal)}" target="_blank" rel="noopener">Faire un don avec PayPal</a>`);
   if(ABOUT.wero) sup.push(`<span class="wero"><b>wero</b> Don par Wero : <strong id="abWeroVal"><button id="abWeroShow" class="ghost">Afficher le numéro</button></strong> <button id="abWeroCopy" class="ib" title="Copier" aria-label="Copier l'identifiant Wero">⧉</button></span>`);
   $("#abSupport").innerHTML=sup.length?`<h3>Soutenir le projet</h3><p>L'atelier est gratuit. Si il vous est utile, vous pouvez soutenir son développement :</p><div class="support">${sup.join("")}</div>${ABOUT.wero?`<p class="muted">Wero : ouvrez l'application de votre banque, choisissez Wero, puis envoyez à l'identifiant ci-dessus.</p>`:""}`:"";
