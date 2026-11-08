@@ -60,8 +60,8 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   check("reload keeps notes and curves", () => { assert.strictEqual(after[0], 1); assert.ok(Math.abs(after[1].y - 14) < 0.6); });
   check("neutral localStorage keys", () => { assert.ok(keys.includes("atelier-logo-v1"), keys.join()); assert.ok(!keys.some(k => /simulimmo/i.test(k)), keys.join()); });
 
-  // reset to the example
-  await p.click("#reset"); await p.click("#cfYes");
+  // back to the example through "Marque et départ"
+  await p.click("#startBtn"); await p.fill("#stName", "Atelier Nova"); await p.click('[data-start="example"]'); await p.click("#stGo"); await p.waitForTimeout(500);
   const reset0 = (await layer(p, "cadre")).subs[0][0];
   check("reset", () => assert.deepStrictEqual(reset0, { x: 84, y: 28, i: { x: 53.07, y: 28 }, o: null }));
 
@@ -87,7 +87,7 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   check("per-letter swap on any word", () => assert.deepStrictEqual(per.slice(0, 3), ["playfair:A", "playfair:t", "montserrat:e"]));
   await p.click("#exportBtn"); await p.check("input[value=full]");
   const save2 = await p.textContent("#exSave");
-  check("export name follows the typed word", () => assert.match(save2, /atelier-nova-logo\.svg/));
+  check("export name follows the brand name", () => assert.match(save2, /atelier-nova-logo\.svg/));
   await p.click("#exClose");
 
   // tablet: tap a node and drag it by touch

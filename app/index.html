@@ -223,6 +223,37 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
 .exfmt{margin-top:6px}
 .exfmt .rast[hidden]{display:none}
 .exfmt select{padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:#fff}
+button.wide{width:100%;margin-top:8px}
+h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
+.startdlg{max-width:min(760px,96vw)}
+.stfields{display:grid;gap:10px;margin-top:12px}
+.stfields label{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.stfields input,.impctl input[type=text]{padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:14px}
+.starts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.starts button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border-radius:10px}
+.starts button span{font-size:12px;color:var(--muted)}
+.starts button.on{border-color:var(--brass);background:#EEF0FB;color:var(--ink);box-shadow:inset 0 0 0 1px var(--brass)}
+.starts button[hidden]{display:none}
+.stshapes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stshapes[hidden]{display:none}
+.stshapes button{width:58px;height:58px;padding:8px;color:var(--ink)}
+.stshapes button.on{border-color:var(--brass);background:#EEF0FB;color:var(--brass)}
+.stshapes svg{width:100%;height:100%;display:block}
+.impdlg{max-width:min(980px,96vw)}
+.impdlg.drop{outline:3px dashed var(--brass);outline-offset:-8px}
+.filebtn{position:relative;display:inline-flex;align-items:center;cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.filebtn.primary{background:var(--night);color:var(--ivory);border-color:var(--night)}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.filebtn:focus-within{outline:2px solid var(--brass);outline-offset:1px}
+.impgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.impgrid figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.impgrid canvas,.impgrid svg{display:block;width:100%;height:190px;object-fit:contain}
+.impgrid figcaption{font-size:12px;color:var(--muted);text-align:center}
+.impctl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;margin:8px 0}
+.impctl label{display:flex;align-items:center;gap:6px;font-size:13px}
+.impctl input[type=range]{flex:1;min-width:0}
+#exPatRow[hidden]{display:none}
+@media (max-width:700px){.impgrid,.impctl{grid-template-columns:1fr}.impgrid canvas,.impgrid svg{height:150px}}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
 @media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
@@ -239,7 +270,7 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
   <div class="group">
     <button id="undo" title="Annuler (Ctrl+Z)">Annuler</button>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
-    <button id="reset" title="Remplacer le dessin par le logo d'exemple">Revenir à l'exemple</button>
+    <button id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
 </header>
@@ -257,6 +288,7 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
         <button data-tool="hand" title="Déplacer la vue (H ou Espace)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 12V6a1.5 1.5 0 013 0v5V4.5a1.5 1.5 0 013 0V11V6a1.5 1.5 0 013 0v8c0 4-2.5 6-6 6-2.5 0-4-1-5.5-3L4 13.5a1.4 1.4 0 012.2-1.7L8 14"/></svg>Vue</button>
       </div>
       <div id="shapeOpts" class="shapeopts" hidden></div>
+      <button id="importBtn" class="wide" title="Fichier ou photo d'un dessin, d'une signature, d'une texture : transformé en courbes">Importer une image…</button>
     </section>
     <section>
       <h2>Grille</h2>
@@ -338,6 +370,13 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
     <select id="exGroup" aria-label="Groupe à exporter"></select>
     <label class="chk"><input type="radio" name="exm" value="layer"> Un calque :</label>
     <select id="exLayer" aria-label="Calque à exporter"></select>
+    <label class="chk"><input type="radio" name="exm" value="pattern"> Motif (mosaïque)</label>
+  </div>
+  <div class="row exfmt" id="exPatRow" hidden>
+    <span class="muted">Motif</span>
+    <select id="exPatSrc" aria-label="Source du motif"></select>
+    <select id="exPatLay" aria-label="Disposition"><option value="grid">Grille</option><option value="brick">Quinconce</option></select>
+    <label class="chk">Marge <input type="range" id="exPatGap" min="0" max="150" value="40" aria-label="Marge autour du motif"></label>
   </div>
   <div class="row exfmt">
     <span class="muted">Format</span>
@@ -365,6 +404,56 @@ label.geo select{flex:1;padding:4px 5px;border:1px solid var(--line);border-radi
   <h2 id="cfTitle">Confirmer</h2>
   <p id="cfText"></p>
   <div class="row" style="justify-content:flex-end"><button id="cfNo">Annuler</button><button id="cfYes" class="primary">Confirmer</button></div>
+</dialog>
+<dialog id="startDlg" class="startdlg" aria-labelledby="stTitle">
+  <h2 id="stTitle">Bienvenue dans l'Atelier du Logo</h2>
+  <p class="muted">Quelques mots sur votre marque : ils servent au logo, aux noms des fichiers et, plus tard, à la charte graphique.</p>
+  <div class="stfields">
+    <label><span>Nom de la marque</span><input id="stName" type="text" maxlength="80" autocomplete="off" placeholder="Ex. : Atelier Nova"></label>
+    <label><span>Slogan <span class="muted">(facultatif)</span></span><input id="stTag" type="text" maxlength="160" autocomplete="off" placeholder="Ex. : Des meubles qui durent"></label>
+    <label><span>Mots-clés <span class="muted">(facultatif, séparés par des virgules)</span></span><input id="stKw" type="text" maxlength="400" autocomplete="off" placeholder="Ex. : artisanal, chaleureux, bois, minimal"></label>
+  </div>
+  <h3>Point de départ</h3>
+  <div class="starts" role="radiogroup" aria-label="Point de départ">
+    <button type="button" role="radio" data-start="keep" id="stKeep"><b>Garder le dessin actuel</b><span>Seuls le nom et les mots-clés changent</span></button>
+    <button type="button" role="radio" data-start="word"><b>Le nom seul</b><span>Votre nom en lettres, la police se change ensuite</span></button>
+    <button type="button" role="radio" data-start="shape"><b>Une forme et le nom</b><span>Cercle, arche, écusson… à modeler</span></button>
+    <button type="button" role="radio" data-start="image"><b>Une image ou une photo</b><span>Dessin, signature, texture : vectorisé</span></button>
+    <button type="button" role="radio" data-start="blank"><b>Page vierge</b><span>Rien, juste les outils</span></button>
+    <button type="button" role="radio" data-start="example"><b>Le logo d'exemple</b><span>Un symbole simple et votre nom</span></button>
+  </div>
+  <div class="stshapes" id="stShapes" hidden></div>
+  <p class="muted" id="stMsg" role="alert"></p>
+  <div class="row" style="justify-content:flex-end"><button id="stLater">Plus tard</button><button id="stGo" class="primary">Commencer</button></div>
+</dialog>
+<dialog id="impDlg" class="impdlg" aria-labelledby="impTitle">
+  <h2 id="impTitle">Importer une image ou une photo</h2>
+  <div class="row">
+    <label class="filebtn primary">Choisir un fichier<input type="file" id="impFile" accept="image/*"></label>
+    <label class="filebtn">Prendre une photo<input type="file" id="impCam" accept="image/*" capture="environment"></label>
+    <span class="muted">ou glissez une image ici · JPEG, PNG, WebP</span>
+  </div>
+  <p class="empty" id="impEmpty" style="margin-top:12px">Photographiez votre dessin ou votre signature bien à plat, en pleine lumière, sans flash. Le papier, ses ombres et sa texture sont retirés automatiquement.</p>
+  <div id="impPrev" hidden>
+    <div class="impgrid">
+      <figure><canvas id="impSrc"></canvas><figcaption>Original</figcaption></figure>
+      <figure><canvas id="impBin"></canvas><figcaption>Page nettoyée</figcaption></figure>
+      <figure><div id="impVec"></div><figcaption>Courbes</figcaption></figure>
+    </div>
+    <div class="row"><span class="muted">Type</span><div class="kinds"><button type="button" data-mode="fill">Dessin, formes pleines</button><button type="button" data-mode="thin">Trait fin, signature</button></div></div>
+    <div class="impctl">
+      <label>Seuil <input type="range" id="impThr" data-io="thr" min="5" max="95"> <span class="chk"><input type="checkbox" data-io="auto"> auto</span></label>
+      <label>Détail <input type="range" data-io="detail" min="0" max="100"></label>
+      <label>Nettoyage <input type="range" data-io="clean" min="0" max="100"></label>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" data-io="invert"> Inverser (dessin clair sur fond sombre)</label>
+      <label class="chk"><input type="checkbox" data-io="ink"> Garder la couleur de l'encre</label>
+      <label class="chk" title="Garde le cadre de l'image comme case de répétition : une texture raccordable reste raccordable"><input type="checkbox" data-io="tile"> Motif raccordable</label>
+    </div>
+  </div>
+  <p class="muted" id="impMsg" role="status"></p>
+  <div class="row" style="justify-content:flex-end"><button id="impCancel">Annuler</button><button id="impAdd" class="primary" disabled>Ajouter au dessin</button></div>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -418,7 +507,7 @@ let grid = {on:false, snap:false, size:4};
 const undoStack = [], redoStack = [];
 
 function validLayers(v){
-  if(!Array.isArray(v) || !v.length) return false;
+  if(!Array.isArray(v)) return false;   // an empty page is a valid document
   const pt = p => p===null || (p && Number.isFinite(p.x) && Number.isFinite(p.y));
   return v.every(l => l && typeof l.id==="string" && typeof l.name==="string" && (l.group==="mark"||l.group==="word")
     && (l.zone===undefined || (Number.isInteger(l.zone) && l.zone>=0 && l.zone<12))
@@ -1033,10 +1122,6 @@ function confirmBox(title,text,yes){ return new Promise(res=>{ const d=$("#confi
   const done=v=>{ d.close(); $("#cfYes").onclick=$("#cfNo").onclick=null; res(v); }; $("#cfYes").onclick=()=>done(true); $("#cfNo").onclick=()=>done(false); d.onclose=()=>res(false); d.showModal(); }); }
 
 $("#undo").onclick=undo; $("#redo").onclick=redo;
-$("#reset").onclick=async()=>{
-  if(!await confirmBox("Revenir à l'exemple ?","Le dessin est remplacé par le logo d'exemple. Les annotations sont conservées, et « Annuler » permet de revenir en arrière.","Revenir à l'exemple")) return;
-  const b=snapshot(); wordText=GLYPHS.word; layers=clone(ORIGIN); pals=[{id:"main",name:"Principale",colors:[]}]; groups=[]; curPal="main"; ensureZones(); sel={layer:null,node:null}; commit(b); toast("Logo d'exemple rétabli (Annuler pour revenir).");
-};
 
 /* ---------- Export ---------- */
 const GROUP_BOX={};
@@ -1059,6 +1144,7 @@ const slug=(s,fb="groupe")=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/
 const filePfx=()=>slug(brandLabel(),"logo");
 function exportSpec(kind, crop){
   const P=filePfx(), T=brandLabel();
+  if(kind==="pattern") return patternSpec() || {name:P+"-motif.svg", svg:svgDoc([], {x0:0,y0:0,x1:256,y1:256}, T)};
   if(kind.startsWith("group:")){
     const G=groupById(kind.slice(6)), ls=layers.filter(l=>l.grp===(G&&G.id) && l.visible);
     if(!G||!ls.length) return {name:P+"-groupe.svg", svg:svgDoc([], {x0:0,y0:0,x1:256,y1:256}, T)};
@@ -1076,7 +1162,7 @@ function exportSpec(kind, crop){
 /* typefaces used by the word and text blocks, for the read-me */
 function usedFonts(){ const ids=[...new Set(layers.map(l=>l.font).filter(Boolean))]; return ids.map(id=>{ const f=fontById(id); return f?f.name.replace(/\s*\(actuelle\)/,""):id==="instrument"?"Instrument Serif":id; }); }
 function buildSVG(mode){ return exportSpec(mode,false).svg; }
-function exKind(){ const m=document.querySelector("input[name=exm]:checked").value; return m==="layer" ? "layer:"+$("#exLayer").value : m==="group" ? "group:"+$("#exGroup").value : m; }
+function exKind(){ const m=document.querySelector("input[name=exm]:checked").value; return m==="pattern" ? "pattern" : m==="layer" ? "layer:"+$("#exLayer").value : m==="group" ? "group:"+$("#exGroup").value : m; }
 const exFmt=()=>document.querySelector("input[name=exf]:checked").value;
 /* SVG -> PNG / JPG in the browser (live text is drawn with the page's fonts only if they are embedded: vectorise it first) */
 function rasterize(svgText, width, bg, type){
@@ -1092,7 +1178,8 @@ function rasterize(svgText, width, bg, type){
 }
 function refreshExport(){
   const spec=exportSpec(exKind(), $("#exCrop").checked);
-  $("#svgcode").value=spec.svg; $("#exPrev").src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(spec.svg);
+  $("#svgcode").value=spec.svg; $("#exPrev").src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(spec.preview||spec.svg);
+  $("#exPatRow").hidden=exKind()!=="pattern";
   if(/<text /.test(spec.svg)) setTimeout(()=>{ $("#exMsg").textContent="Ce fichier contient du texte vivant (police Google Fonts requise pour l'afficher). Pour des contours, utilisez « Vectoriser » dans la section Texte."; },0);
   $("#exSave").textContent="Télécharger "+spec.name; $("#exMsg").textContent="";
 }
@@ -1102,12 +1189,14 @@ $("#exportBtn").onclick=()=>{
   { const g=selLayers().map(id=>(layerById(id)||{}).grp).find(Boolean); if(g) $("#exGroup").value=g; }
   $("#exLayer").innerHTML=[["mark","Symbole"],["word","Mot"]].map(([g,t])=>`<optgroup label="${t}">`+layers.filter(l=>l.group===g).map(l=>`<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("")+"</optgroup>").join("");
   if(sel.layer) $("#exLayer").value=sel.layer;
+  fillPatternSources();
   refreshExport(); $("#exSave").hidden=!caps.downloads; $("#exZip").hidden=!caps.downloads; refreshFmt(); $("#exportDlg").showModal();
 };
 document.querySelectorAll("input[name=exm]").forEach(r=>r.onchange=()=>{ refreshExport(); refreshFmt(); });
 $("#exGroup").onchange=()=>{ document.querySelector("input[name=exm][value=group]").checked=true; refreshExport(); refreshFmt(); };
 $("#exLayer").onchange=()=>{ document.querySelector("input[name=exm][value=layer]").checked=true; refreshExport(); };
 $("#exCrop").onchange=refreshExport;
+for(const id of ["#exPatSrc","#exPatLay","#exPatGap"]) $(id).addEventListener("input",()=>{ document.querySelector("input[name=exm][value=pattern]").checked=true; refreshExport(); refreshFmt(); });
 $("#exClose").onclick=()=>$("#exportDlg").close();
 $("#exCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText($("#svgcode").value); $("#exMsg").textContent="Code SVG copié."; }catch(_){ $("#svgcode").select(); $("#exMsg").textContent="Copie refusée par le navigateur : le code est sélectionné, utilisez Ctrl+C."; } };
 function dlError(err){ const c=err&&err.code; return c==="declined"?"Téléchargement annulé.":"Téléchargement indisponible ("+(c||"erreur")+"). Utilisez « Copier le code »."; }
@@ -1814,11 +1903,11 @@ async function setText(target, str, f, opts={}){
   }
   let G; try{ G=await loadGlyphs(f.gkey); }catch(_){ toast("Glyphes de « "+f.name+" » introuvables. Rechargez la page."); return false; }
   const old=target.layers, before=snapshot();
-  const m=old.length?textMetrics(old):{x0:target.x0, baseline:target.baseline, s:1};
+  const m=old.length?textMetrics(old):{x0:Number.isFinite(target.x0)?target.x0:(layers.some(l=>l.group==="mark")?301:28), baseline:Number.isFinite(target.baseline)?target.baseline:GLYPHS.baseline, s:1};
   const {letters, missing}=layoutText(str, f, G, 0, m.baseline, f.k*m.s);
   if(!letters.length){ toast("Aucun caractère de ce texte n'existe dans « "+f.name+" »."); return false; }
   const nb=bounds(letters.map(l=>({subs:l.subs}))), dx=m.x0-nb.x0;
-  const first=old[0]||target.proto||{fill:palette[0],zone:0};
+  const first=old[0]||target.proto||{fill:primary(palette[0]||EX.ink),zone:0};
   const pfx=target.kind==="word"?"lettre-":target.g.id+"-";
   const fresh=letters.map((g,i)=>{ const L={visible:first.visible!==false, locked:false, id:pfx+(i+1), name:(g.ch==="—"?"Barre":(target.kind==="word"?"Lettre ":"")+g.ch)+" · "+(i+1), group:first.group||"word", fill:first.fill, zone:first.zone||0, font:f.id, subs:g.subs};
     if(g.ch!=="—") L.ch=g.ch;
@@ -1851,7 +1940,7 @@ async function addTextBlock(w){
   await loadFonts(); const f=currentFontOf(wordLayers())||FONTS[0];
   const g={id:"txt"+Date.now().toString(36), name:"Texte "+(++textN), pal:null, open:true, text:{str:"Texte", font:f.id}};
   groups.push(g);
-  const ok=await setText({kind:"block", g, layers:[], x0:w.x, baseline:w.y, proto:{fill:palette[0],zone:0,group:"mark"}}, "Texte", f);
+  const ok=await setText({kind:"block", g, layers:[], x0:w.x, baseline:w.y, proto:{fill:primary(palette[0]||EX.ink),zone:0,group:"mark"}}, "Texte", f);
   if(!ok){ groups=groups.filter(x=>x!==g); return; }
   setTool("move"); const inp=$("#txtIn"); renderTextRow(); inp.focus(); inp.select();
   toast("Bloc de texte créé : tapez votre texte puis Entrée. Le bouton F change sa police.");
@@ -2107,6 +2196,276 @@ $("#txtIn").addEventListener("keydown",e=>{
   if(typeKey(e.code, e.shiftKey)){ e.preventDefault(); e.stopImmediatePropagation(); flash(e.code); if(!LAYOUTS[kbLang].ime) renderKb(); }
 },true);
 
+/* ---------- Image import: clean the page, trace the contours, fit curves ----------
+   A photo of a drawing or a signature becomes editable curves, all in the browser:
+   1. clean: grey levels divided by the local paper brightness (max filter + blur) removes texture, shadows and uneven light;
+      threshold (Otsu by default), then specks and pinholes smaller than "Nettoyage" are removed;
+   2. trace: pixel-edge contours with the ink on their right, so holes come out reversed (nonzero fill keeps them open);
+   3. fit: staircase midpoints, Ramer-Douglas-Peucker simplification ("Détail"), then sharp turns stay corners and the
+      other points get Catmull-Rom handles. One compound layer, editable with the Plume. */
+const VEC_MAX=900;
+function vecGrey(img){
+  const sc=Math.min(1, VEC_MAX/Math.max(img.naturalWidth||img.width, img.naturalHeight||img.height));
+  const w=Math.max(1,Math.round((img.naturalWidth||img.width)*sc)), h=Math.max(1,Math.round((img.naturalHeight||img.height)*sc));
+  const c=document.createElement("canvas"); c.width=w; c.height=h; const g=c.getContext("2d",{willReadFrequently:true});
+  g.fillStyle="#fff"; g.fillRect(0,0,w,h); g.drawImage(img,0,0,w,h);
+  const d=g.getImageData(0,0,w,h).data, grey=new Float32Array(w*h);
+  for(let i=0;i<w*h;i++) grey[i]=(0.299*d[4*i]+0.587*d[4*i+1]+0.114*d[4*i+2])/255;
+  return {w,h,grey,rgb:d,canvas:c};
+}
+/* separable running max (paper brightness) then box blur, on a grid of radius R */
+function vecMax1(src,w,h,R,horiz){ const out=new Float32Array(w*h);
+  if(horiz) for(let y=0;y<h;y++){ const o=y*w; for(let x=0;x<w;x++){ let m=0; const a=Math.max(0,x-R), b=Math.min(w-1,x+R); for(let k=a;k<=b;k++) if(src[o+k]>m) m=src[o+k]; out[o+x]=m; } }
+  else for(let x=0;x<w;x++) for(let y=0;y<h;y++){ let m=0; const a=Math.max(0,y-R), b=Math.min(h-1,y+R); for(let k=a;k<=b;k++) if(src[k*w+x]>m) m=src[k*w+x]; out[y*w+x]=m; }
+  return out; }
+function vecBlur(src,w,h,R){ // box blur with an integral image
+  const I=new Float64Array((w+1)*(h+1));
+  for(let y=0;y<h;y++){ let row=0; for(let x=0;x<w;x++){ row+=src[y*w+x]; I[(y+1)*(w+1)+x+1]=I[y*(w+1)+x+1]+row; } }
+  const out=new Float32Array(w*h);
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){ const x0=Math.max(0,x-R), y0=Math.max(0,y-R), x1=Math.min(w,x+R+1), y1=Math.min(h,y+R+1);
+    out[y*w+x]=(I[y1*(w+1)+x1]-I[y0*(w+1)+x1]-I[y1*(w+1)+x0]+I[y0*(w+1)+x0])/((x1-x0)*(y1-y0)); }
+  return out; }
+function vecOtsu(v){ const H=new Float64Array(256); for(const x of v) H[Math.max(0,Math.min(255,Math.round(x*255)))]++;
+  let sum=0, n=v.length; for(let i=0;i<256;i++) sum+=i*H[i];
+  let sB=0, wB=0, best=0, thr=128; for(let i=0;i<256;i++){ wB+=H[i]; if(!wB) continue; const wF=n-wB; if(!wF) break; sB+=i*H[i];
+    const mB=sB/wB, mF=(sum-sB)/wF, b=wB*wF*(mB-mF)*(mB-mF); if(b>best){ best=b; thr=i; } }
+  return (thr+0.5)/255; }
+/* remove connected components (4-neighbours) of value val smaller than minA pixels */
+function vecDespeckle(bin,w,h,val,minA){
+  if(minA<=1) return; const seen=new Uint8Array(w*h), stack=new Int32Array(w*h), comp=new Int32Array(w*h);
+  for(let s=0;s<w*h;s++){ if(seen[s]||bin[s]!==val) continue;
+    let sp=0, n=0, edge=false; stack[sp++]=s; seen[s]=1;
+    while(sp){ const p=stack[--sp]; comp[n++]=p; const x=p%w, y=(p-x)/w; if(x===0||y===0||x===w-1||y===h-1) edge=true;
+      if(x>0&&!seen[p-1]&&bin[p-1]===val){ seen[p-1]=1; stack[sp++]=p-1; } if(x<w-1&&!seen[p+1]&&bin[p+1]===val){ seen[p+1]=1; stack[sp++]=p+1; }
+      if(y>0&&!seen[p-w]&&bin[p-w]===val){ seen[p-w]=1; stack[sp++]=p-w; } if(y<h-1&&!seen[p+w]&&bin[p+w]===val){ seen[p+w]=1; stack[sp++]=p+w; } }
+    if(n<minA && !(val===0&&edge)) for(let k=0;k<n;k++) bin[comp[k]]=1-val; }
+}
+function vecClean(src, o){
+  const {w,h}=src, size=Math.min(w,h), grey=o.invert?src.grey.map(v=>1-v):src.grey; // light ink on dark: invert first, then the "paper" is bright again
+  // paper brightness: wide for filled shapes, narrow for thin strokes (keeps faint pencil)
+  const R=Math.max(3, Math.round(size*(o.thin?0.035:0.12)));
+  const step=Math.max(1, Math.floor(R/6)), sw=Math.ceil(w/step), sh=Math.ceil(h/step), small=new Float32Array(sw*sh);
+  for(let y=0;y<sh;y++) for(let x=0;x<sw;x++) small[y*sw+x]=grey[Math.min(h-1,y*step)*w+Math.min(w-1,x*step)];
+  const Rs=Math.max(1,Math.round(R/step));
+  let bg=vecBlur(vecMax1(vecMax1(small,sw,sh,Rs,true),sw,sh,Rs,false),sw,sh,Rs);
+  const norm=new Float32Array(w*h);
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){ const b=bg[Math.min(sh-1,Math.floor(y/step))*sw+Math.min(sw-1,Math.floor(x/step))]||1;
+    norm[y*w+x]=Math.min(1, grey[y*w+x]/Math.max(0.05,b)); }
+  const thr=o.auto?Math.min(0.92,vecOtsu(norm)):o.thr;
+  const bin=new Uint8Array(w*h); for(let i=0;i<w*h;i++) bin[i]=norm[i]<thr?1:0;
+  const minA=Math.round(o.clean*o.clean*size*size/250000); // "Nettoyage" 0..100 -> 0..(size/5)^2 px
+  vecDespeckle(bin,w,h,1,minA); vecDespeckle(bin,w,h,0,minA);
+  return {bin, thr};
+}
+/* pixel-edge contours, ink on the right of the walking direction (y down) */
+function vecTrace(bin,w,h){
+  const W=w+1, mask=new Uint8Array(W*(h+1)), at=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&bin[y*w+x]===1;
+  // dirs 0:+x 1:+y 2:-x 3:-y
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){ if(!bin[y*w+x]) continue;
+    if(!at(x,y-1)) mask[y*W+x]|=1;         // top edge, left -> right
+    if(!at(x+1,y)) mask[y*W+x+1]|=2;       // right edge, down
+    if(!at(x,y+1)) mask[(y+1)*W+x+1]|=4;   // bottom edge, right -> left
+    if(!at(x-1,y)) mask[(y+1)*W+x]|=8; }   // left edge, up
+  const DX=[1,0,-1,0], DY=[0,1,0,-1], loops=[];
+  for(let v0=0;v0<mask.length;v0++){
+    while(mask[v0]){
+      let d=mask[v0]&1?0:mask[v0]&2?1:mask[v0]&4?2:3, v=v0; const pts=[];
+      for(let guard=0;guard<4*W*(h+1);guard++){
+        mask[v]&=~(1<<d); pts.push(v); v+=DX[d]+DY[d]*W;
+        if(v===v0) break;                   // closed (edges left at v0 start another loop)
+        const m=mask[v]; if(!m) break;
+        const r=(d+1)%4, l=(d+3)%4; d = m&(1<<r)?r : m&(1<<d)?d : m&(1<<l)?l : -1; if(d<0) break;
+      }
+      if(pts.length>=4) loops.push(pts.map(q=>({x:q%W, y:Math.floor(q/W)})));
+    }
+  }
+  return loops;
+}
+function polyArea(p){ let a=0; for(let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length]; a+=q.x*r.y-r.x*q.y; } return a/2; }
+function rdp(pts, tol){ // open polyline
+  if(pts.length<3) return pts.slice(); const keep=new Uint8Array(pts.length); keep[0]=keep[pts.length-1]=1; const st=[[0,pts.length-1]];
+  while(st.length){ const [a,b]=st.pop(); const A=pts[a], B=pts[b], dx=B.x-A.x, dy=B.y-A.y, L=Math.hypot(dx,dy)||1; let md=-1, mi=-1;
+    for(let i=a+1;i<b;i++){ const d=Math.abs((pts[i].x-A.x)*dy-(pts[i].y-A.y)*dx)/L; if(d>md){ md=d; mi=i; } }
+    if(md>tol){ keep[mi]=1; st.push([a,mi],[mi,b]); } }
+  return pts.filter((_,i)=>keep[i]); }
+function rdpClosed(pts, tol){ // split at the point farthest from the first one
+  let far=0, fd=-1; pts.forEach((p,i)=>{ const d=(p.x-pts[0].x)**2+(p.y-pts[0].y)**2; if(d>fd){ fd=d; far=i; } });
+  const a=rdp(pts.slice(0,far+1),tol), b=rdp(pts.slice(far).concat([pts[0]]),tol);
+  return a.slice(0,-1).concat(b.slice(0,-1)); }
+/* polygon -> nodes: corners stay sharp, the rest get smooth Catmull-Rom handles */
+function fitNodes(poly, cornerCos){
+  const n=poly.length; return poly.map((p,i)=>{ const a=poly[(i-1+n)%n], c=poly[(i+1)%n];
+    const ux=p.x-a.x, uy=p.y-a.y, vx=c.x-p.x, vy=c.y-p.y, lu=Math.hypot(ux,uy)||1, lv=Math.hypot(vx,vy)||1;
+    if((ux*vx+uy*vy)/(lu*lv) < cornerCos) return {x:p.x,y:p.y,i:null,o:null};
+    const tx=c.x-a.x, ty=c.y-a.y, lt=Math.hypot(tx,ty)||1;
+    return {x:p.x,y:p.y,i:{x:p.x-tx/lt*lu/3,y:p.y-ty/lt*lu/3},o:{x:p.x+tx/lt*lv/3,y:p.y+ty/lt*lv/3}}; }); }
+function vectorize(src, o){
+  const {bin,thr}=vecClean(src,o), loops=vecTrace(bin,src.w,src.h);
+  const tol=0.35+(100-o.detail)/100*(o.thin?1.6:2.6), minLoop=Math.max(4,(o.clean/100)*(o.clean/100)*src.w*src.h/4000);
+  const subs=[];
+  for(const L of loops){
+    if(Math.abs(polyArea(L))<minLoop) continue;
+    const mid=L.map((p,i)=>{ const q=L[(i+1)%L.length]; return {x:(p.x+q.x)/2, y:(p.y+q.y)/2}; });
+    const poly=rdpClosed(mid,tol); if(poly.length<3) continue;
+    subs.push(fitNodes(poly, o.thin?-0.1:0.25));
+  }
+  // ink colour: mean of the original pixels kept as ink
+  let r=0,g=0,b=0,k=0; for(let i=0;i<bin.length;i+=3) if(bin[i]){ r+=src.rgb[4*i]; g+=src.rgb[4*i+1]; b+=src.rgb[4*i+2]; k++; }
+  const ink=k?"#"+[r,g,b].map(v=>Math.round(v/k).toString(16).padStart(2,"0")).join("").toUpperCase():"#000000";
+  return {bin, thr, subs, ink, nodes:subs.reduce((s,x)=>s+x.length,0)};
+}
+/* traced pixels -> world units: fit the drawing (or the whole frame, for a pattern tile) in the symbol area */
+function vecPlace(res, src, asTile){
+  const all={subs:res.subs}, b=asTile?{x0:0,y0:0,x1:src.w,y1:src.h}:bounds([all]);
+  const bw=b.x1-b.x0||1, bh=b.y1-b.y0||1, s=Math.min(200/bh, 600/bw), x0=28, y0=128-bh*s/2;
+  const T=p=>p&&{x:r2(x0+(p.x-b.x0)*s), y:r2(y0+(p.y-b.y0)*s)};
+  return {subs:res.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)}))), tile:asTile?{x:x0,y:r2(y0),w:r2(bw*s),h:r2(bh*s)}:null}; }
+
+/* Import dialog */
+const imp={src:null, res:null, o:{thin:false, auto:true, thr:0.6, detail:55, clean:20, invert:false, ink:true, tile:false}, t:null};
+function impOpen(){ $("#impDlg").showModal(); impRender(); }
+async function impLoad(file){
+  if(!file) return; $("#impMsg").textContent="Lecture de l'image…";
+  if(!/^image\//.test(file.type||"image/")){ $("#impMsg").textContent="Ce fichier n'est pas une image."; return; }
+  const url=URL.createObjectURL(file), img=new Image();
+  try{ await new Promise((ok,ko)=>{ img.onload=ok; img.onerror=ko; img.src=url; }); }
+  catch(_){ URL.revokeObjectURL(url); $("#impMsg").textContent="Format non lu par ce navigateur (essayez JPEG ou PNG)."; return; }
+  imp.src=vecGrey(img); URL.revokeObjectURL(url); imp.res=null; impRun();
+}
+function impRun(){ clearTimeout(imp.t); imp.t=setTimeout(()=>{ if(!imp.src) return; const t0=performance.now(); imp.res=vectorize(imp.src, imp.o); imp.ms=Math.round(performance.now()-t0); impRender(); }, 60); }
+function impRender(){
+  const o=imp.o, has=!!imp.src;
+  $("#impEmpty").hidden=has; $("#impPrev").hidden=!has; $("#impAdd").disabled=!(imp.res&&imp.res.subs.length);
+  document.querySelectorAll("#impDlg [data-io]").forEach(el=>{ const k=el.dataset.io; if(el.type==="checkbox") el.checked=!!o[k]; else if(el.type==="range") el.value=k==="thr"?Math.round(o.thr*100):o[k]; });
+  document.querySelectorAll("#impDlg [data-mode]").forEach(b=>b.classList.toggle("on", (b.dataset.mode==="thin")===o.thin));
+  $("#impThr").disabled=o.auto;
+  if(!has){ $("#impMsg").textContent=""; return; }
+  const {w,h}=imp.src, sc=$("#impSrc"); sc.width=w; sc.height=h; sc.getContext("2d").drawImage(imp.src.canvas,0,0);
+  if(!imp.res) return;
+  const bc=$("#impBin"); bc.width=w; bc.height=h; const g=bc.getContext("2d"), id=g.createImageData(w,h);
+  for(let i=0;i<w*h;i++){ const v=imp.res.bin[i]?30:255; id.data[4*i]=id.data[4*i+1]=id.data[4*i+2]=v; id.data[4*i+3]=255; } g.putImageData(id,0,0);
+  if(o.auto) $("#impThr").value=Math.round(imp.res.thr*100);
+  const fill=o.ink?imp.res.ink:primary(palette[0]||EX.ink);
+  $("#impVec").innerHTML=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><path d="${pathD(imp.res.subs)}" fill="${fill}"/></svg>`;
+  $("#impMsg").textContent=imp.res.subs.length?`${imp.res.subs.length} contour${imp.res.subs.length>1?"s":""}, ${imp.res.nodes} points${imp.res.nodes>4000?" : beaucoup de points, baissez le Détail ou augmentez le Nettoyage":""}.`:"Rien n'a été détecté : réglez le Seuil, ou cochez Inverser pour un dessin clair sur fond sombre.";
+}
+function impAdd(){
+  if(!imp.res||!imp.res.subs.length) return;
+  const placed=vecPlace(imp.res, imp.src, imp.o.tile), b=snapshot(), id=newLayerId("image");
+  const L={visible:true, locked:false, id, name:imp.o.tile?"Motif importé":imp.o.thin?"Signature":"Image vectorisée", group:"mark", fill:imp.o.ink?imp.res.ink:primary(palette[0]||EX.ink), subs:placed.subs};
+  if(placed.tile) L.tile=placed.tile;
+  layers.push(L); ensureZones(); sel={layer:id,node:null,layers:[id]}; commit(b); $("#impDlg").close(); fit();
+  toast((imp.o.tile?"Motif ajouté : exportez-le en mosaïque depuis Exporter.":"Image vectorisée ajoutée : la Plume modifie ses points.")+" (Annuler pour revenir)");
+}
+for(const id of ["#impFile","#impCam"]) $(id).addEventListener("change",e=>{ impLoad(e.target.files[0]); e.target.value=""; });
+$("#impDlg").addEventListener("dragover",e=>{ e.preventDefault(); $("#impDlg").classList.add("drop"); });
+$("#impDlg").addEventListener("dragleave",()=>$("#impDlg").classList.remove("drop"));
+$("#impDlg").addEventListener("drop",e=>{ e.preventDefault(); $("#impDlg").classList.remove("drop"); const f=[...(e.dataTransfer.files||[])].find(f=>/^image\//.test(f.type)); if(f) impLoad(f); });
+$("#impDlg").addEventListener("input",e=>{ const k=e.target.dataset.io; if(!k) return;
+  if(e.target.type==="checkbox") imp.o[k]=e.target.checked; else imp.o[k]=k==="thr"?+e.target.value/100:+e.target.value;
+  if(k==="ink") impRender(); else impRun(); });
+$("#impDlg").addEventListener("click",e=>{ const m=e.target.closest("[data-mode]"); if(m){ imp.o.thin=m.dataset.mode==="thin"; impRun(); impRender(); } });
+$("#impCancel").onclick=()=>$("#impDlg").close();
+$("#impAdd").onclick=impAdd;
+$("#importBtn").onclick=impOpen;
+window.__vec={vectorize, vecGrey, imp};
+
+/* ---------- First open: brand, tagline, keywords, then a starting point ----------
+   Shown while no brand name is known (and not postponed with "Plus tard"); the "Marque et départ" button reopens it.
+   Starting points: keep the drawing, blank page, the name alone, a shape + the name, an imported image, the example.
+   The whole start is one undo step. */
+const START_SHAPES={
+  cercle:["Cercle",()=>circle(128,128,100)],
+  carre:["Carré arrondi",()=>roundRect(28,28,200,200,48)],
+  hexagone:["Hexagone",()=>{ const P=[]; for(let k=0;k<6;k++){ const a=-Math.PI/2+k*Math.PI/3; P.push({x:r2(128+100*Math.cos(a)),y:r2(128+100*Math.sin(a)),i:null,o:null}); } return [P]; }],
+  losange:["Losange",()=>[[{x:128,y:28,i:null,o:null},{x:228,y:128,i:null,o:null},{x:128,y:228,i:null,o:null},{x:28,y:128,i:null,o:null}]]],
+  arche:["Arche",()=>[[{x:28,y:228,i:null,o:null},{x:28,y:128,i:null,o:{x:28,y:72.77}},{x:128,y:28,i:{x:72.77,y:28},o:{x:183.23,y:28}},{x:228,y:128,i:{x:228,y:72.77},o:null},{x:228,y:228,i:null,o:null}]]],
+  ecusson:["Écusson",()=>[[{x:28,y:28,i:null,o:null},{x:228,y:28,i:null,o:null},{x:228,y:118,i:null,o:{x:228,y:178}},{x:128,y:228,i:{x:196,y:212},o:{x:60,y:212}},{x:28,y:118,i:{x:28,y:178},o:null}]]],
+};
+const WELCOME_SKIP="atelier-logo-welcome-later";
+let startChoice="word", startShape="cercle";
+function shapeThumb(k){ return `<svg viewBox="20 20 216 216" aria-hidden="true"><path d="${pathD(START_SHAPES[k][1]())}" fill="currentColor"/></svg>`; }
+function isExample(){ return JSON.stringify(layers.map(l=>[l.id,l.subs]))===JSON.stringify(ORIGIN.map(l=>[l.id,l.subs])); }
+function openStart(){
+  const d=$("#startDlg"), canKeep=layers.length>0 && !isExample();
+  $("#stName").value=brand.name||""; $("#stTag").value=brand.tagline||""; $("#stKw").value=(brand.keywords||[]).join(", ");
+  startChoice=canKeep?"keep":"word";
+  $("#stKeep").hidden=!canKeep;
+  $("#stShapes").innerHTML=Object.keys(START_SHAPES).map(k=>`<button type="button" data-shape="${k}" title="${START_SHAPES[k][0]}" aria-label="${START_SHAPES[k][0]}">${shapeThumb(k)}</button>`).join("");
+  renderStart(); $("#stMsg").textContent=""; d.showModal(); $("#stName").focus();
+}
+function renderStart(){
+  document.querySelectorAll("#startDlg [data-start]").forEach(b=>{ const on=b.dataset.start===startChoice; b.classList.toggle("on",on); b.setAttribute("aria-checked",String(on)); });
+  document.querySelectorAll("#stShapes [data-shape]").forEach(b=>b.classList.toggle("on",b.dataset.shape===startShape));
+  $("#stShapes").hidden=startChoice!=="shape";
+  $("#stGo").textContent=startChoice==="image"?"Continuer : choisir l'image":"Commencer";
+}
+$("#startDlg").addEventListener("click",e=>{
+  const c=e.target.closest("[data-start]"); if(c){ startChoice=c.dataset.start; renderStart(); return; }
+  const s=e.target.closest("[data-shape]"); if(s){ startShape=s.dataset.shape; renderStart(); }
+});
+async function applyStart(choice, info, shape){
+  brand={name:info.name, tagline:info.tagline, keywords:info.keywords};
+  const b0=snapshot(), u0=undoStack.length;
+  if(choice!=="keep"){
+    groups=[]; curPal="main"; pals=[{id:"main",name:"Principale",colors:[]}]; sel={layer:null,node:null};
+    layers = choice==="example" ? clone(ORIGIN) : [];
+    if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
+    ensureZones(); wordText=brand.name;
+    if(choice==="word"||choice==="shape"||choice==="example"){
+      await loadFonts().catch(()=>null); const f=fontById("instrument");
+      if(f) await setText({kind:"word", layers:wordLayers(), x0:choice==="word"?28:undefined}, brand.name, f);
+      else if(choice!=="example") wordText=brand.name;
+    }
+  }
+  undoStack.length=Math.min(undoStack.length,u0); redoStack.length=0;
+  if(b0!==snapshot()) undoStack.push(b0);
+  syncFills(); fixSel(); renderAll(); scheduleSave("shape"); scheduleSave("palette"); fit();
+}
+$("#stGo").onclick=async()=>{
+  const name=$("#stName").value.trim().slice(0,80);
+  if(!name){ $("#stMsg").textContent="Indiquez le nom de la marque : il sert au logo et aux noms des fichiers."; $("#stName").focus(); return; }
+  const info={name, tagline:$("#stTag").value.trim().slice(0,160), keywords:$("#stKw").value.split(/[,;\n]/).map(k=>k.trim().slice(0,40)).filter(Boolean).slice(0,12)};
+  $("#stGo").disabled=true; try{ await applyStart(startChoice, info, startShape); } finally{ $("#stGo").disabled=false; }
+  $("#startDlg").close(); try{ localStorage.removeItem(WELCOME_SKIP); }catch(_){}
+  if(startChoice==="image") impOpen();
+  else toast(startChoice==="keep"?"Marque enregistrée.":"C'est parti ! « Annuler » revient au dessin précédent.");
+};
+$("#stLater").onclick=()=>{ try{ localStorage.setItem(WELCOME_SKIP,"1"); }catch(_){} $("#startDlg").close(); };
+$("#stName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#stGo").click(); } });
+$("#startBtn").onclick=openStart;
+function maybeWelcome(){ let later=false; try{ later=!!localStorage.getItem(WELCOME_SKIP); }catch(_){}
+  if(!brand.name && !later && !document.querySelector("dialog[open]")) openStart(); }
+window.__start=applyStart;
+
+/* ---------- Pattern (mosaic) export ----------
+   Source: the whole symbol, a group, or one layer. A layer imported as "motif raccordable" keeps its image frame as the
+   repeat cell, so a seamless drawing stays seamless; other sources get a margin. "Quinconce" offsets every other row by half a cell. */
+function patternSpec(){
+  const srcV=$("#exPatSrc").value, layout=$("#exPatLay").value, gap=+$("#exPatGap").value/100;
+  const ls=srcV==="mark"?layers.filter(l=>l.visible&&l.group==="mark"):srcV.startsWith("g:")?layers.filter(l=>l.visible&&l.grp===srcV.slice(2)):[layerById(srcV.slice(2))].filter(Boolean);
+  if(!ls.length) return null;
+  const tileL=ls.length===1&&ls[0].tile; let x0,y0,w,h;
+  if(tileL){ ({x:x0,y:y0,w,h}=ls[0].tile); }
+  else { const b=bounds(ls), m=Math.max(b.x1-b.x0,b.y1-b.y0)*gap/2; x0=b.x0-m; y0=b.y0-m; w=b.x1-b.x0+2*m; h=b.y1-b.y0+2*m; }
+  const W=r2(w), H=r2(layout==="brick"?2*h:h);
+  let defs=""; const body=ls.map(l=>{ const r=layerSVG(l,{pfx:"pat"}); defs+=r.defs; return r.body; }).join("");
+  const bases=layout==="brick"?[[0,0],[w/2,h]]:[[0,0]], uses=[];
+  for(const [bx,by] of bases) for(const dx of [-W,0,W]) for(const dy of [-H,0,H]) uses.push(`<use href="#motif" x="${r2(bx+dx)}" y="${r2(by+dy)}"/>`);
+  const inner=`<defs>${defs}<g id="motif">${body}</g></defs>${uses.join("")}`;
+  const T=brandLabel()+" — motif", P=filePfx();
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${r2(x0)} ${r2(y0)} ${W} ${H}" width="${W}" height="${H}">\n  <title>${esc(T)}</title>\n  ${inner}\n</svg>\n`;
+  const M=r2(3*Math.max(W,H));   // square mosaic preview, at least 3 cells each way
+  const mos=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${M} ${M}" width="${M}" height="${M}"><defs><pattern id="tile" patternUnits="userSpaceOnUse" width="${W}" height="${H}"><svg viewBox="${r2(x0)} ${r2(y0)} ${W} ${H}" width="${W}" height="${H}">${inner}</svg></pattern></defs><rect width="100%" height="100%" fill="url(#tile)"/></svg>`;
+  return {name:P+"-motif.svg", svg, preview:mos};
+}
+function fillPatternSources(){
+  const tiles=layers.filter(l=>l.tile), cur=$("#exPatSrc").value;
+  $("#exPatSrc").innerHTML=`<option value="mark">Symbole entier</option>`+tiles.map(l=>`<option value="l:${esc(l.id)}">${esc(l.name)} (raccordable)</option>`).join("")+
+    groups.map(g=>`<option value="g:${esc(g.id)}">Groupe : ${esc(g.name)}</option>`).join("")+layers.filter(l=>l.group==="mark"&&!l.tile).map(l=>`<option value="l:${esc(l.id)}">Calque : ${esc(l.name)}</option>`).join("");
+  if([...$("#exPatSrc").options].some(o=>o.value===cur)) $("#exPatSrc").value=cur; else if(tiles.length) $("#exPatSrc").value="l:"+tiles[0].id;
+}
+
 /* ---------- Persistence (db + assets, local fallback) ---------- */
 const caps={db:null, assets:null, downloads:null, comments:null};
 const LS_KEY="atelier-logo-v1";
@@ -2217,7 +2576,7 @@ async function initPersistence(){
 
 /* ---------- Start ---------- */
 setTool("move");
-initPersistence();
+initPersistence().finally(maybeWelcome);
 renderClaudeBar();
 window.__atelier = { get layers(){return layers;}, get notes(){return notes;}, get view(){return view;}, buildSVG, get sel(){return sel;} };
 </script>

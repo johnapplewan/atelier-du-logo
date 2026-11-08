@@ -6,6 +6,9 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 
 ## Fonctions
 
+- **Premier lancement** : nom de la marque, slogan, mots-clés, puis point de départ (le nom seul, une forme et le nom, une image ou une photo, page vierge, logo d'exemple). Le bouton « Marque et départ » le rouvre.
+- **Import d'image ou de photo** : dessin à la main, signature, texture. Le papier, ses ombres et sa texture sont retirés, les contours deviennent des courbes de Bézier modifiables (réglages Seuil, Détail, Nettoyage, mode trait fin, inversion). Sur tablette, « Prendre une photo » ouvre l'appareil photo.
+- **Motifs** : export en mosaïque (grille ou quinconce) ; une image importée comme « motif raccordable » garde son cadre comme case de répétition.
 - **Calques et groupes** : renommage, masquage et verrouillage en lot, sélection par plage avec Maj, opacité, modes de fusion.
 - **Plume Bézier** : sélection de plusieurs points, raccourcis de précision.
 - **Formes, rotation et redimensionnement** : avec ou sans proportions.
@@ -24,7 +27,7 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 | `src/template.html` | Source de l'application |
 | `build.js` | `npm run build` : `src/template.html` + le mot par défaut, dessiné depuis `app/glyphs/instrument.js` → `app/index.html` |
 | `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` puis `trim.cjs` → `fonts.js` (métadonnées seules), `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
-| `tests/` | Tests Playwright sur `app/index.html` (Chromium) : `npm test` |
+| `tests/` | Tests Playwright (Chromium) sur `app/` servi en local : `npm test` |
 
 ## Licences
 
