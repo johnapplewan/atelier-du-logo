@@ -369,6 +369,15 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
 .support{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .support a.give{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;text-decoration:none;font-weight:600;color:#fff}
 .support a.paypal{background:#0070BA}.support .wero{display:flex;align-items:center;gap:8px;font-size:13px}.support .wero b{background:#FFE600;color:#1D1D1F;padding:3px 9px;border-radius:999px}
+body.nohelp .help{display:none!important}
+body.nohelp .hint{opacity:0;pointer-events:none;transition:opacity .4s}body.nohelp .hint.flash,body.nohelp .hint.live{opacity:1}
+.scdlg{max-width:min(980px,96vw);width:100%}.scdlg .sp{flex:1}
+.sclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px 24px;max-height:68vh;overflow:auto;margin:10px 0}
+.sclist dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0;font-size:13px}.sclist dt{white-space:nowrap}.sclist dd{margin:0;color:var(--muted)}
+kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
+.ruler{position:absolute;z-index:5;background:#FBFBFA}.ruler[hidden]{display:none}
+.ruler.top{top:0;left:0;cursor:s-resize}.ruler.left{top:0;left:0;cursor:e-resize}.ruler.corner{top:0;left:0;width:20px;height:20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);z-index:6}
+#stage.rulers .claudebar,#stage.rulers .glyphbar{top:30px}#stage.rulers .mini{top:30px;left:30px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
 @media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
@@ -386,6 +395,7 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
   <div class="group">
     <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
+    <button id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
     <button id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
     <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
     <button id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
@@ -420,14 +430,16 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
       </div>
       <div class="row"><label class="muted" for="gridSize">Pas</label>
         <select id="gridSize"><option value="1">1</option><option value="2">2</option><option value="4" selected>4</option><option value="8">8</option><option value="16">16</option></select>
-        <span class="muted">unités (le symbole fait 256)</span></div>
+        <span class="muted help">unités (le symbole fait 256)</span></div>
+      <div class="row"><label class="chk"><input type="checkbox" id="rulersOn"> Règles et guides</label><button id="guidesClear" class="ib" title="Effacer tous les guides" aria-label="Effacer les guides" disabled>×</button></div>
+      <p class="muted help" style="margin:4px 0 0">Glissez depuis une règle pour poser un guide ; ramenez-le sur la règle pour le retirer. Avec le magnétisme, les points s'y accrochent.</p>
     </section>
     <section>
       <h2>Palette</h2>
       <div class="row palbar"><select id="palSel" aria-label="Palette à modifier"></select><button class="ib" id="palName" title="Renommer la palette" aria-label="Renommer la palette">✎</button><button id="palNew" title="Nouvelle palette (copie de celle-ci)">Nouvelle</button><button class="ib" id="palDel" title="Supprimer cette palette" aria-label="Supprimer cette palette">×</button></div>
       <p class="muted" id="palUse" style="margin:4px 0 8px"></p>
       <div class="pal" id="palette"></div>
-      <p class="muted" style="margin:6px 0 0">Clic : modifier la couleur · glisser : changer l'ordre (et donc la place des couleurs sur le logo)</p>
+      <p class="muted help" style="margin:6px 0 0">Clic : modifier la couleur · glisser : changer l'ordre (et donc la place des couleurs sur le logo)</p>
       <div class="row" style="margin-top:8px"><button id="palSuggest">Suggestions</button></div>
       <div id="palSuggestions"></div>
     </section>
@@ -446,6 +458,7 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
         <g id="ovl"></g>
         <g id="pins"></g>
         <g id="histHi" pointer-events="none"></g>
+        <g id="guides"></g>
       </g>
     </svg>
     <div class="mini" id="miniLeft">
@@ -454,6 +467,7 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
       <div class="flyout" id="flyout" hidden></div>
     </div>
     <button class="mini-open right" id="showRight" title="Rouvrir le panneau droit" aria-label="Rouvrir le panneau droit">‹</button>
+    <canvas id="rulerTop" class="ruler top" hidden></canvas><canvas id="rulerLeft" class="ruler left" hidden></canvas><div id="rulerCorner" class="ruler corner" title="Règles (Ctrl+R)" hidden></div>
     <div class="glyphbar" id="glyphBar" hidden></div>
     <div class="claudebar" id="claudeBar" hidden>
       <span id="claudeMsg"></span>
@@ -636,6 +650,11 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
   <h3>Crédits</h3>
   <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js (licence MIT). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
   <div class="row" style="justify-content:flex-end"><button id="abClose">Fermer</button></div>
+</dialog>
+<dialog id="scDlg" class="scdlg" aria-labelledby="scTitle">
+  <div class="row"><h2 id="scTitle">Raccourcis</h2><span class="sp"></span><label class="chk"><input type="checkbox" id="scHelp"> Afficher les aides à l'écran</label></div>
+  <div class="sclist" id="scList"></div>
+  <div class="row" style="justify-content:flex-end"><button id="scClose">Fermer</button></div>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -889,7 +908,7 @@ const cv = $("#cv"), world = $("#world"), art = $("#art"), ovl = $("#ovl"), pins
 function applyView(){
   world.setAttribute("transform", `translate(${view.tx} ${view.ty}) scale(${view.k})`);
   $("#zoomVal").textContent = Math.round(view.k*100/ baseK()) + " %";
-  renderOverlay(); renderPins();
+  renderOverlay(); renderPins(); renderGuides(); renderRulers();
 }
 let _baseK = 1; const baseK = () => _baseK;
 function renderArt(){
@@ -1094,11 +1113,11 @@ function renderInspector(){
       <input type="number" id="rotDeg" value="0" step="1" aria-label="Angle en degrés"><button id="rotGo">OK</button></div>
     ${!multiL&&L.open?`<div class="stylebox"><label class="geo">Épaisseur du trait <input type="range" id="swR" min="0.5" max="60" step="0.5" value="${L.sw||4}"><span id="swV">${L.sw||4}</span></label>
       <div class="row"><button id="closePath">Fermer le tracé</button><button id="toShape">Convertir en forme pleine</button></div></div>`:""}
-    ${multiL?`<p class="muted">Maj + clic pour ajouter ou retirer un calque.</p>`:""}
+    ${multiL?`<p class="muted help">Maj + clic pour ajouter ou retirer un calque.</p>`:""}
     <p class="muted">${L.subs.length} contour${L.subs.length>1?"s":""} · ${npts} points${L.locked?" · verrouillé":""}</p>`;
   const sn=sel.node, many=selPoints();
   if(tool==="points" && many.length>1){
-    h+=`<p style="margin-top:8px"><strong>${many.length} points sélectionnés</strong></p><p class="muted">Glissez l'un d'eux ou utilisez les flèches pour tous les déplacer. Maj + clic ajoute ou retire un point, Échap vide la sélection.</p>
+    h+=`<p style="margin-top:8px"><strong>${many.length} points sélectionnés</strong></p><p class="muted help">Glissez l'un d'eux ou utilisez les flèches pour tous les déplacer. Maj + clic ajoute ou retire un point, Échap vide la sélection.</p>
       <div class="row" style="margin-top:8px"><button id="delPt" class="danger">Supprimer les points</button><button id="cornerPt">Points anguleux</button></div>`;
   } else if(sn && tool==="points"){
     const n=L.subs[sn.s][sn.n];
@@ -1106,7 +1125,7 @@ function renderInspector(){
       <div class="row" style="margin-top:8px"><button id="delPt" class="danger">Supprimer le point</button></div>
       <div class="row"><button id="cornerPt" title="Retire les poignées">Point anguleux</button><button id="smoothPt" title="Poignées alignées">Point lisse</button></div>`;
   } else if(tool!=="points"){
-    h+=`<p class="muted">Passez à l'outil Points (A) pour éditer les points.</p>`;
+    h+=`<p class="muted help">Passez à l'outil Points (A) pour éditer les points.</p>`;
   }
   el.innerHTML=h;
   el.querySelectorAll("[data-rot]").forEach(b=>b.addEventListener("click",()=>rotateSelection(+b.dataset.rot)));
@@ -1192,7 +1211,7 @@ function setTool(t){
   if(tool==="pen" && t!=="pen" && penPath) finishPen(false);
   tool=t; cv.setAttribute("class","t-"+t);
   document.querySelectorAll("[data-tool]").forEach(b=>{ b.classList.toggle("on",b.dataset.tool===t); b.setAttribute("aria-pressed",b.dataset.tool===t); });
-  $("#hint").textContent=HINTS[t]; if(t!=="points"&&t!=="pen") sel.node=null; renderOverlay(); renderInspector(); if(window.renderMini) renderMini(); renderShapeOpts(); renderDrawOpts();
+  $("#hint").textContent=HINTS[t]; if(window.flashHint) flashHint(); if(window.renderGuides) renderGuides(); if(t!=="points"&&t!=="pen") sel.node=null; renderOverlay(); renderInspector(); if(window.renderMini) renderMini(); renderShapeOpts(); renderDrawOpts();
 }
 document.querySelectorAll("[data-tool]").forEach(b=>b.addEventListener("click",()=>setTool(b.dataset.tool)));
 
@@ -1229,6 +1248,7 @@ cv.addEventListener("pointerdown", e=>{
   if(pointers.size>2) return;
   cv.setPointerCapture(e.pointerId);
   const w=screenToWorld(e), t=e.target;
+  if(t.dataset && t.dataset.guide!==undefined && !spaceDown && tool==="move"){ startGuideDrag(e, guides[+t.dataset.guide].o, +t.dataset.guide); drag={type:"guide"}; return; }
   if(e.button===1 || spaceDown || tool==="hand"){ drag={type:"pan",sx:e.clientX,sy:e.clientY,tx:view.tx,ty:view.ty}; cv.classList.add("panning"); return; }
   if(e.button!==0 && e.pointerType==="mouse") return;
   const pin=t.closest && t.closest("[data-pin]");
@@ -1243,7 +1263,7 @@ cv.addEventListener("pointerdown", e=>{
   if(tool==="bubble"){ addNote(w); return; }
   if(tool==="shape"){ drag={type:"shape", start:w, cur:null}; return; }
   if(tool==="text"){ addTextBlock({x:r2(w.x), y:r2(w.y)}); return; }
-  if(tool==="pen"){ const P={x:snapV(w.x),y:snapV(w.y)};
+  if(tool==="pen"){ const P={x:guideSnap(snapV(w.x),"x"),y:guideSnap(snapV(w.y),"y")};
     if(penPath && penPath.length>1 && Math.hypot(w.x-penPath[0].x,w.y-penPath[0].y)<9/view.k){ finishPen(true); return; }
     if(!penPath) penPath=[]; const node={x:P.x,y:P.y,i:null,o:null}; penPath.push(node); drag={type:"penhandle", node, start:P}; renderOverlay(); return; }
   if(tool==="pencil"){ const pr=e.pointerType==="pen"&&e.pressure>0?e.pressure:0.5; drag={type:"pencil", pts:[{x:w.x,y:w.y,p:pr}], pen:e.pointerType==="pen"}; return; }
@@ -1297,6 +1317,7 @@ cv.addEventListener("pointermove", e=>{
     const r=cv.getBoundingClientRect(); view.tx+=cx-pinch.cx; view.ty+=cy-pinch.cy; zoomAt(d/pinch.d, cx-r.left, cy-r.top); pinch={d,cx,cy}; return; }
   if(!drag) return;
   const w=screenToWorld(e);
+  if(drag.type==="guide"){ moveGuide(e); return; }
   if(drag.type==="pan"){ view.tx=drag.tx+e.clientX-drag.sx; view.ty=drag.ty+e.clientY-drag.sy; applyView(); return; }
   if(drag.type==="marquee"||drag.type==="lmarquee"){ drag.cur=w; renderOverlay(); return; }
   if(drag.type==="shape"){ drag.cur=w; drag.box=shapeBox(drag,e); renderOverlay(); const b=drag.box; $("#hint").textContent="L "+r2(Math.abs(b[2]-b[0]))+" · H "+r2(Math.abs(b[3]-b[1])); return; }
@@ -1330,7 +1351,7 @@ cv.addEventListener("pointermove", e=>{
     const dx=sv(drag.acc.x), dy=sv(drag.acc.y); rx=dx; ry=dy;
     drag.group.forEach((L,i)=>{ L.subs=clone(drag.orig[i]); L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,dy))); });
   } else if(drag.type==="nodes"){
-    const m=drag.main, nx=sv(m.ox+drag.acc.x), ny=sv(m.oy+drag.acc.y), dx=nx-m.ox, dy=ny-m.oy;
+    const m=drag.main, nx=guideSnap(sv(m.ox+drag.acc.x),"x"), ny=guideSnap(sv(m.oy+drag.acc.y),"y"), dx=nx-m.ox, dy=ny-m.oy;
     for(const it of drag.items) moveNode(it.node, it.ox+dx-it.node.x, it.oy+dy-it.node.y);
     rx=m.node.x; ry=m.node.y; if(drag.items.length>1){ rx=r2(dx); ry=r2(dy); }
   } else if(drag.type==="handle"){
@@ -1341,12 +1362,13 @@ cv.addEventListener("pointermove", e=>{
   }
   const len = drag.type==="handle" ? " · longueur "+r2(Math.hypot(drag.p.x-drag.anchor.x, drag.p.y-drag.anchor.y)) : "";
   $("#hint").textContent=(drag.type==="layer"||(drag.type==="nodes"&&drag.items.length>1)?"Décalage ":"")+"X "+rx+" · Y "+ry+len+(fine?" · précision ×0,1":"");
-  renderArt(); renderOverlay();
+  $("#hint").classList.add("live"); renderArt(); renderOverlay();
 });
 function endPointer(e){
   pointers.delete(e.pointerId); if(pointers.size<2) pinch=null;
   if(!drag) return;
-  const d=drag; drag=null; cv.classList.remove("panning"); $("#hint").textContent=HINTS[tool];
+  const d=drag; drag=null; cv.classList.remove("panning"); $("#hint").textContent=HINTS[tool]; $("#hint").classList.remove("live");
+  if(d.type==="guide"){ endGuide(e); return; }
   if(d.type==="pin"){ if(d.moved) scheduleSave("notes"); return; }
   if(d.type==="penhandle"){ renderOverlay(); return; }
   if(d.type==="pencil"){ finishPencil(d.pts); return; }
@@ -1384,12 +1406,20 @@ function startNodesDrag(w, main, before){
 }
 
 /* ---------- Keyboard ---------- */
+// a closed dialog must not keep the focus: shortcuts would stay ignored until the next click on the drawing
+document.addEventListener("close", e=>{ const a=document.activeElement; if(a && e.target.contains && e.target.contains(a)) a.blur(); }, true);
 window.addEventListener("keydown", e=>{
-  if(e.target.closest && e.target.closest("input,textarea,select,dialog")) return;
+  // keys typed in an open dialog or a field are theirs; a key that still comes from a closed dialog is a shortcut
+  const dlg=e.target.closest&&e.target.closest("dialog");
+  if((e.key===" "||e.key==="Enter") && e.target.closest && e.target.closest("input,button,select,a")) return;   // space / Enter still tick boxes and press buttons
+  // only text-like fields keep the letters: a ticked checkbox or a slider must not block the shortcuts
+  if(dlg ? dlg.open : (e.target.closest && e.target.closest("textarea,select,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]):not([type=button])"))) return;
   const mod=e.ctrlKey||e.metaKey;
   if(tool==="pen" && penPath){
     if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); finishPen(false); return; }
     if(e.key==="Backspace"||e.key==="Delete"){ e.preventDefault(); penPath.pop(); if(!penPath.length) penPath=null; renderOverlay(); return; } }
+  if(mod && !e.shiftKey && e.key.toLowerCase()==="r"){ e.preventDefault(); setRulers(!rulersOn); return; }
+  if(e.key==="?"){ e.preventDefault(); openShortcuts(); return; }
   if(mod && e.key.toLowerCase()==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if(mod && e.key.toLowerCase()==="y"){ e.preventDefault(); redo(); return; }
   if(mod && e.key.toLowerCase()==="a" && tool==="points"){ const L=layerById(sel.layer); if(L){ e.preventDefault(); sel.multi=[]; L.subs.forEach((s,si)=>s.forEach((n,ni)=>sel.multi.push({l:L.id,s:si,n:ni}))); renderAll(); } return; }
@@ -2060,7 +2090,7 @@ function renderShapeOpts(){
   el.innerHTML=`<div class="kinds">${kinds.map(([k,t])=>`<button data-sk="${k}" class="${k===shapeKind?"on":""}">${t}</button>`).join("")}</div>
     ${shapeKind==="round"?`<label class="geo">Rayon <input type="number" min="0" max="200" value="${shapeR}" data-so="r"></label>`:""}
     ${shapeKind==="poly"||shapeKind==="star"?`<label class="geo">${shapeKind==="star"?"Branches":"Côtés"} <input type="number" min="3" max="24" value="${shapeSides}" data-so="n"></label>`:""}
-    <p class="muted" style="margin:6px 0 0">Glissez sur le dessin. Maj = proportions égales, Alt = depuis le centre. Ensuite, l'outil Points (A) édite ses points.</p>`;
+    <p class="muted help" style="margin:6px 0 0">Glissez sur le dessin. Maj = proportions égales, Alt = depuis le centre. Ensuite, l'outil Points (A) édite ses points.</p>`;
 }
 $("#shapeOpts").addEventListener("click",e=>{ const b=e.target.closest("[data-sk]"); if(b){ shapeKind=b.dataset.sk; renderShapeOpts(); } });
 $("#shapeOpts").addEventListener("change",e=>{ const k=e.target.dataset.so; if(k==="r") shapeR=Math.max(0,+e.target.value||0); if(k==="n") shapeSides=Math.max(3,Math.min(24,+e.target.value||6)); });
@@ -2138,12 +2168,12 @@ function renderDrawOpts(){
       <label class="geo">${drawPrefs.mode==="brush"?"Largeur":"Épaisseur"} <input type="range" min="0.5" max="40" step="0.5" value="${drawPrefs.size}" data-do="size"><span>${drawPrefs.size}</span></label>
       <label class="geo">Lissage <input type="range" min="0" max="100" value="${drawPrefs.smooth}" data-do="smooth"></label>
       ${drawPrefs.mode==="brush"?`<label class="chk"><input type="checkbox" data-do="pressure" ${drawPrefs.pressure?"checked":""}> Pression du stylet</label>`:""}
-      <p class="muted" style="margin:6px 0 0">Revenez au point de départ pour fermer la forme. Le tracé devient des courbes modifiables avec l'outil Points.</p>`
+      <p class="muted help" style="margin:6px 0 0">Revenez au point de départ pour fermer la forme. Le tracé devient des courbes modifiables avec l'outil Points.</p>`
     : tool==="pen"?`<label class="geo">Épaisseur des traits ouverts <input type="range" min="0.5" max="40" step="0.5" value="${drawPrefs.size}" data-do="size"><span>${drawPrefs.size}</span></label>
       <label class="chk"><input type="checkbox" data-do="handles" ${showAllHandles?"checked":""}> Afficher toutes les poignées</label>
-      <p class="muted" style="margin:6px 0 0">Clic = point anguleux, clic-glisser = courbe. Cliquez le premier point pour fermer, Entrée pour un tracé ouvert.</p>`
+      <p class="muted help" style="margin:6px 0 0">Clic = point anguleux, clic-glisser = courbe. Cliquez le premier point pour fermer, Entrée pour un tracé ouvert.</p>`
     : `<label class="chk"><input type="checkbox" data-do="handles" ${showAllHandles?"checked":""}> Afficher toutes les poignées</label>
-      <p class="muted" style="margin:6px 0 0">Alt + glisser un point : sortir ses poignées. Double-clic : point anguleux ou lisse.</p>`);
+      <p class="muted help" style="margin:6px 0 0">Alt + glisser un point : sortir ses poignées. Double-clic : point anguleux ou lisse.</p>`);
 }
 $("#drawOpts").addEventListener("click",e=>{ const b=e.target.closest("[data-dm]"); if(b){ drawPrefs.mode=b.dataset.dm; saveDrawPrefs(); renderDrawOpts(); } });
 $("#drawOpts").addEventListener("input",e=>{ const k=e.target.dataset.do; if(!k) return;
@@ -3853,7 +3883,7 @@ const P={
 let curProject=null, collections=[], projFilter="all", projQuery="", projReady=false;
 const newPid=()=>"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const emptyBrand=()=>({name:"",tagline:"",keywords:[],letters:""});
-function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist)}; }
+function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist), guides:clone(guides)}; }
 function validDoc(d){ return d && validLayers(d.layers) && (d.notes===undefined||validNotes(d.notes)) && (d.pals===undefined||validPals(d.pals)) && (d.groups===undefined||validGroups(d.groups)); }
 function thumbSVG(ls){
   const vis=(ls||layers).filter(l=>l.visible!==false); if(!vis.length) return "";
@@ -3865,7 +3895,7 @@ function loadDoc(d){
   layers=validLayers(d.layers)?clone(d.layers):[]; notes=validNotes(d.notes)?clone(d.notes):[];
   pals=validPals(d.pals)?clone(d.pals):[{id:"main",name:"Principale",colors:[]}]; groups=validGroups(d.groups)?clone(d.groups):[];
   curPal=typeof d.curPal==="string"?d.curPal:"main"; wordText=typeof d.wordText==="string"?d.wordText:""; brand=validBrand(d.brand)?clone(d.brand):emptyBrand();
-  hist=validHist(d.hist)?clone(d.hist):[]; redoIds=[]; sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
+  hist=validHist(d.hist)?clone(d.hist):[]; redoIds=[]; guides=validGuides(d.guides)?clone(d.guides):[]; renderGuides(); sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
   ensureZones(); fixSel(); setClaudeUndo(null);
   const ed=$("#noteEditor"); if(ed) ed.dataset.for="";
   renderAll(); renderPins(); renderNotes(); renderNoteEditor(); updateButtons(); fit();
@@ -4054,6 +4084,71 @@ $("#copyBtn").onclick=copyLayers; $("#pasteBtn").onclick=pasteLayers;
 window.addEventListener("pagehide", ()=>{ if(projT) projectFlush(); });
 window.__projects={P, get current(){ return curProject; }, flush:projectFlush, open:openProject};
 
+/* ---------- Rulers and guides ----------
+   Rulers (top, left) in drawing units follow the zoom; drag from a ruler to drop a guide, drag a guide back onto a
+   ruler to remove it. Guides belong to the project (doc.guides) and attract points when magnetism is on. */
+let rulersOn=false, guides=[];   // {o:"h"|"v", v}
+const RS=20;   // ruler thickness (px)
+function validGuides(v){ return Array.isArray(v)&&v.length<=200&&v.every(g=>g&&(g.o==="h"||g.o==="v")&&Number.isFinite(g.v)); }
+function renderRulers(){
+  const top=$("#rulerTop"), left=$("#rulerLeft"), corner=$("#rulerCorner"); if(!top) return;
+  top.hidden=left.hidden=corner.hidden=!rulersOn; $("#stage").classList.toggle("rulers",rulersOn); if(!rulersOn) return;
+  const r=cv.getBoundingClientRect(), dpr=window.devicePixelRatio||1, k=view.k;
+  const steps=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,5000], step=steps.find(s=>s*k>=60)||5000, minor=step/5;
+  for(const [c,horiz] of [[top,true],[left,false]]){ const W=horiz?r.width:RS, H=horiz?RS:r.height;
+    c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); c.style.width=W+"px"; c.style.height=H+"px";
+    const g=c.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.fillStyle="#FBFBFA"; g.fillRect(0,0,W,H); g.strokeStyle="#B9B9B4"; g.fillStyle="#6B6B70"; g.font="9px Inter,system-ui,sans-serif"; g.lineWidth=1;
+    const len=horiz?W:H, off=horiz?view.tx:view.ty, a=Math.floor((-off/k)/minor)*minor, b=(len-off)/k;
+    g.beginPath();
+    for(let v=a; v<=b; v+=minor){ const px=Math.round(off+v*k)+0.5, big=Math.abs(v/step-Math.round(v/step))<1e-6, t=big?RS*0.6:RS*0.28;
+      if(horiz){ g.moveTo(px,RS); g.lineTo(px,RS-t); } else { g.moveTo(RS,px); g.lineTo(RS-t,px); }
+      if(big){ const lab=String(Math.round(v)); if(horiz) g.fillText(lab,px+2,9); else { g.save(); g.translate(9,px-2); g.rotate(-Math.PI/2); g.fillText(lab,0,0); g.restore(); } } }
+    g.stroke(); g.fillStyle="#E3E3E0"; if(horiz) g.fillRect(0,RS-1,W,1); else g.fillRect(RS-1,0,1,H); }
+}
+function renderGuides(){ const gEl=$("#guides"); if(!gEl) return; const k=view.k||1, grab=tool==="move"?"":"pointer-events:none;";   // guides are moved with the Calque tool only
+  gEl.innerHTML=guides.map((g,i)=>g.o==="h"
+    ?`<line x1="-100000" y1="${g.v}" x2="100000" y2="${g.v}" stroke="#E0457B" stroke-width="${1/k}" pointer-events="none"/><line data-guide="${i}" x1="-100000" y1="${g.v}" x2="100000" y2="${g.v}" stroke="transparent" stroke-width="${8/k}" style="${grab}cursor:ns-resize"/>`
+    :`<line x1="${g.v}" y1="-100000" x2="${g.v}" y2="100000" stroke="#E0457B" stroke-width="${1/k}" pointer-events="none"/><line data-guide="${i}" x1="${g.v}" y1="-100000" x2="${g.v}" y2="100000" stroke="transparent" stroke-width="${8/k}" style="${grab}cursor:ew-resize"/>`).join(""); }
+/* guides attract coordinates (magnetism on) within 6 screen px */
+function guideSnap(v, axis){ if(!grid.snap||!guides.length) return v; const o=axis==="x"?"v":"h"; let best=v, bd=6/(view.k||1);
+  for(const g of guides) if(g.o===o&&Math.abs(g.v-v)<bd){ bd=Math.abs(g.v-v); best=g.v; } return best; }
+function setRulers(on){ rulersOn=on; $("#rulersOn").checked=on; try{ localStorage.setItem("atelier-logo-rulers", on?"1":""); }catch(_){} renderRulers(); renderGuides(); }
+function guidesChanged(){ renderGuides(); scheduleSave("palette"); projectTouch(); $("#guidesClear").disabled=!guides.length; }
+let guideDrag=null;
+function startGuideDrag(e, o, idx){ guideDrag={o, idx, id:e.pointerId}; e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);
+  if(idx<0){ guides.push({o, v:0}); guideDrag.idx=guides.length-1; } moveGuide(e); }
+function moveGuide(e){ if(!guideDrag) return; const w=screenToWorld(e), g=guides[guideDrag.idx]; g.v=r2(g.o==="h"?(grid.snap?snapV(w.y):w.y):(grid.snap?snapV(w.x):w.x)); renderGuides();
+  $("#hint").textContent=(g.o==="h"?"Guide horizontal · Y ":"Guide vertical · X ")+g.v+" · ramenez-le sur la règle pour le supprimer"; $("#hint").classList.add("live"); }
+function endGuide(e){ if(!guideDrag) return; const r=cv.getBoundingClientRect(), g=guides[guideDrag.idx];
+  const out=g.o==="h"?e.clientY<r.top+(rulersOn?RS:0):e.clientX<r.left+(rulersOn?RS:0);
+  if(out) guides.splice(guideDrag.idx,1); guideDrag=null; $("#hint").classList.remove("live"); $("#hint").textContent=HINTS[tool]; guidesChanged(); }
+for(const [id,o] of [["#rulerTop","h"],["#rulerLeft","v"]]){ const el=$(id);
+  el.addEventListener("pointerdown",e=>{ e.preventDefault(); startGuideDrag(e,o,-1); }); el.addEventListener("pointermove",moveGuide); el.addEventListener("pointerup",endGuide); el.addEventListener("pointercancel",endGuide); }
+$("#rulersOn").onchange=e=>setRulers(e.target.checked);
+$("#guidesClear").onclick=()=>{ guides=[]; guidesChanged(); toast("Guides effacés."); };
+new ResizeObserver(()=>renderRulers()).observe(cv);
+try{ rulersOn=!!localStorage.getItem("atelier-logo-rulers"); }catch(_){}
+
+/* ---------- Shortcuts directory, and help texts on demand ----------
+   Help texts are hidden by default (body.nohelp); the tool hint shows for a moment when the tool changes and
+   during drags. "?" opens the directory, which also turns the on-screen help back on. */
+const SHORTCUTS=[
+  ["Outils",[["V","Calque : sélectionner, déplacer, redimensionner"],["P","Plume : créer un tracé"],["N","Crayon : dessin à main levée"],["A","Points : modifier les points et les poignées"],["M","Formes"],["T","Texte"],["B","Bulle d'annotation"],["H ou Espace maintenu","Vue : déplacer la vue"]]],
+  ["Édition",[["Ctrl+Z / Ctrl+Maj+Z","Annuler / rétablir"],["Appui long sur Annuler","Historique du projet"],["Ctrl+C / Ctrl+V","Copier / coller des calques (entre projets aussi)"],["Ctrl+D","Dupliquer"],["Ctrl+G / Ctrl+Maj+G","Grouper / dégrouper"],["Suppr","Supprimer le point sélectionné"],["F2","Renommer"],["Flèches","Déplacer de 1 (Maj : 10, Alt : 0,1)"],["R / Maj+R","Pivoter de 15° (Alt : 1°)"],["[ et ]","Pivoter de −15° / +15°"]]],
+  ["Plume et points",[["Clic / clic-glisser","Point anguleux / courbe"],["Clic sur le 1er point","Fermer la forme"],["Entrée ou Échap","Terminer en tracé ouvert"],["Retour arrière","Retirer le dernier point"],["Alt + glisser un point","Sortir ses poignées"],["Double-clic sur un point","Anguleux ou lisse"],["Alt + glisser une poignée","Poignée opposée en miroir"],["Ctrl + glisser une poignée","Horizontale ou verticale"],["Maj pendant un glissé","Précision ×0,1"],["Ctrl+A","Tous les points du calque"]]],
+  ["Vue",[["0","Ajuster à l'écran"],["+ / −","Zoomer / dézoomer"],["Ctrl + molette","Zoom"],["Tab","Masquer / afficher les panneaux"],["Ctrl+R","Règles et guides"],["?","Ce répertoire des raccourcis"]]],
+];
+let helpOn=false; try{ helpOn=!!localStorage.getItem("atelier-logo-help"); }catch(_){}
+function applyHelp(){ document.body.classList.toggle("nohelp",!helpOn); }
+function openShortcuts(){ $("#scList").innerHTML=SHORTCUTS.map(([t,list])=>`<section><h3>${t}</h3><dl>${list.map(([k,d])=>`<dt>${k.split(" / ").map(x=>x.replace(/([^+ ]+)/g,"<kbd>$1</kbd>").replace(/<kbd>(ou|sur|un|le|du|pendant|une|glisser|Appui|long|maintenu|point|poignée|1er|molette|Clic|clic|clic-glisser|Double-clic|calque|Annuler|Retour|arrière|Entrée|Échap|et)<\/kbd>/g,"$1")).join(" / ")}</dt><dd>${d}</dd>`).join("")}</dl></section>`).join("");
+  $("#scHelp").checked=helpOn; $("#scDlg").showModal(); }
+$("#scHelp").onchange=e=>{ helpOn=e.target.checked; try{ localStorage.setItem("atelier-logo-help", helpOn?"1":""); }catch(_){} applyHelp(); };
+$("#scClose").onclick=()=>$("#scDlg").close();
+$("#scBtn").onclick=openShortcuts;
+let hintT=null;
+function flashHint(){ const h=$("#hint"); h.classList.add("flash"); clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove("flash"),3500); }
+applyHelp();
+
 /* ---------- About ----------
    Author's text and support links: filled in here (empty = hidden). PayPal: a paypal.me link. Wero has no public
    payment link: show the phone number or e-mail registered with Wero, with a copy button. */
@@ -4076,9 +4171,9 @@ $("#abClose").onclick=()=>$("#aboutDlg").close();
 const caps={db:null, assets:null, downloads:null, comments:null};
 const LS_KEY="atelier-logo-v1";
 function setStatus(txt, err){ const s=$("#status"); s.classList.toggle("err",!!err); s.querySelector("span").textContent=txt; }
-const palDoc=()=>({v:2, pals, groups, wt:wordText, brand});
+const palDoc=()=>({v:2, pals, groups, wt:wordText, brand, guides});
 function loadPalDoc(v){ if(Array.isArray(v)){ if(validPalette(v)){ pals=[{id:"main",name:"Principale",colors:v}]; } return true; }
-  if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; if(validBrand(v.brand)) brand=v.brand; return true; } return false; }
+  if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; if(validBrand(v.brand)) brand=v.brand; if(validGuides(v.guides)) guides=v.guides; return true; } return false; }
 function localSave(){ projectTouch(); try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
 function localLoad(){ try{ const v=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return v; }catch(_){ return null; } }
 const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,palette:0};
@@ -4184,7 +4279,7 @@ async function initPersistence(){
 /* ---------- Start ---------- */
 setTool("move");
 initPersistence().finally(()=>initProjects().finally(maybeWelcome));
-renderClaudeBar();
+renderClaudeBar(); setRulers(rulersOn);
 window.__atelier = { get layers(){return layers;}, get notes(){return notes;}, get view(){return view;}, buildSVG, get sel(){return sel;} };
 </script>
 </body>
