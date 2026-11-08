@@ -1,5 +1,7 @@
 # Publishes app/ (the standalone workshop) on GitHub Pages at each push to main.
 # One-time setup: Settings > Pages > Source: « GitHub Actions ».
+# Optional secret ATELIER_WERO (Settings > Secrets and variables > Actions): the Wero number shown in « À propos ».
+# It is injected at build time only, so it never appears in the repository.
 name: GitHub Pages
 on:
   push:
@@ -20,6 +22,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build (support links from secrets)
+        run: node build.js
+        env:
+          ATELIER_WERO: ${{ secrets.ATELIER_WERO }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
