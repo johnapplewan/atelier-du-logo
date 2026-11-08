@@ -34,6 +34,21 @@ header .group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 #status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
 #status i{width:7px;height:7px;border-radius:50%;background:var(--brass);display:inline-block}
 #status.err i{background:var(--danger)}
+.winwrap{position:relative}
+.winmenu{position:absolute;top:calc(100% + 6px);right:0;z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(20,20,25,.14);padding:10px;min-width:250px}
+.winmenu[hidden]{display:none}
+.winmenu label{display:flex;gap:8px;align-items:center;padding:5px 4px;border-radius:6px;cursor:pointer}
+.winmenu label:hover{background:var(--cream)}
+.winmenu p{margin:6px 4px 2px;font-size:12px}
+.detached{border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.detached[hidden]{display:none}
+aside.left>.collapse+.detached{margin-right:30px}
+aside.right>.collapse+.detached{margin-left:30px}
+.detached button{font-size:12px;padding:3px 8px}
+body.panelwin{background:var(--paper);height:auto;min-height:100%}
+body.panelwin main{display:block}
+body.panelwin aside{border:0;overflow:visible;padding:14px}
+body.panelwin aside.right>section:first-of-type{padding-left:0}
 main{flex:1;display:grid;grid-template-columns:268px 1fr 290px;min-height:0}
 aside{background:var(--paper);overflow:auto;padding:14px;min-height:0}
 aside.left{border-right:1px solid var(--line)}
@@ -398,6 +413,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <div class="group">
     <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
+    <span class="winwrap"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
     <button id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
     <button id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
     <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
@@ -409,7 +425,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
 <main>
   <aside class="left">
     <button class="collapse" id="hideLeft" title="Rétracter le panneau (Tab : les deux)" aria-label="Rétracter le panneau gauche">‹</button>
-    <section>
+    <section id="toolsSec">
       <h2>Outils</h2>
       <div class="tools" role="toolbar" aria-label="Outils">
         <button data-tool="move" title="Sélection et déplacement de calque (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3l14 8-6 1.5L10 19z"/></svg>Calque</button>
@@ -437,7 +453,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
       <div class="row"><label class="chk"><input type="checkbox" id="rulersOn"> Règles et guides</label><button id="guidesClear" class="ib" title="Effacer tous les guides" aria-label="Effacer les guides" disabled>×</button></div>
       <p class="muted help" style="margin:4px 0 0">Glissez depuis une règle pour poser un guide ; ramenez-le sur la règle pour le retirer. Avec le magnétisme, les points s'y accrochent.</p>
     </section>
-    <section>
+    <section id="palSec">
       <h2>Palette</h2>
       <div class="row palbar"><select id="palSel" aria-label="Palette à modifier"></select><button class="ib" id="palName" title="Renommer la palette" aria-label="Renommer la palette">✎</button><button id="palNew" title="Nouvelle palette (copie de celle-ci)">Nouvelle</button><button class="ib" id="palDel" title="Supprimer cette palette" aria-label="Supprimer cette palette">×</button></div>
       <p class="muted" id="palUse" style="margin:4px 0 8px"></p>
@@ -446,7 +462,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
       <div class="row" style="margin-top:8px"><button id="palSuggest">Suggestions</button></div>
       <div id="palSuggestions"></div>
     </section>
-    <section>
+    <section id="layersSec">
       <h2>Calques</h2>
       <div class="row lbar" style="margin-bottom:6px"><button id="grpBtn" title="Grouper la sélection (Ctrl+G)">Grouper</button><button id="ungrpBtn" title="Dégrouper (Ctrl+Maj+G)">Dégrouper</button><button id="dupBtn" title="Dupliquer (Ctrl+D)">Dupliquer</button><button id="copyBtn" title="Copier les calques sélectionnés, pour ce projet ou un autre (Ctrl+C)">Copier</button><button id="pasteBtn" title="Coller les calques copiés (Ctrl+V)">Coller</button></div>
       <ul class="layers" id="layers"></ul>
@@ -492,7 +508,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
       <div class="row"><button id="fontBtn" class="fbtn" aria-haspopup="true" aria-expanded="false" title="Changer la police des lettres sélectionnées">F</button><span class="muted" id="fontHint">Police</span></div>
       <div class="fontmenu" id="fontMenu" hidden></div>
     </section>
-    <section>
+    <section id="notesSec">
       <h2>Annotations</h2>
       <ul class="notes" id="notes"></ul>
       <div id="sendBox" class="send"></div>
@@ -672,6 +688,16 @@ window.__ABOUT = window.__ABOUT || {"paypal":"","wero":""};
 const C = {night:"#1D1D1F", ivory:"#FFFFFF", brass:"#4F5BD5"};
 /* colours of the neutral example logo */
 const EX = {ink:"#22252B", paper:"#F2EFE8", accent:"#E0703A"};
+/* Detachable panels: panels moved into other windows stay driven by this script. While windows are open,
+   document.querySelector(All) also searches them, and keyboard / pointer listeners set on this document or
+   window are mirrored there (see "Panel windows" below). */
+const panelDocs=[];
+{ const qs=Document.prototype.querySelector, qsa=Document.prototype.querySelectorAll;
+  document.querySelector=function(sel){ const r=qs.call(document,sel); if(r||!panelDocs.length) return r; for(const d of panelDocs){ const x=qs.call(d,sel); if(x) return x; } return null; };
+  document.querySelectorAll=function(sel){ const r=qsa.call(document,sel); return panelDocs.length?[...r, ...panelDocs.flatMap(d=>[...qsa.call(d,sel)])]:r; }; }
+const MIRRORED=new Set(["keydown","keyup","pointerdown","click"]), mirrored=[];
+for(const [tgt,obj] of [["win",window],["doc",document]]){ const add=obj.addEventListener.bind(obj);
+  obj.addEventListener=function(type,fn,opts){ if(MIRRORED.has(type)) mirrored.push({tgt,type,fn,opts}); return add(type,fn,opts); }; }
 const $ = s => document.querySelector(s);
 const clone = o => JSON.parse(JSON.stringify(o));
 const r2 = n => Math.round(n*100)/100;
@@ -1261,6 +1287,58 @@ $("#showRight").onclick=()=>setPanels(panelsOpen().left,true);
 $("#miniTool").onclick=()=>{ const f=$("#flyout"); f.hidden=!f.hidden; $("#miniTool").setAttribute("aria-expanded",String(!f.hidden)); };
 $("#flyout").addEventListener("click",e=>{ const b=e.target.closest("[data-ft]"); if(!b) return; setTool(b.dataset.ft); $("#flyout").hidden=true; });
 try{ const pp=JSON.parse(localStorage.getItem("atelier-logo-panels")||"null"); if(pp) setPanels(pp.left!==false, pp.right!==false); }catch(_){}
+
+/* ---------- Panel windows ----------
+   « Fenêtres » moves a panel's own DOM into a separate window (window.open, same origin), e.g. on a second
+   screen. Nothing is copied: one drawing, one history, one save. Closing the window, « Rattacher » or closing
+   the workshop puts the panel back. Only in the standalone app (the artifact frame blocks window.open). */
+const PANELS={
+  tools:{title:"Outils", els:["#toolsSec"], w:300, h:520},
+  layers:{title:"Calques", els:["#layersSec"], w:320, h:640},
+  selection:{title:"Sélection", els:["#inspector","#fontSec"], w:340, h:720},
+  palette:{title:"Palette", els:["#palSec"], w:320, h:520},
+  notes:{title:"Bulles", els:["#notesSec","#noteEditor"], w:340, h:620},
+};
+const qsMain=sel=>Document.prototype.querySelector.call(document,sel);
+function detachPanel(key){
+  const P=PANELS[key]; if(P.win && !P.win.closed){ P.win.focus(); return true; }
+  const els=P.els.map(sel=>qsMain(sel)); if(els.some(e=>!e)) return false;
+  const side=els[0].closest("aside").classList.contains("left")?"left":"right";
+  const sx=window.screenX+(side==="left"?-P.w-10:window.outerWidth+10), sy=window.screenY+60;
+  const w=window.open("", "atelier-panel-"+key, `popup,width=${P.w},height=${P.h},left=${Math.max(0,sx)},top=${Math.max(0,sy)}`);
+  if(!w){ toast("Le navigateur a bloqué la fenêtre : autorisez les fenêtres pour cette page."); return false; }
+  const d=w.document;
+  d.open(); d.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base href="${esc(location.href)}"><title>${esc(P.title)} · Atelier du Logo</title></head><body class="panelwin"><main><aside class="${side}"></aside></main></body></html>`); d.close();
+  for(const st of Document.prototype.querySelectorAll.call(document,"style,link[rel=stylesheet]")) d.head.appendChild(d.importNode(st,true));
+  const aside=d.querySelector("aside");
+  P.marks=els.map((el,i)=>{ const m=document.createElement("div"); m.hidden=i>0; m.className="detached"; m.dataset.detached=key;
+    if(i===0){ m.innerHTML=`<span>${esc(P.title)} : dans une autre fenêtre</span><button>Rattacher</button>`; m.querySelector("button").onclick=()=>attachPanel(key); }
+    el.before(m); aside.appendChild(d.adoptNode(el)); return m; });
+  for(const l of mirrored) (l.tgt==="win"?w:d).addEventListener(l.type,l.fn,l.opts);
+  P.win=w; P.doc=d; panelDocs.push(d);
+  w.addEventListener("pagehide",()=>attachPanel(key));
+  renderWinMenu(); return true;
+}
+function attachPanel(key){
+  const P=PANELS[key]; if(!P.doc) return;
+  const d=P.doc; P.doc=null;
+  P.els.forEach((sel,i)=>{ const el=Document.prototype.querySelector.call(d,sel), m=P.marks[i]; if(el && m) m.replaceWith(document.adoptNode(el)); else if(m) m.remove(); });
+  P.marks=null; const k=panelDocs.indexOf(d); if(k>=0) panelDocs.splice(k,1);
+  const w=P.win; P.win=null; if(w && !w.closed) try{ w.close(); }catch(_){}
+  renderWinMenu();
+}
+const detachedPanels=()=>Object.keys(PANELS).filter(k=>PANELS[k].doc);
+function renderWinMenu(){
+  const m=$("#winMenu"); if(!m) return;
+  m.innerHTML=Object.entries(PANELS).map(([k,P])=>`<label><input type="checkbox" data-win="${k}" ${P.doc?"checked":""}> ${esc(P.title)}</label>`).join("")+
+    `<p class="muted">Chaque panneau coché s'ouvre dans sa propre fenêtre, à placer sur un autre écran. Décochez ou fermez la fenêtre pour le rattacher.</p>`;
+  m.querySelectorAll("[data-win]").forEach(c=>c.onchange=()=>{ if(c.checked){ if(!detachPanel(c.dataset.win)) c.checked=false; } else attachPanel(c.dataset.win); });
+  const b=$("#winBtn"); if(b) b.classList.toggle("act", detachedPanels().length>0);
+}
+if(window.top===window && /^https?:$/.test(location.protocol)){ $("#winBtn").hidden=false; renderWinMenu(); }
+$("#winBtn").onclick=()=>{ const m=$("#winMenu"); m.hidden=!m.hidden; $("#winBtn").setAttribute("aria-expanded",String(!m.hidden)); };
+document.addEventListener("pointerdown",e=>{ if(!$("#winMenu").hidden && !(e.target.closest && e.target.closest(".winwrap"))) $("#winMenu").hidden=true; });
+window.addEventListener("pagehide",()=>{ for(const k of detachedPanels()){ const w=PANELS[k].win; try{ w && w.close(); }catch(_){} } });
 
 /* ---------- Pointer interaction ---------- */
 let drag=null, spaceDown=false; const pointers=new Map(); let pinch=null;
