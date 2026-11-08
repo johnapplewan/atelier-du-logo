@@ -90,6 +90,15 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   check("export name follows the brand name", () => assert.match(save2, /atelier-nova-logo\.svg/));
   await p.click("#exClose");
 
+  // "À propos": project, author, support buttons only when configured
+  await p.click("#aboutBtn");
+  const ab = await p.evaluate(() => [document.querySelector("#aboutDlg").open, /éditeur vectoriel/.test(document.querySelector("#aboutDlg").textContent), document.querySelector("#abSupport").innerHTML]);
+  check("about: presentation shown, no support button while links are empty", () => { assert.ok(ab[0] && ab[1]); assert.strictEqual(ab[2], ""); });
+  await p.evaluate(() => { ABOUT.paypal = "https://www.paypal.com/paypalme/exemple"; ABOUT.wero = "06 00 00 00 00"; renderAbout(); });
+  const sup = await p.evaluate(() => [document.querySelector("#abSupport a.paypal").getAttribute("href"), /Wero/.test(document.querySelector("#abSupport").textContent)]);
+  check("about: PayPal link and Wero identifier once configured", () => assert.deepStrictEqual(sup, ["https://www.paypal.com/paypalme/exemple", true]));
+  await p.click("#abClose");
+
   // tablet: tap a node and drag it by touch
   const { ctx: tctx, page: tp, errors: terr } = await open(browser, { context: { viewport: { width: 1024, height: 1366 }, hasTouch: true, isMobile: true } });
   const tws = worldToScreen(tp);
