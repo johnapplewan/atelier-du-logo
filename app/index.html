@@ -235,6 +235,14 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .starts button.on{border-color:var(--brass);background:#EEF0FB;color:var(--ink);box-shadow:inset 0 0 0 1px var(--brass)}
 .starts button[hidden]{display:none}
 .stprops[hidden]{display:none}
+.props button b{font-size:12.5px;text-align:left}
+.props button span{white-space:normal!important;text-align:left;line-height:1.35}
+.props button svg{height:96px!important}
+.stylebox{margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.stylebox select{width:100%;padding:5px 6px;border:1px solid var(--line);border-radius:7px;background:#fff}
+.fxlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.fxlist li{display:flex;align-items:center;gap:6px;font-size:12px}.fxlist li span{flex:1;min-width:0}
+.fxlist input[type=range]{width:80px}.fxlist input[type=color]{width:26px;height:22px;padding:0;border:1px solid var(--line);border-radius:5px}
 .stprops{margin-top:10px}
 .props{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
 .props button{display:flex;flex-direction:column;gap:6px;align-items:stretch;padding:10px;background:#fff;border-radius:10px;min-width:0}
@@ -576,6 +584,7 @@ function validLayers(v){
     && (l.name.length<=80)
     && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && l.live.family.length<=60
          && Number.isFinite(l.live.w0) && Number.isFinite(l.live.h0) && Number.isFinite(l.live.bx) && Number.isFinite(l.live.by) && l.subs.length===1 && l.subs[0].length===4))
+    && validFx(l.fx)
     && typeof l.fill==="string" && /^#[0-9a-fA-F]{6}$/.test(l.fill) && Array.isArray(l.subs)
     && l.subs.every(s => Array.isArray(s) && s.length>=2 && s.every(n => n && Number.isFinite(n.x) && Number.isFinite(n.y) && pt(n.i) && pt(n.o))));
 }
@@ -863,6 +872,7 @@ function renderInspector(){
     <div class="sizerow"><label>L <input type="number" id="szW" step="1" value="${r2(sb.x1-sb.x0)}"></label><button class="ib${sizeLock?" act":""}" id="szLock" title="${sizeLock?"Proportions verrouillées":"Proportions libres"}" aria-pressed="${sizeLock}">${sizeLock?ICON.lock:ICON.unlock}</button><label>H <input type="number" id="szH" step="1" value="${r2(sb.y1-sb.y0)}"></label></div>
     <label class="geo">Opacité <input type="range" id="opR" min="0" max="100" value="${op}"><span id="opV">${op} %</span></label>
     <label class="geo">Fusion <select id="blendSel" aria-label="Mode de fusion">${BLENDS.map(([v,t])=>`<option value="${v}" ${sameBl&&bl===v?"selected":""}>${t}</option>`).join("")}${sameBl?"":`<option selected disabled>— modes différents —</option>`}</select></label>
+    ${styleSection(SL)}
     <div><div class="muted" style="margin-bottom:5px">Zone de couleur (clic pour changer)</div><div class="zones">${LP.colors.map((c,i)=>`<button class="zone-btn${same&&zoneOf[0]===i?" cur":""}" data-zone="${i}" data-hex="${primary(c)}" style="background:${paintCss(c)}" title="Zone ${i+1}${typeof c==="string"?" · "+c:" · dégradé"}" aria-label="Zone ${i+1}"><span>${i+1}</span></button>`).join("")}</div>
       <p class="muted" style="margin:4px 0 0">Palette : ${esc(LP.name)}${G?" (groupe « "+esc(G.name)+" »)":""}</p></div>
     <div class="rotrow"><span class="muted">Rotation</span><button data-rot="-90" title="−90°">↺ 90°</button><button data-rot="-15" title="−15° ( [ )">↺ 15°</button><button data-rot="15" title="+15° ( ] )">↻ 15°</button><button data-rot="90" title="+90°">↻ 90°</button>
@@ -895,6 +905,7 @@ function renderInspector(){
   $("#opR").oninput=e=>{ if(!opBefore) opBefore=snapshot(); const v=+e.target.value/100; SL.forEach(M=>{ M.opacity=v; }); $("#opV").textContent=Math.round(v*100)+" %"; renderArt(); };
   $("#opR").onchange=()=>{ if(opBefore){ const b=opBefore; opBefore=null; commit(b); } };
   $("#blendSel").onchange=e=>{ const v=e.target.value; if(!BLEND_IDS.has(v)) return; const b=snapshot(); SL.forEach(M=>{ if(v==="normal") delete M.blend; else M.blend=v; }); commit(b); };
+  bindStyleSection(SL);
   if($("#rotGo")) $("#rotGo").addEventListener("click",()=>{ const d=parseFloat($("#rotDeg").value); if(Number.isFinite(d)&&d) rotateSelection(d); });
   el.querySelectorAll("[data-zone]").forEach(b=>b.addEventListener("click",()=>{ const b0=snapshot(), z=+b.dataset.zone; ids.forEach(id=>{ layerById(id).zone=z; }); commit(b0); }));
   if(tool==="points" && many.length>1){
@@ -1503,7 +1514,7 @@ const BLENDS=[["normal","Normal"],["multiply","Produit"],["screen","Superpositio
   ["hue","Teinte"],["saturation","Saturation"],["color","Couleur"],["luminosity","Luminosité"],["plus-lighter","Addition (plus clair)"]];
 const BLEND_IDS=new Set(BLENDS.map(b=>b[0]));
 function layerSVG(L, opts){
-  const r=layerSVG0(L,opts), o=Number.isFinite(L.opacity)?L.opacity:1, bl=L.blend&&L.blend!=="normal"?L.blend:null;
+  const r=applyFx(L, layerSVG0(L,opts), opts), o=Number.isFinite(L.opacity)?L.opacity:1, bl=L.blend&&L.blend!=="normal"?L.blend:null;
   if(o<1||bl) r.body=`<g${o<1?` opacity="${r2(o)}"`:""}${bl?` style="mix-blend-mode:${bl}"`:""}>${r.body}</g>`;
   return r;
 }
@@ -2346,8 +2357,8 @@ function vecTrace(bin,w,h){
 function polyArea(p){ let a=0; for(let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length]; a+=q.x*r.y-r.x*q.y; } return a/2; }
 function rdp(pts, tol){ // open polyline
   if(pts.length<3) return pts.slice(); const keep=new Uint8Array(pts.length); keep[0]=keep[pts.length-1]=1; const st=[[0,pts.length-1]];
-  while(st.length){ const [a,b]=st.pop(); const A=pts[a], B=pts[b], dx=B.x-A.x, dy=B.y-A.y, L=Math.hypot(dx,dy)||1; let md=-1, mi=-1;
-    for(let i=a+1;i<b;i++){ const d=Math.abs((pts[i].x-A.x)*dy-(pts[i].y-A.y)*dx)/L; if(d>md){ md=d; mi=i; } }
+  while(st.length){ const [a,b]=st.pop(); const A=pts[a], B=pts[b], dx=B.x-A.x, dy=B.y-A.y, L=Math.hypot(dx,dy); let md=-1, mi=-1;
+    for(let i=a+1;i<b;i++){ const d=L>1e-9?Math.abs((pts[i].x-A.x)*dy-(pts[i].y-A.y)*dx)/L:Math.hypot(pts[i].x-A.x,pts[i].y-A.y); if(d>md){ md=d; mi=i; } }
     if(md>tol){ keep[mi]=1; st.push([a,mi],[mi,b]); } }
   return pts.filter((_,i)=>keep[i]); }
 function rdpClosed(pts, tol){ // split at the point farthest from the first one
@@ -2432,6 +2443,440 @@ $("#impAdd").onclick=impAdd;
 $("#importBtn").onclick=impOpen;
 window.__vec={vectorize, vecGrey, imp};
 
+/* ---------- Styles: effects (kept editable) and transformations (redraw the curves) ----------
+   Effects live on the layer (L.fx = [{t, a: 0..100, c: "#RRGGBB"?}], up to 4) and are drawn by layerSVG, so the canvas,
+   the previews and every export show the same thing. Transformations rewrite the selected layers into new curves
+   (one undo step). Styles are named combinations of both. */
+const FX={
+  contour:{n:"Line art (contour seul)", a:30},
+  cerne:{n:"Cerne cartoon", a:40, c:"#1A1A1A"},
+  cel:{n:"Cel-shading", a:45},
+  ombre:{n:"Ombre portée", a:35, c:"#000000"},
+  ombrelongue:{n:"Ombre longue", a:50},
+  extrusion:{n:"Extrusion 3D", a:35},
+  relief:{n:"Relief (biseau)", a:50},
+  gravure:{n:"Gravé en creux", a:45},
+  bois:{n:"Bois massif (veinage)", a:50},
+  or:{n:"Métal / dorure", a:60, c:"#C9A13B"},
+  neon:{n:"Néon", a:50, c:"#39F3FF"},
+  trame:{n:"Trame demi-teinte", a:40},
+  hachures:{n:"Hachures (taille-douce)", a:40},
+  grain:{n:"Grain vintage", a:45},
+  riso:{n:"Risographie", a:45, c:"#FF48B0"},
+  papier:{n:"Papier découpé", a:45},
+  verre:{n:"Verre", a:50},
+};
+const FX_IDS=new Set(Object.keys(FX));
+function validFx(v){ return v===undefined||(Array.isArray(v)&&v.length<=4&&v.every(e=>e&&FX_IDS.has(e.t)&&Number.isFinite(e.a)&&e.a>=0&&e.a<=100&&(e.c===undefined||/^#[0-9a-fA-F]{6}$/.test(e.c)))); }
+/* a layer's main colour, even before it has a palette zone */
+function baseOf(L){ const p=Number.isInteger(L.zone)?paintOf(L):null, c=p?primary(p):L.fill; return HEX.test(c)?c:(HEX.test(L.fill)?L.fill:"#777777"); }
+function shade(hex, k){ // k -1..1: darker / lighter
+  const n=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)), t=k<0?0:255, f=Math.abs(k);
+  return "#"+n.map(v=>Math.round(v+(t-v)*f).toString(16).padStart(2,"0")).join("").toUpperCase(); }
+function seeded(str){ let h=2166136261; for(const ch of String(str)){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619); } return ()=>((h=Math.imul(h^h>>>15,2246822507)^Math.imul(h^h>>>13,3266489909))>>>0)/4294967296; }
+/* r: {defs, body} of the plain layer; returns the styled version */
+function applyFx(L, r, opts){
+  if(!Array.isArray(L.fx)||!L.fx.length||!L.subs.length) return r;
+  const b=bounds([L]), S=Math.max(b.x1-b.x0,b.y1-b.y0)||1, d=pathD(L.subs);
+  const base=baseOf(L);
+  const id=(opts.pfx||"g")+"-fx-"+L.id.replace(/[^\w-]/g,"");
+  let defs=r.defs, body=r.body, under="", over="", wrap=[];
+  const clip=`${id}-clip`; let needClip=false;
+  const steps=(len,ang,col,op,sfx)=>{ const n=Math.max(2,Math.min(70,Math.round(len/Math.max(0.6,S/160)))), dx=Math.cos(ang)*len/n, dy=Math.sin(ang)*len/n;
+    defs+=`<path id="${id}-p${sfx}" d="${d}"/>`; let s=`<g fill="${col}"${op<1?` opacity="${op}"`:""} pointer-events="none">`;
+    for(let k=n;k>=1;k--) s+=`<use href="#${id}-p${sfx}" x="${r2(dx*k)}" y="${r2(dy*k)}"/>`; return s+"</g>"; };
+  L.fx.forEach((e,k)=>{ const a=e.a/100, c=e.c||FX[e.t].c, fid=id+"-"+k;
+    switch(e.t){
+      case "contour": { const w=r2(S*(0.006+a*0.03)); body=body.replace(/ fill="([^"]+)"/, ` fill="none" stroke="$1" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`); break; }
+      case "cerne": under+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="${r2(S*(0.01+a*0.06))}" stroke-linejoin="round" pointer-events="none"/>`; break;
+      case "cel": { needClip=true; const o=r2(S*(0.02+a*0.08));
+        over+=`<g clip-path="url(#${clip})" pointer-events="none"><path d="${d}" fill="${shade(base,-0.35)}"/><path d="${d}" transform="translate(${-o} ${-o})" fill="${base}"/></g>`+
+              `<g clip-path="url(#${clip})" pointer-events="none" opacity=".75"><path d="${d}" fill="${shade(base,0.35)}"/><path d="${d}" transform="translate(${r2(o*0.5)} ${r2(o*0.5)})" fill="${base}"/></g>`; break; }
+      case "ombre": { const o=r2(S*(0.01+a*0.06)); defs+=`<filter id="${fid}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="${r2(S*0.004+a*S*0.03)}"/></filter>`;
+        under+=`<path d="${d}" transform="translate(${o} ${o})" fill="${c}" opacity="${r2(0.15+a*0.35)}" filter="url(#${fid})" pointer-events="none"/>`; break; }
+      case "ombrelongue": under+=steps(S*(0.1+a*1.1), Math.PI/4, shade(base,-0.45), 0.55, k); break;
+      case "extrusion": under+=steps(S*(0.02+a*0.22), Math.PI*0.3, shade(base,-0.38), 1, k); break;
+      case "relief": defs+=`<filter id="${fid}" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceAlpha" stdDeviation="${r2(S*(0.006+a*0.02))}" result="b"/><feSpecularLighting in="b" surfaceScale="${r2(2+a*6)}" specularConstant="${r2(0.6+a*0.5)}" specularExponent="18" lighting-color="#ffffff" result="s"><feDistantLight azimuth="225" elevation="45"/></feSpecularLighting><feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/><feComposite in="SourceGraphic" in2="s2" operator="arithmetic" k1="0" k2="1" k3="${r2(0.5+a*0.4)}" k4="0"/></filter>`;
+        wrap.push(`filter="url(#${fid})"`); break;
+      case "gravure": { const o=r2(S*(0.006+a*0.025)); defs+=`<filter id="${fid}" x="-20%" y="-20%" width="140%" height="140%"><feOffset in="SourceAlpha" dx="${o}" dy="${o}" result="o"/><feGaussianBlur in="o" stdDeviation="${r2(o*0.8)}" result="b"/><feComposite in="SourceAlpha" in2="b" operator="arithmetic" k2="1" k3="-1" result="i"/><feFlood flood-color="#000" flood-opacity="${r2(0.35+a*0.45)}"/><feComposite in2="i" operator="in" result="sh"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="sh"/></feMerge></filter>`;
+        wrap.push(`filter="url(#${fid})"`); break; }
+      case "bois": { needClip=true; const rnd=seeded(L.id), n=Math.round(10+a*22), w=b.x1-b.x0, h=b.y1-b.y0; let g="";
+        for(let i=0;i<n;i++){ const y=b.y0+h*(i+rnd()*0.6)/n, amp=h*(0.004+rnd()*0.012), ph=rnd()*6, fr=(2+rnd()*3)/w*Math.PI;
+          let p=`M${r2(b.x0-4)} ${r2(y)}`; for(let x=b.x0;x<=b.x1+4;x+=w/40) p+=`L${r2(x)} ${r2(y+Math.sin(x*fr+ph)*amp+Math.sin(x*fr*3.1+ph)*amp*0.4)}`;
+          g+=`<path d="${p}" fill="none" stroke="${shade(base,i%3?-0.22:-0.38)}" stroke-width="${r2(S*(0.002+rnd()*0.004))}" opacity=".8"/>`; }
+        const kx=b.x0+w*(0.25+rnd()*0.5), ky=b.y0+h*(0.3+rnd()*0.4); for(let j=1;j<=3;j++) g+=`<ellipse cx="${r2(kx)}" cy="${r2(ky)}" rx="${r2(S*0.018*j)}" ry="${r2(S*0.008*j)}" fill="none" stroke="${shade(base,-0.3)}" stroke-width="${r2(S*0.003)}"/>`;
+        over+=`<g clip-path="url(#${clip})" pointer-events="none">${g}</g>`; break; }
+      case "or": { const m=c; defs+=`<linearGradient id="${fid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(m,-0.35)}"/><stop offset=".3" stop-color="${shade(m,0.55)}"/><stop offset=".5" stop-color="${m}"/><stop offset=".72" stop-color="${shade(m,0.7)}"/><stop offset="1" stop-color="${shade(m,-0.4)}"/></linearGradient>`;
+        body=body.replace(/ fill="([^"]+)"/, ` fill="url(#${fid})"`); break; }
+      case "neon": { defs+=`<filter id="${fid}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${r2(S*(0.01+a*0.05))}"/></filter>`;
+        under+=`<path d="${d}" fill="${c}" opacity=".9" filter="url(#${fid})" pointer-events="none"/>`;
+        over+=`<path d="${d}" fill="none" stroke="${shade(c,0.75)}" stroke-width="${r2(S*0.008)}" stroke-linejoin="round" pointer-events="none"/>`; break; }
+      case "trame": { const s=r2(S*(0.02+(1-a)*0.05)); defs+=`<pattern id="${fid}" patternUnits="userSpaceOnUse" width="${s}" height="${s}" patternTransform="rotate(45)"><circle cx="${r2(s/2)}" cy="${r2(s/2)}" r="${r2(s*(0.18+a*0.3))}" fill="${base}"/></pattern>`;
+        body=body.replace(/ fill="([^"]+)"/, ` fill="url(#${fid})"`); break; }
+      case "hachures": { const s=r2(S*0.025); defs+=`<pattern id="${fid}" patternUnits="userSpaceOnUse" width="${s}" height="${s}" patternTransform="rotate(-35)"><rect width="${s}" height="${r2(s*(0.15+a*0.6))}" fill="${base}"/></pattern>`;
+        body=body.replace(/ fill="([^"]+)"/, ` fill="url(#${fid})"`); break; }
+      case "grain": defs+=`<filter id="${fid}" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${r2(1.4-a*0.6)}" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${r2(-2-a*4)} ${r2(1.6+a*1.2)}" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter>`;
+        wrap.push(`filter="url(#${fid})"`); break;
+      case "riso": { const o=r2(S*(0.006+a*0.03)); under+=`<path d="${d}" transform="translate(${o} ${r2(-o*0.6)})" fill="${c}" style="mix-blend-mode:multiply" opacity=".85" pointer-events="none"/>`; break; }
+      case "papier": { const o=r2(S*(0.01+a*0.04)); defs+=`<filter id="${fid}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="${r2(o*0.7)}"/></filter>`;
+        under+=`<path d="${d}" transform="translate(${r2(o*0.6)} ${r2(o*1.6)})" fill="#000" opacity=".28" filter="url(#${fid})" pointer-events="none"/><path d="${d}" transform="translate(0 ${o})" fill="${shade(base,-0.25)}" pointer-events="none"/>`; break; }
+      case "verre": { needClip=true; body=body.replace(/ fill="([^"]+)"/, ` fill="$1" fill-opacity="${r2(0.75-a*0.5)}"`);
+        over+=`<g clip-path="url(#${clip})" pointer-events="none"><ellipse cx="${r2(b.x0+(b.x1-b.x0)*0.3)}" cy="${r2(b.y0)}" rx="${r2((b.x1-b.x0)*0.6)}" ry="${r2((b.y1-b.y0)*0.45)}" fill="#fff" opacity="${r2(0.25+a*0.3)}"/></g><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="${r2(S*0.006)}" pointer-events="none"/>`; break; }
+    }
+  });
+  if(needClip) defs+=`<clipPath id="${clip}"><path d="${d}"/></clipPath>`;
+  for(const w of wrap) body=`<g ${w}>${body}</g>`;
+  return {defs, body:under+body+over};
+}
+
+/* ---- geometry helpers for transformations ---- */
+function samplePoly(sub, step){ const out=[];
+  for(let j=0;j<sub.length;j++){ const p=segPts(sub[j], sub[(j+1)%sub.length]), len=Math.hypot(p[3].x-p[0].x,p[3].y-p[0].y)+Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y)+Math.hypot(p[2].x-p[3].x,p[2].y-p[3].y);
+    const n=Math.max(1,Math.ceil(len/step)); for(let k=0;k<n;k++) out.push(bez(p,k/n)); }
+  return out; }
+const polyNodes=pts=>pts.map(p=>({x:r2(p.x),y:r2(p.y),i:null,o:null}));
+function rasterInside(ls, res){ // inside test on a canvas
+  const b=bounds(ls), W=b.x1-b.x0||1, H=b.y1-b.y0||1, k=res/Math.max(W,H), cw=Math.ceil(W*k)+2, ch=Math.ceil(H*k)+2;
+  const c=document.createElement("canvas"); c.width=cw; c.height=ch; const g=c.getContext("2d",{willReadFrequently:true});
+  g.setTransform(k,0,0,k,-b.x0*k+1,-b.y0*k+1); g.fillStyle="#000"; for(const L of ls) g.fill(new Path2D(pathD(L.subs)),"nonzero");
+  const data=g.getImageData(0,0,cw,ch).data;
+  return {b, inside:(x,y)=>{ const px=Math.floor((x-b.x0)*k+1), py=Math.floor((y-b.y0)*k+1); return px>=0&&py>=0&&px<cw&&py<ch&&data[(py*cw+px)*4+3]>127; }};
+}
+function delaunay(pts){ // Bowyer-Watson
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y), mx=Math.min(...xs), my=Math.min(...ys), d=Math.max(Math.max(...xs)-mx, Math.max(...ys)-my)*10||10;
+  const P=pts.concat([{x:mx-d,y:my-d},{x:mx+2*d,y:my-d},{x:mx-d,y:my+2*d}]), n=pts.length; let tris=[[n,n+1,n+2]];
+  const circ=t=>{ const [a,b,c]=t.map(i=>P[i]), D=2*(a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y))||1e-9;
+    const ux=((a.x*a.x+a.y*a.y)*(b.y-c.y)+(b.x*b.x+b.y*b.y)*(c.y-a.y)+(c.x*c.x+c.y*c.y)*(a.y-b.y))/D, uy=((a.x*a.x+a.y*a.y)*(c.x-b.x)+(b.x*b.x+b.y*b.y)*(a.x-c.x)+(c.x*c.x+c.y*c.y)*(b.x-a.x))/D;
+    return {x:ux,y:uy,r:(a.x-ux)**2+(a.y-uy)**2}; };
+  let cc=tris.map(circ);
+  for(let i=0;i<n;i++){ const p=P[i], bad=[], keep=[], keepC=[];
+    tris.forEach((t,k)=>{ const c=cc[k]; if((p.x-c.x)**2+(p.y-c.y)**2<c.r) bad.push(t); else { keep.push(t); keepC.push(c); } });
+    const edges=new Map(); for(const t of bad) for(const [u,v] of [[t[0],t[1]],[t[1],t[2]],[t[2],t[0]]]){ const key=u<v?u+","+v:v+","+u; edges.set(key, edges.has(key)?null:[u,v]); }
+    tris=keep; cc=keepC; for(const e of edges.values()) if(e){ const t=[e[0],e[1],i]; tris.push(t); cc.push(circ(t)); } }
+  return tris.filter(t=>t.every(i=>i<n)).map(t=>t.map(i=>P[i])); }
+/* layers with given fills -> zones of a new palette for their group */
+function groupWithPalette(name, tones){
+  const g={id:"grp"+Date.now().toString(36)+(++dupN), name:name.slice(0,60), pal:null, open:true};
+  if(pals.length<12){ const p={id:"pal"+Date.now().toString(36)+dupN, name:name.slice(0,60), colors:tones.slice(0,MAXZ)}; pals.push(p); g.pal=p.id; }
+  groups.push(g); return g; }
+/* ---- transformations: each returns new layers for one source layer ---- */
+const TRANSFORMS={
+  lowpoly:{n:"Low poly (facettes)", run(L,a){ const base=baseOf(L), {b,inside}=rasterInside([L],400), S=Math.max(b.x1-b.x0,b.y1-b.y0), step=S*(0.12-a*0.085), rnd=seeded(L.id+"lp");
+    const pts=[]; for(const s of L.subs) samplePoly(s, step*0.9).forEach(p=>pts.push({x:p.x,y:p.y}));
+    for(let y=b.y0;y<=b.y1;y+=step) for(let x=b.x0;x<=b.x1;x+=step){ const p={x:x+(rnd()-0.5)*step*0.8, y:y+(rnd()-0.5)*step*0.8}; if(inside(p.x,p.y)) pts.push(p); }
+    const tris=delaunay(pts).filter(t=>{ const cx=(t[0].x+t[1].x+t[2].x)/3, cy=(t[0].y+t[1].y+t[2].y)/3; return inside(cx,cy); });
+    const tones=[-0.32,-0.18,-0.06,0.06,0.18,0.3].map(k=>shade(base,k)), buckets=tones.map(()=>[]);
+    for(const t of tris){ const cx=(t[0].x+t[1].x+t[2].x)/3, cy=(t[0].y+t[1].y+t[2].y)/3, light=1-((cx-b.x0)/(b.x1-b.x0||1)*0.5+(cy-b.y0)/(b.y1-b.y0||1)*0.5);
+      const k=Math.max(0,Math.min(5,Math.round(light*4+rnd()*2-0.5))); const tri=area3(t)<0?t.slice().reverse():t; buckets[k].push(polyNodes(tri)); }
+    return {tones, layers:buckets.map((subs,i)=>subs.length?{name:L.name+" · facettes "+(i+1), fill:tones[i], subs}:null).filter(Boolean)}; }},
+  mosaique:{n:"Mosaïque / vitrail", run(L,a){ const r=TRANSFORMS.lowpoly.run(L,a*0.6); r.layers.forEach(l=>l.subs=l.subs.map(s=>{ const cx=s.reduce((q,n)=>q+n.x,0)/s.length, cy=s.reduce((q,n)=>q+n.y,0)/s.length; return s.map(n=>({x:r2(cx+(n.x-cx)*0.84),y:r2(cy+(n.y-cy)*0.84),i:null,o:null})); })); return r; }},
+  pixel:{n:"Pixel art", run(L,a){ const base=baseOf(L), {b,inside}=rasterInside([L],500), S=Math.max(b.x1-b.x0,b.y1-b.y0), cell=S/Math.round(10+a*38), main=[], dark=[];
+    for(let y=b.y0;y<b.y1;y+=cell){ let run=null, runD=null;
+      const flush=()=>{ for(const [r,arr] of [[run,main],[runD,dark]]) if(r) arr.push(polyNodes([{x:r.x0,y},{x:r.x1,y},{x:r.x1,y:y+cell},{x:r.x0,y:y+cell}])); run=runD=null; };
+      for(let x=b.x0;x<b.x1;x+=cell){ if(!inside(x+cell/2,y+cell/2)){ flush(); continue; }
+        const edge=!inside(x+cell*1.5,y+cell/2)||!inside(x+cell/2,y+cell*1.5);
+        if(edge){ if(run){ main.push(polyNodes([{x:run.x0,y},{x:run.x1,y},{x:run.x1,y:y+cell},{x:run.x0,y:y+cell}])); run=null; } runD=runD||{x0:x}; runD.x1=x+cell; }
+        else { if(runD){ dark.push(polyNodes([{x:runD.x0,y},{x:runD.x1,y},{x:runD.x1,y:y+cell},{x:runD.x0,y:y+cell}])); runD=null; } run=run||{x0:x}; run.x1=x+cell; } }
+      flush(); }
+    const tones=[base, shade(base,-0.3)]; return {tones, layers:[main.length&&{name:L.name+" · pixels", fill:tones[0], subs:main}, dark.length&&{name:L.name+" · pixels ombrés", fill:tones[1], subs:dark}].filter(Boolean)}; }},
+  pointillisme:{n:"Pointillisme", run(L,a){ const base=baseOf(L), {b,inside}=rasterInside([L],400), S=Math.max(b.x1-b.x0,b.y1-b.y0), step=S*(0.07-a*0.045), rnd=seeded(L.id+"pt"), subs=[];
+    for(let y=b.y0;y<=b.y1;y+=step*0.87) for(let x=b.x0+((Math.round((y-b.y0)/(step*0.87))%2)*step/2);x<=b.x1;x+=step){ if(inside(x,y)) subs.push(circle(x+(rnd()-0.5)*step*0.2,y,step*(0.28+rnd()*0.12))[0]); }
+    return {tones:[base], layers:[{name:L.name+" · points", fill:base, subs}]}; }},
+  croquis:{n:"Dessin à la main (croquis)", run(L,a){ const base=baseOf(L), S=Math.max(...(()=>{ const b=bounds([L]); return [b.x1-b.x0,b.y1-b.y0]; })()), amp=S*(0.004+a*0.02);
+    const wob=(seed)=>L.subs.map(s=>{ const rnd=seeded(L.id+seed), pts=samplePoly(s,S/60), ph=rnd()*6;
+      const out=pts.map((p,i)=>{ const q=pts[(i+1)%pts.length], nx=-(q.y-p.y), ny=q.x-p.x, l=Math.hypot(nx,ny)||1, w=(Math.sin(i*0.7+ph)*0.6+rnd()-0.5)*amp; return {x:p.x+nx/l*w, y:p.y+ny/l*w}; });
+      return fitNodes(rdpClosed(out, S*0.003), -1); });
+    return {tones:[base, shade(base,-0.55)], layers:[{name:L.name+" · lavis", fill:shade(base,0.15), subs:wob("a")}, {name:L.name+" · trait", fill:shade(base,-0.55), subs:wob("b"), fx:[{t:"contour",a:10+a*20}]}]}; }},
+  oneline:{n:"One line (trait continu)", run(L,a){ const base=baseOf(L), S=Math.max(...(()=>{ const b=bounds([L]); return [b.x1-b.x0,b.y1-b.y0]; })());
+    const loops=L.subs.map(s=>samplePoly(s,S/80)); if(!loops.length) return {tones:[],layers:[]};
+    let path=[], cur=loops[0][0]; const back=[];
+    loops.forEach((lp,i)=>{ let k=0, bd=Infinity; lp.forEach((p,j)=>{ const dd=(p.x-cur.x)**2+(p.y-cur.y)**2; if(dd<bd){ bd=dd; k=j; } });
+      const ord=lp.slice(k).concat(lp.slice(0,k+1)); if(i) back.unshift(cur); path=path.concat(ord); cur=ord[ord.length-1]; });
+    const all=path.concat(back); return {tones:[base], layers:[{name:L.name+" · une ligne", fill:base, subs:[fitNodes(rdp(all,S*0.002),-1)], fx:[{t:"contour",a:5+a*25}]}]}; }},
+  isometrie:{n:"Isométrie 2D", run(L,a,ctx){ const base=baseOf(L), b=ctx||bounds([L]), cx=(b.x0+b.x1)/2, cy=(b.y0+b.y1)/2, c=Math.cos(Math.PI/6), s=Math.sin(Math.PI/6);
+    const T=p=>p&&{x:r2(cx+(p.x-cx)*c), y:r2(cy+(p.y-cy)+(p.x-cx)*s)};   // vertical face of an isometric cube
+    return {tones:[base], layers:[{name:L.name+" · iso", fill:base, subs:L.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)}))), fx:[{t:"extrusion",a:20+a*50}]}]}; }},
+  arabesque:{n:"Arabesques (ornements)", once:true, run(L,a){ const base=baseOf(L), b=bounds([L]), W=b.x1-b.x0, H=b.y1-b.y0, S=Math.max(W,H), subs=[];
+    const scroll=(ox,oy,dir,size)=>{ const pts=[], N=70, w0=size*0.07; const C=t=>{ const r=size*(1-t)*0.55+size*0.04, th=t*Math.PI*2.6; return {x:ox+dir*(size*0.6*t+Math.cos(th+Math.PI)*r*0.5), y:oy-Math.sin(th)*r*0.5}; };
+      const L1=[], L2=[]; for(let i=0;i<=N;i++){ const t=i/N, p=C(t), q=C(Math.min(1,t+0.01)), nx=-(q.y-p.y), ny=q.x-p.x, l=Math.hypot(nx,ny)||1, w=w0*(1-t*0.85); L1.push({x:p.x+nx/l*w,y:p.y+ny/l*w}); L2.push({x:p.x-nx/l*w,y:p.y-ny/l*w}); }
+      const poly=L1.concat(L2.reverse()); const s=fitNodes(rdpClosed(poly,size*0.004),0.2); subs.push(area3(s)<0?s.reverse():s); };
+    const sz=S*(0.35+a*0.4); scroll(b.x1+sz*0.05,(b.y0+b.y1)/2,1,sz); scroll(b.x0-sz*0.05,(b.y0+b.y1)/2,-1,sz);
+    scroll((b.x0+b.x1)/2+sz*0.02,b.y1+sz*0.35,1,sz*0.55); scroll((b.x0+b.x1)/2-sz*0.02,b.y1+sz*0.35,-1,sz*0.55);
+    return {tones:[base], keep:true, layers:[{name:"Arabesques", fill:base, subs}]}; }},
+  geometrique:{n:"Géométrique (anguleux)", run(L,a){ const base=baseOf(L), b=bounds([L]), S=Math.max(b.x1-b.x0,b.y1-b.y0);
+    return {tones:[base], layers:[{name:L.name+" · géométrique", fill:base, subs:L.subs.map(s=>polyNodes(rdpClosed(samplePoly(s,S/120),S*(0.01+a*0.05))))}]}; }},
+  arrondi:{n:"Arrondi (doux)", run(L,a){ const base=baseOf(L), b=bounds([L]), S=Math.max(b.x1-b.x0,b.y1-b.y0);
+    return {tones:[base], layers:[{name:L.name+" · arrondi", fill:base, subs:L.subs.map(s=>fitNodes(rdpClosed(samplePoly(s,S/120),S*(0.004+a*0.02)),-1))}]}; }},
+};
+function area3(p){ let s=0; for(let i=0;i<p.length;i++){ const q=p[i], r=p[(i+1)%p.length]; s+=q.x*r.y-r.x*q.y; } return s/2; }
+/* named styles: transformations and effects together */
+const STYLES={
+  lowpoly:{n:"Low poly", tr:"lowpoly"}, pixel:{n:"Pixel art", tr:"pixel"}, hd2d:{n:"HD-2D", tr:"pixel", fx:[{t:"relief",a:35},{t:"ombre",a:45}]},
+  flat:{n:"Flat design", flat:true, fx:[{t:"ombrelongue",a:14}]}, cel:{n:"Cel-shading", fx:[{t:"cel",a:45},{t:"cerne",a:30}]},
+  cartoon:{n:"Cartoon", tr:"arrondi", fx:[{t:"cel",a:35},{t:"cerne",a:55}]}, realiste:{n:"Réaliste", fx:[{t:"relief",a:65},{t:"ombre",a:45}]},
+  lineart:{n:"Line art", fx:[{t:"contour",a:25}]}, oneline:{n:"One line", tr:"oneline"}, main:{n:"Dessin à la main", tr:"croquis"},
+  iso:{n:"Isométrie 2D", tr:"isometrie"}, arabesque:{n:"Arabesque", tr:"arabesque"}, mosaique:{n:"Mosaïque / vitrail", tr:"mosaique"},
+  pointillisme:{n:"Pointillisme", tr:"pointillisme"}, geometrique:{n:"Géométrique", tr:"geometrique"}, gravebois:{n:"Gravé dans le bois", fx:[{t:"bois",a:55},{t:"gravure",a:55},{t:"extrusion",a:25}]},
+  vintage:{n:"Vintage / rétro", fx:[{t:"riso",a:30,c:"#E3A72F"},{t:"grain",a:40}]}, neon:{n:"Néon", fx:[{t:"neon",a:55}]}, dore:{n:"Doré / luxe", fx:[{t:"or",a:60},{t:"relief",a:40}]},
+  papier:{n:"Papier découpé", fx:[{t:"papier",a:50}]}, gravure:{n:"Gravure taille-douce", fx:[{t:"hachures",a:45},{t:"cerne",a:15}]}, trame:{n:"Pop art (trame)", fx:[{t:"trame",a:45},{t:"cerne",a:45}]},
+  verre:{n:"Verre / glassmorphism", fx:[{t:"verre",a:55}]}, extrusion:{n:"3D extrudé", fx:[{t:"extrusion",a:45},{t:"relief",a:30}]},
+};
+/* apply to layers (by id): one undo step. kind: "fx:<id>" | "tr:<id>" | "st:<id>" */
+function applyStyle(ids, kind, amount){
+  const b=snapshot(), newSel=styleLayers(ids, kind, amount), [k,id]=kind.split(":");
+  sel={layer:newSel[0]||null,node:null,layers:newSel}; commit(b);
+  const nm=k==="fx"?FX[id].n:k==="tr"?TRANSFORMS[id].n:STYLES[id].n; toast("Style « "+nm+" » appliqué (Annuler pour revenir).");
+}
+/* the styling itself, without undo step (also used to build the logo concepts) */
+function styleLayers(ids, kind, amount){
+  const [k,id]=kind.split(":"), a=(Number.isFinite(amount)?amount:50)/100; let newSel=[];
+  const addFx=(L,list)=>{ L.fx=(L.fx||[]).filter(e=>!list.some(x=>x.t===e.t)).concat(clone(list)).slice(-4); };
+  const sl=ids.map(layerById).filter(L=>L&&!L.locked&&L.kind!=="live"), ctx=sl.length?bounds(sl):null, onceDone=new Set();
+  const transform=(L,tr)=>{ const T=TRANSFORMS[tr];
+    if(T.once){ if(onceDone.has(tr)) return [L]; onceDone.add(tr); L=Object.assign({},L,{subs:sl.flatMap(M=>M.subs)}); }   // one ornament for the whole selection
+    const res=T.run(L,a,ctx); if(!res.layers.length) return [L];
+    if(T.once) L=layerById(sl[sl.length-1].id);
+    const g=groupWithPalette(L.name+" · "+TRANSFORMS[tr].n.split(" (")[0], res.tones);
+    const made=res.layers.map(x=>{ const M={visible:true,locked:false,id:newLayerId(tr),name:x.name.slice(0,80),group:"mark",fill:x.fill,subs:x.subs,grp:g.id}; if(x.fx) M.fx=clone(x.fx); if(L.opacity!==undefined) M.opacity=L.opacity; return M; });
+    const at=layers.indexOf(L); if(res.keep){ layers.splice(at+1,0,...made); } else layers.splice(at,1,...made); return made; };
+  for(const lid of ids){ const L=layerById(lid); if(!L||L.locked||L.kind==="live") continue;
+    if(k==="fx"){ addFx(L,[{t:id,a:Math.round(a*100)}]); newSel.push(L.id); }
+    else if(k==="tr"){ newSel.push(...transform(L,id).map(M=>M.id)); }
+    else { const st=STYLES[id]; let out=[L];
+      if(st.flat){ const P=palOf(L), p=P.colors[L.zone]; if(p&&typeof p!=="string") P.colors[L.zone]=primary(p); }
+      if(st.tr) out=transform(L,st.tr);
+      if(st.fx) out.forEach(M=>addFx(M,st.fx)); newSel.push(...out.map(M=>M.id)); } }
+  ensureZones(); return newSel;
+}
+function styleSection(SL){
+  const L=SL[0], fx=Array.isArray(L.fx)?L.fx:[];
+  const opt=(o,label)=>`<optgroup label="${label}">${o}</optgroup>`;
+  return `<div class="stylebox"><div class="muted" style="margin-bottom:5px">Style et stylisation</div>
+    <div class="row"><select id="styleSel" aria-label="Appliquer un style"><option value="">Appliquer un style…</option>
+      ${opt(Object.entries(STYLES).map(([k,s])=>`<option value="st:${k}">${s.n}</option>`).join(""),"Styles complets")}
+      ${opt(Object.entries(FX).map(([k,s])=>`<option value="fx:${k}">${s.n}</option>`).join(""),"Effets (courbes intactes)")}
+      ${opt(Object.entries(TRANSFORMS).map(([k,s])=>`<option value="tr:${k}">${s.n}</option>`).join(""),"Transformations (redessine)")}
+    </select></div>
+    <label class="geo">Intensité <input type="range" id="styleAmt" min="0" max="100" value="${styleAmt}"></label>
+    ${fx.length?`<ul class="fxlist">${fx.map((e,i)=>`<li><span>${esc(FX[e.t].n)}</span><input type="range" min="0" max="100" value="${e.a}" data-fxa="${i}" aria-label="Intensité ${esc(FX[e.t].n)}">${FX[e.t].c?`<input type="color" value="${e.c||FX[e.t].c}" data-fxc="${i}" aria-label="Couleur">`:""}<button class="ib" data-fxdel="${i}" aria-label="Retirer ${esc(FX[e.t].n)}">×</button></li>`).join("")}</ul>`:""}
+  </div>`;
+}
+let styleAmt=50;
+function bindStyleSection(SL){
+  const ids=SL.map(M=>M.id);
+  $("#styleSel").onchange=e=>{ const v=e.target.value; if(v) applyStyle(ids, v, styleAmt); };
+  $("#styleAmt").oninput=e=>{ styleAmt=+e.target.value; };
+  let fb=null; const L=SL[0];
+  document.querySelectorAll("#inspector [data-fxa]").forEach(r=>{ r.oninput=()=>{ if(!fb) fb=snapshot(); const i=+r.dataset.fxa, t=L.fx[i].t; SL.forEach(M=>(M.fx||[]).forEach(e=>{ if(e.t===t) e.a=+r.value; })); renderArt(); };
+    r.onchange=()=>{ if(fb){ const b=fb; fb=null; commit(b); } }; });
+  document.querySelectorAll("#inspector [data-fxc]").forEach(r=>{ r.onchange=()=>{ const b=snapshot(), t=L.fx[+r.dataset.fxc].t; SL.forEach(M=>(M.fx||[]).forEach(e=>{ if(e.t===t) e.c=r.value.toUpperCase(); })); commit(b); }; });
+  document.querySelectorAll("#inspector [data-fxdel]").forEach(x=>{ x.onclick=()=>{ const b=snapshot(), t=L.fx[+x.dataset.fxdel].t; SL.forEach(M=>{ if(M.fx){ M.fx=M.fx.filter(e=>e.t!==t); if(!M.fx.length) delete M.fx; } }); commit(b); }; });
+}
+
+/* ---------- Pictograms (200 x 200 box) ----------
+   Each pictogram is a list of parts {name, tone: "main" | "second" | "detail", subs}. Solid contours are wound one way,
+   holes the other (nonzero fill). Mostly polygons, so they can be cut in half, faceted, pixelated… */
+const IC={
+  solid:pts=>{ const s=polyNodes(pts); return area3(s)<0?s.reverse():s; },
+  hole:pts=>{ const s=polyNodes(pts); return area3(s)>0?s.reverse():s; },
+  mirror:(pts,cx=100)=>pts.slice().reverse().map(p=>({x:2*cx-p.x,y:p.y})),
+  sym:half=>{ const m=IC.mirror(half); return half.concat(m.filter((p,i)=>!(i===0&&p.x===half[half.length-1].x&&p.y===half[half.length-1].y))); },
+  thick:(line,w0,w1)=>{ const L1=[], L2=[]; line.forEach((p,i)=>{ const a=line[Math.max(0,i-1)], b=line[Math.min(line.length-1,i+1)], nx=-(b.y-a.y), ny=b.x-a.x, l=Math.hypot(nx,ny)||1, w=(w0+(w1-w0)*i/(line.length-1))/2;
+      L1.push({x:p.x+nx/l*w,y:p.y+ny/l*w}); L2.push({x:p.x-nx/l*w,y:p.y-ny/l*w}); }); return IC.solid(L1.concat(L2.reverse())); },
+  curve:(f,n=48)=>{ const o=[]; for(let i=0;i<n;i++) o.push(f(i/n)); return o; },
+  circ:(cx,cy,r,n=40)=>IC.curve(t=>({x:cx+r*Math.cos(2*Math.PI*t), y:cy+r*Math.sin(2*Math.PI*t)}),n),
+  rect:(x0,y0,x1,y1)=>[{x:x0,y:y0},{x:x1,y:y0},{x:x1,y:y1},{x:x0,y:y1}],
+  rot:(pts,cx,cy,a)=>pts.map(p=>({x:cx+(p.x-cx)*Math.cos(a)-(p.y-cy)*Math.sin(a), y:cy+(p.x-cx)*Math.sin(a)+(p.y-cy)*Math.cos(a)})),
+};
+const ICONS={
+  cerf:{n:"cerf", build(){
+    const head=IC.sym([{x:100,y:190},{x:109,y:187},{x:116,y:174},{x:123,y:152},{x:129,y:128},{x:132,y:114},{x:152,y:113},{x:172,y:98},{x:148,y:93},{x:128,y:98},{x:116,y:92},{x:100,y:90}].reverse());
+    const antler=dir=>{ const X=p=>({x:100+dir*(p.x-100),y:p.y});
+      return [IC.thick([{x:110,y:94},{x:118,y:76},{x:126,y:58},{x:138,y:40},{x:148,y:18}].map(X),11,3), IC.thick([{x:120,y:72},{x:140,y:66},{x:158,y:52}].map(X),7,2),
+              IC.thick([{x:128,y:55},{x:124,y:36},{x:118,y:20}].map(X),6,2), IC.thick([{x:138,y:40},{x:158,y:34},{x:170,y:18}].map(X),6,2)]; };
+    return [{name:"Bois du cerf",tone:"second",subs:antler(1).concat(antler(-1))}, {name:"Tête du cerf",tone:"main",subs:[IC.solid(head)]},
+      {name:"Yeux et museau",tone:"detail",subs:[IC.solid([{x:113,y:128},{x:120,y:124},{x:121,y:131}]),IC.solid([{x:87,y:128},{x:80,y:124},{x:79,y:131}]),IC.solid([{x:92,y:178},{x:108,y:178},{x:104,y:188},{x:96,y:188}])]}]; }},
+  bois:{n:"bois de cerf", build(){ return [{name:"Bois",tone:"main",subs:ICONS.cerf.build()[0].subs.map(s=>s.map(n=>({x:n.x,y:r2(n.y*1.6+20),i:null,o:null})))}]; }},
+  arbre:{n:"sapin", build(){ return [{name:"Feuillage",tone:"main",subs:[IC.solid(IC.sym([{x:100,y:182},{x:176,y:168},{x:136,y:124},{x:162,y:124},{x:126,y:78},{x:148,y:78},{x:100,y:12}].reverse()))]},{name:"Tronc",tone:"second",subs:[IC.solid(IC.rect(90,168,110,196))]}]; }},
+  feuille:{n:"feuille", build(){ const pts=IC.curve(t=>{ const a=t*2*Math.PI; return {x:100+58*Math.sin(a)*Math.pow(Math.abs(Math.sin(a/2)),0.15), y:105-85*Math.cos(a)}; },56);
+    return [{name:"Feuille",tone:"main",subs:[IC.solid(pts)]},{name:"Nervure",tone:"detail",subs:[IC.thick([{x:100,y:185},{x:100,y:110},{x:101,y:40}],6,2),IC.thick([{x:100,y:120},{x:128,y:92}],4,2),IC.thick([{x:100,y:140},{x:72,y:112}],4,2)]}]; }},
+  montagne:{n:"montagne", build(){ return [{name:"Montagnes",tone:"main",subs:[IC.solid([{x:8,y:178},{x:72,y:72},{x:98,y:108},{x:132,y:42},{x:192,y:178}])]},{name:"Neige",tone:"detail",subs:[IC.solid([{x:132,y:42},{x:150,y:76},{x:138,y:70},{x:128,y:82},{x:118,y:70}])]}]; }},
+  vague:{n:"vague", build(){ const top=t=>({x:10+180*t, y:100-26*Math.sin(t*Math.PI*2.4)}); const pts=IC.curve(top,40).concat([{x:190,y:100-26*Math.sin(Math.PI*2.4)},{x:190,y:180},{x:10,y:180}]);
+    return [{name:"Vague",tone:"main",subs:[IC.solid(pts)]},{name:"Écume",tone:"detail",subs:[IC.thick(IC.curve(t=>({x:20+160*t,y:132-12*Math.sin(t*Math.PI*3+1)}),30),5,5)]}]; }},
+  soleil:{n:"soleil", build(){ const rays=[]; for(let k=0;k<12;k++){ const a=k*Math.PI/6; rays.push(IC.solid(IC.rot([{x:100,y:4},{x:108,y:36},{x:92,y:36}],100,100,a))); }
+    return [{name:"Soleil",tone:"main",subs:[IC.solid(IC.circ(100,100,52))]},{name:"Rayons",tone:"second",subs:rays}]; }},
+  maison:{n:"maison", build(){ return [{name:"Maison",tone:"main",subs:[IC.solid([{x:100,y:22},{x:186,y:96},{x:162,y:96},{x:162,y:182},{x:38,y:182},{x:38,y:96},{x:14,y:96}]),IC.hole(IC.rect(86,128,114,182))]},{name:"Fenêtre",tone:"detail",subs:[IC.solid(IC.rect(92,64,108,80))]}]; }},
+  cle:{n:"clé", build(){ return [{name:"Clé",tone:"main",subs:[IC.solid(IC.circ(58,100,40)),IC.hole(IC.circ(58,100,18)),IC.solid([{x:94,y:92},{x:190,y:92},{x:190,y:108},{x:94,y:108}]),IC.solid(IC.rect(150,108,162,134)),IC.solid(IC.rect(172,108,184,126))]}]; }},
+  tasse:{n:"tasse", build(){ return [{name:"Tasse",tone:"main",subs:[IC.solid([{x:30,y:70},{x:150,y:70},{x:146,y:150},{x:126,y:178},{x:54,y:178},{x:34,y:150}]),IC.solid(IC.circ(160,108,30)),IC.hole(IC.circ(160,108,16))]},
+    {name:"Vapeur",tone:"second",subs:[0,1,2].map(i=>IC.thick(IC.curve(t=>({x:62+i*28+10*Math.sin(t*Math.PI*2),y:56-40*t}),16),7,4))}]; }},
+  ble:{n:"épi de blé", build(){ const g=[]; for(let i=0;i<5;i++) for(const s of [-1,1]){ const cy=48+i*24, cx=100+s*16; g.push(IC.solid(IC.rot(IC.circ(cx,cy,1,24).map(p=>({x:cx+(p.x-cx)*9,y:cy+(p.y-cy)*16})),cx,cy,s*0.5))); }
+    g.push(IC.solid(IC.circ(100,24,1,24).map(p=>({x:100+(p.x-100)*8,y:24+(p.y-24)*16}))));
+    return [{name:"Grains",tone:"main",subs:g},{name:"Tige",tone:"second",subs:[IC.thick([{x:100,y:196},{x:100,y:150},{x:100,y:40}],7,4)]}]; }},
+  plume:{n:"plume", build(){ const pts=IC.curve(t=>{ const a=t*2*Math.PI; return {x:100+40*Math.sin(a)+18*Math.sin(a)*Math.cos(a), y:100-86*Math.cos(a)}; },50).map(p=>({x:p.x+(100-p.y)*0.35,y:p.y}));
+    return [{name:"Plume",tone:"main",subs:[IC.solid(pts)]},{name:"Rachis",tone:"detail",subs:[IC.thick([{x:62,y:196},{x:96,y:110},{x:130,y:22}],6,2)]}]; }},
+  oiseau:{n:"oiseau", build(){ return [{name:"Oiseau",tone:"main",subs:[IC.solid([{x:16,y:70},{x:70,y:96},{x:104,y:84},{x:132,y:40},{x:132,y:90},{x:176,y:92},{x:192,y:84},{x:186,y:104},{x:150,y:124},{x:110,y:150},{x:62,y:146},{x:30,y:176},{x:42,y:132},{x:56,y:110}])]}]; }},
+  poisson:{n:"poisson", build(){ const body=IC.curve(t=>({x:88+70*Math.cos(2*Math.PI*t), y:100+40*Math.sin(2*Math.PI*t)*(1-0.2*Math.cos(2*Math.PI*t))}),48);
+    return [{name:"Poisson",tone:"main",subs:[IC.solid(body),IC.solid([{x:150,y:100},{x:194,y:62},{x:184,y:100},{x:194,y:138}]),IC.hole(IC.circ(54,92,7,16))]}]; }},
+  fleur:{n:"fleur", build(){ const pet=[]; for(let k=0;k<6;k++) pet.push(IC.solid(IC.rot(IC.circ(100,58,1,30).map(p=>({x:100+(p.x-100)*24,y:58+(p.y-58)*40})),100,100,k*Math.PI/3)));
+    return [{name:"Pétales",tone:"main",subs:pet},{name:"Cœur",tone:"second",subs:[IC.solid(IC.circ(100,100,24))]}]; }},
+  couronne:{n:"couronne", build(){ return [{name:"Couronne",tone:"main",subs:[IC.solid([{x:20,y:60},{x:62,y:104},{x:100,y:40},{x:138,y:104},{x:180,y:60},{x:166,y:150},{x:34,y:150}]),IC.solid(IC.rect(34,158,166,178))]},{name:"Joyaux",tone:"detail",subs:[IC.solid(IC.circ(100,128,9,20)),IC.solid(IC.circ(62,132,7,16)),IC.solid(IC.circ(138,132,7,16))]}]; }},
+  etoile:{n:"étoile", build(){ const p=[]; for(let k=0;k<10;k++){ const a=-Math.PI/2+k*Math.PI/5, r=k%2?40:94; p.push({x:100+r*Math.cos(a),y:106+r*Math.sin(a)}); } return [{name:"Étoile",tone:"main",subs:[IC.solid(p)]}]; }},
+  coeur:{n:"cœur", build(){ return [{name:"Cœur",tone:"main",subs:[IC.solid(IC.curve(t=>{ const a=2*Math.PI*t; return {x:100+5.4*16*Math.pow(Math.sin(a),3), y:96-5.4*(13*Math.cos(a)-5*Math.cos(2*a)-2*Math.cos(3*a)-Math.cos(4*a))}; },60))]}]; }},
+  goutte:{n:"goutte", build(){ return [{name:"Goutte",tone:"main",subs:[IC.solid(IC.curve(t=>{ const a=2*Math.PI*t; return {x:100+62*Math.sin(a)*Math.pow((1-Math.cos(a))/2,0.9), y:16+170*(1-Math.cos(a))/2}; },50))]}]; }},
+  flamme:{n:"flamme", build(){ const o=IC.curve(t=>{ const a=2*Math.PI*t; return {x:100+62*Math.sin(a)*Math.pow((1-Math.cos(a))/2,1.1)+14*Math.sin(3*a)*(1-Math.cos(a))/2, y:12+178*(1-Math.cos(a))/2}; },56);
+    return [{name:"Flamme",tone:"main",subs:[IC.solid(o)]},{name:"Cœur de flamme",tone:"second",subs:[IC.solid(o.map(p=>({x:100+(p.x-100)*0.5,y:190-(190-p.y)*0.55})))]}]; }},
+  marteau:{n:"marteau", build(){ return [{name:"Tête",tone:"main",subs:[IC.solid([{x:40,y:40},{x:150,y:40},{x:172,y:56},{x:150,y:76},{x:40,y:76},{x:28,y:58}])]},{name:"Manche",tone:"second",subs:[IC.solid(IC.rect(88,76,112,192))]}]; }},
+  scie:{n:"lame de scie", build(){ const p=[]; for(let k=0;k<48;k++){ const a=k*Math.PI/24, r=k%2?80:94; p.push({x:100+r*Math.cos(a+(k%2?0.03:0)),y:100+r*Math.sin(a)}); }
+    return [{name:"Lame",tone:"main",subs:[IC.solid(p),IC.hole(IC.circ(100,100,18))]}]; }},
+  rondin:{n:"rondin", build(){ return [{name:"Rondin",tone:"main",subs:[IC.solid(IC.circ(100,100,90,48))]},{name:"Cernes",tone:"detail",subs:[60,38,18].flatMap(r=>[IC.solid(IC.circ(100+(90-r)*0.06,100,r+3,40)),IC.hole(IC.circ(100+(90-r)*0.06,100,r-2,40))])}]; }},
+  livre:{n:"livre", build(){ return [{name:"Livre",tone:"main",subs:[IC.solid([{x:100,y:58},{x:150,y:40},{x:188,y:46},{x:188,y:160},{x:150,y:154},{x:100,y:172},{x:50,y:154},{x:12,y:160},{x:12,y:46},{x:50,y:40}])]},{name:"Reliure",tone:"detail",subs:[IC.solid(IC.rect(97,58,103,172))]}]; }},
+};
+/* keyword -> pictogram, material and style hints (accents and case ignored, plural tolerated) */
+const SUBJECTS={
+  cerf:"cerf biche daim renne elan chevreuil faon cervide",
+  bois:"ramure andouiller",
+  arbre:"arbre foret sapin pin chene bosquet sylvestre",
+  feuille:"feuille plante vegetal nature bio jardin verdure herbe",
+  montagne:"montagne alpes randonnee sommet ski alpin pic",
+  vague:"mer ocean vague surf plage maritime marin",
+  soleil:"soleil ete lumiere solaire solstice",
+  maison:"maison immobilier habitat logement toit agence foyer",
+  cle:"cle serrure securite acces serrurier",
+  tasse:"cafe the tasse coffee barista torrefaction",
+  ble:"ble pain boulangerie farine cereale agriculture moisson boulanger",
+  plume:"plume ecriture auteur poesie litterature edition redaction",
+  oiseau:"oiseau envol liberte hirondelle colombe",
+  poisson:"poisson peche poissonnerie",
+  fleur:"fleur fleuriste rose floral bouquet",
+  couronne:"couronne roi reine royal royaute",
+  etoile:"etoile star excellence",
+  coeur:"coeur amour sante soin care",
+  goutte:"goutte eau hydratation pluie source",
+  flamme:"flamme feu energie barbecue bougie braise",
+  marteau:"marteau outil artisan bricolage forge forgeron",
+  scie:"scie scierie menuiserie menuisier decoupe",
+  rondin:"rondin ebenisterie ebeniste charpente charpentier buche tronc",
+  livre:"livre librairie ecole formation bibliotheque",
+};
+const MATERIALS={ bois:"bois ebenisterie ebeniste menuiserie menuisier charpente artisanal artisanale massif chene noyer", or:"or dore luxe premium prestige bijou joaillerie", neon:"neon nuit club bar soiree", pierre:"pierre mineral beton marbre" };
+const STYLE_HINTS={ lowpoly:"tech moderne digital numerique 3d geometrique jeu", pixel:"retro jeu gaming arcade pixel 8bit", main:"artisanal fait main artisan atelier authentique",
+  lineart:"minimal minimaliste epure simple elegant", gravure:"tradition traditionnel ancien vintage heritage", cartoon:"enfant fun ludique joyeux", arabesque:"oriental luxe ornement baroque classique raffine",
+  oneline:"design galerie art minimal", iso:"architecture construction batiment tech", realiste:"nature sauvage authentique", cel:"bd manga jeu fun", vintage:"vintage retro brasserie biere" };
+const STYLE_FONTS={ lowpoly:["montserrat","spacegrotesk","poppins"], pixel:["bebas","spacegrotesk"], hd2d:["cinzel","bebas"], main:["caveat","homemade","dancing"], lineart:["raleway","josefin","inter"],
+  gravure:["baskerville","cinzel","ebgaramond"], gravebois:["cinzel","baskerville","dmserif"], cartoon:["pacifico","youngserif","poppins"], arabesque:["cinzel","cormorant-i","fraktur"], oneline:["josefin","raleway"],
+  iso:["oswald","bebas","montserrat-caps"], realiste:["playfair","ebgaramond","fraunces"], cel:["poppins","youngserif"], flat:["poppins","montserrat","inter"], vintage:["abril","dmserif","youngserif"],
+  dore:["cinzel","playfair","cormorant-i"], neon:["monoton","spacegrotesk"], extrusion:["bebas","oswald"], papier:["fraunces","poppins"] };
+function wordsOf(list){ return plainText(list.join(" ")).split(/[^a-z0-9]+/).filter(Boolean).map(w=>w.replace(/(s|x)$/,"")); }
+const hits=(words,dict)=>{ const set=new Set(dict.split(" ").map(w=>w.replace(/(s|x)$/,""))); return words.filter(w=>set.has(w)).length; };
+function readKeywords(keywords){
+  const w=wordsOf(keywords);
+  const subjects=Object.entries(SUBJECTS).map(([k,v])=>[k,hits(w,v)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  if(subjects.includes("cerf")&&!subjects.includes("bois")&&w.includes("boi")) subjects.push("bois");
+  const material=Object.entries(MATERIALS).map(([k,v])=>[k,hits(w,v)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0])[0]||null;
+  const styles=Object.entries(STYLE_HINTS).map(([k,v])=>[k,hits(w,v)]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  const unknown=w.filter(x=>x.length>3 && !Object.values(SUBJECTS).some(v=>hits([x],v)) && !Object.values(MATERIALS).some(v=>hits([x],v)) && !Object.values(STYLE_HINTS).some(v=>hits([x],v)) && !Object.values(MOODS).some(m=>hits([x],m.w)));
+  return {subjects, material, styles, unknown};
+}
+
+/* ---------- Logo concepts from the keywords ----------
+   Keywords -> subjects (pictograms), a material (bois, or…) and style hints. Concepts mix a subject, a support
+   (écusson, planche, badge…), a style (low poly, line art, gravure…) and a typeface chosen to match the style:
+   bust + name below · engraved plank · shield + icon · stylised half figure + name on two lines · interlaced
+   monogram in a shield with the subject coming out of it · 3D monogram in the material.
+   A subject outside the pictogram library gets a placeholder and a bubble brief, for Claude to draw it. */
+const MATERIAL_COLORS={ bois:{main:"#8B5A2B",second:"#5C3A1E",detail:"#2E1C0F",text:"#3B2414",light:"#F3E6D3"}, or:{main:"#1E1B2E",second:"#C9A13B",detail:"#F4F0EA",text:"#1E1B2E",light:"#F4F0EA"},
+  neon:{main:"#14162B",second:"#39F3FF",detail:"#FF48B0",text:"#14162B",light:"#EEF4F8"}, pierre:{main:"#5E6368",second:"#3A3F44",detail:"#E6E4DF",text:"#2E3236",light:"#EFEEEA"} };
+const STYLE_DEFAULTS=["lowpoly","lineart","realiste","arabesque","cel","main","oneline","pixel","iso","gravure","flat","vintage"];
+/* run sync code on a concept document as if it were the open drawing (palettes, groups, styles), then restore */
+function withDoc(doc, fn){
+  const save={layers, pals, groups, curPal, previewPal, palette, sel};
+  layers=doc.layers; pals=doc.pals; groups=doc.groups; curPal="main"; previewPal=null; palette=pals[0].colors;
+  try{ return fn(); } finally { doc.layers=layers; doc.pals=pals; doc.groups=groups; ({layers, pals, groups, curPal, previewPal, palette, sel}=save); }
+}
+function placeIcon(id, box, tones){ // pictogram scaled into box {x,y,s} with tone colours
+  return ICONS[id].build().map((part,i)=>({visible:true,locked:false,id:"motif-"+id+"-"+(i+1),name:part.name,group:"mark",fill:tones[part.tone]||tones.main,
+    subs:part.subs.map(s=>s.map(n=>({x:r2(box.x+n.x*box.s),y:r2(box.y+n.y*box.s),i:n.i&&{x:r2(box.x+n.i.x*box.s),y:r2(box.y+n.i.y*box.s)},o:n.o&&{x:r2(box.x+n.o.x*box.s),y:r2(box.y+n.o.y*box.s)}})))})); }
+function clipHalf(subs, xCut){ // keep x <= xCut (polygons; Sutherland-Hodgman per contour)
+  return subs.map(s=>{ const out=[]; for(let i=0;i<s.length;i++){ const a=s[i], b=s[(i+1)%s.length], ina=a.x<=xCut, inb=b.x<=xCut;
+      if(ina) out.push({x:a.x,y:a.y,i:null,o:null}); if(ina!==inb){ const t=(xCut-a.x)/(b.x-a.x); out.push({x:r2(xCut),y:r2(a.y+(b.y-a.y)*t),i:null,o:null}); } }
+    return out; }).filter(s=>s.length>=3); }
+/* name laid out with a loaded glyph set: 1 or 2 lines, left or centred, from (x, baseline) */
+function nameLayers(str, f, G, o){
+  const words=String(str).trim().split(/\s+/); let lines=[words.join(" ")];
+  if(o.lines===2 && words.length>1){ let best=1, bd=Infinity; for(let k=1;k<words.length;k++){ const d=Math.abs(words.slice(0,k).join(" ").length-words.slice(k).join(" ").length); if(d<bd){ bd=d; best=k; } } lines=[words.slice(0,best).join(" "), words.slice(best).join(" ")]; }
+  const out=[]; let n=0; const sc=f.k*(o.scale||1), lh=(G.upem||1000)*sc*1.05;
+  lines.forEach((line,li)=>{ const {letters}=layoutText(line, f, G, 0, o.baseline+li*lh, sc); if(!letters.length) return;
+    const b=bounds(letters.map(l=>({subs:l.subs}))), dx=(o.align==="center"?o.x-(b.x1-b.x0)/2:o.x)-b.x0;
+    letters.forEach(g=>{ n++; const L={visible:true,locked:false,id:"lettre-"+n,name:(g.ch==="—"?"Barre":"Lettre "+g.ch)+" · "+n,group:"word",fill:o.fill,font:f.id,subs:g.subs};
+      if(g.ch!=="—") L.ch=g.ch; L.subs.forEach(s=>s.forEach(p=>moveNode(p,dx,0))); L._bl=o.baseline+li*lh; if(o.fx) L.fx=clone(o.fx); out.push(L); }); });
+  const ob=out.length?bounds(out):null;   // optional: top of the name at o.top, or its middle at o.middle
+  const dy=!ob?0:o.top!==undefined?o.top-ob.y0:o.middle!==undefined?o.middle-(ob.y0+ob.y1)/2:0;
+  out.forEach(L=>{ if(dy) L.subs.forEach(s=>s.forEach(p=>moveNode(p,0,dy))); stamp(L,L._bl+dy); delete L._bl; });
+  return out; }
+function monoLayers(str, f, G, box, fill){ const {letters}=layoutText(str, f, G, 0, 0, 1); if(!letters.length) return [];
+  const b=bounds(letters.map(l=>({subs:l.subs}))), s=Math.min(box.w/(b.x1-b.x0||1), box.h/(b.y1-b.y0||1)), ox=box.cx-(b.x0+b.x1)/2*s, oy=box.cy-(b.y0+b.y1)/2*s, T=p=>p&&{x:r2(ox+p.x*s),y:r2(oy+p.y*s)};
+  return letters.map((g,i)=>({visible:true,locked:false,id:"mono-"+(i+1),name:"Monogramme "+g.ch,group:"mark",fill,font:f.id,ch:g.ch,subs:g.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)})))})); }
+const STYLE_LABEL=k=>(STYLES[k]||{n:k}).n.toLowerCase();
+function conceptPlan(info, round){
+  const kw=readKeywords(info.keywords), moods=rankMoods(info.keywords), mood=MOODS[moods[0]];
+  const tones=kw.material?MATERIAL_COLORS[kw.material]:{main:mood.c[0][0],second:mood.c[0][2],detail:mood.c[0][1],text:mood.c[0][0],light:mood.c[0][1]};
+  const subj=kw.subjects.filter(s=>ICONS[s]), main=subj[0]||null, unknown=kw.unknown[0]||null;
+  const styles=[...new Set(kw.styles.concat(kw.material==="bois"?["gravebois","lowpoly","main"]:kw.material==="or"?["dore","arabesque"]:[]).concat(STYLE_DEFAULTS))];
+  const st=i=>styles[(i+round*2)%styles.length];
+  const font=(s,i)=>{ const l=STYLE_FONTS[s]||["playfair","montserrat"]; return l[(i+round)%l.length]; };
+  const sub2=subj[1]||null, letters=keyLetters(info.name, info.letters).toUpperCase();
+  const lex=main?ICONS[main].n:unknown||"symbole";
+  const plans=[];
+  const push=(p)=>plans.push(Object.assign({tones, subject:main, unknown:main?null:unknown, letters},p));
+  const s0=st(0), s1=st(1), s2=st(2), s3=st(3);
+  push({kind:"buste", style:s0, font:font(s0,0), lines:2, title:`${cap(lex)} ${STYLE_LABEL(s0)}, nom en dessous`, desc:`Le ${lex} en ${STYLE_LABEL(s0)}, le nom centré dessous sur deux lignes.`});
+  push({kind:"planche", style:kw.material==="bois"||!kw.material?"gravebois":"dore", font:font("gravebois",1), title:`Planche gravée`, desc:`Une planche ${kw.material==="bois"||!kw.material?"de bois massif":"en "+kw.material} avec le ${lex} et le nom gravés.`});
+  push({kind:"ecusson", style:s1, font:font(s1,1), title:`Écusson et ${lex}`, desc:`Un écusson portant le ${lex} (${STYLE_LABEL(s1)}), le nom à côté.`});
+  push({kind:"demi", style:s2, font:font(s2,2), lines:2, title:`Demi-${lex} ${STYLE_LABEL(s2)}`, desc:`Une moitié de ${lex} stylisée en ${STYLE_LABEL(s2)}, le nom sur deux lignes.`});
+  push({kind:"entrelacs", style:s3, font:["cinzel","playfair","dmserif","baskerville"][round%4], second:main==="cerf"?"bois":(sub2||main), title:`${letters} entrelacés`, desc:`${letters.split("").join(" et ")} entrelacés dans un écusson${main?", d'où sortent "+(main==="cerf"?"des bois de cerf":"des éléments du "+lex):""}.`});
+  push({kind:"mono3d", style:kw.material==="or"?"dore":"gravebois", font:["bebas","oswald","cinzel","dmserif"][round%4], title:`${letters} en 3D`, desc:`${letters} ${kw.material==="or"?"dorés":"gravés dans du bois massif"}, vus de trois quarts avec profondeur.`});
+  return {plans, kw};
+}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+async function buildConcept(plan, info){
+  const f=fontById(plan.font)||fontById("instrument"), G=await loadGlyphs(f.gkey), t=plan.tones, doc={layers:[], pals:[{id:"main",name:"Principale",colors:[t.main,t.text,t.light]}], groups:[]};
+  const missing=!plan.subject;
+  const icon=(box,tones)=>plan.subject?placeIcon(plan.subject, box, tones):[{visible:true,locked:false,id:"motif-provisoire",name:"À dessiner : "+(plan.unknown||"symbole"),group:"mark",fill:tones.main,subs:START_SHAPES.cercle[1]().map(s=>s.map(n=>({x:r2(box.x+(n.x-28)*box.s),y:r2(box.y+(n.y-28)*box.s),i:n.i&&{x:r2(box.x+(n.i.x-28)*box.s),y:r2(box.y+(n.i.y-28)*box.s)},o:n.o&&{x:r2(box.x+(n.o.x-28)*box.s),y:r2(box.y+(n.o.y-28)*box.s)}})))}];
+  return withDoc(doc, ()=>{
+    const ids=()=>layers.map(l=>l.id), styleIt=(ls,s,a)=>{ const keep=new Set(ls.map(l=>l.id)); styleLayers([...keep], "st:"+s, a); };
+    if(plan.kind==="buste"){ const ic=icon({x:28,y:8,s:1},t); layers.push(...ic); styleIt(ic, plan.style, 55);
+      layers.push(...nameLayers(info.name, f, G, {x:128, baseline:282, top:bounds(layers).y1+22, align:"center", lines:plan.lines, fill:t.text, scale:0.62})); }
+    else if(plan.kind==="planche"){ const nm=nameLayers(info.name, f, G, {x:230, baseline:150, middle:116, align:"left", lines:1, fill:shade(t.main,-0.45), scale:0.62}), nb=bounds(nm), W=Math.max(560,nb.x1+60);
+      const plank={visible:true,locked:false,id:"planche",name:"Planche",group:"mark",fill:t.main,subs:roundRect(10,30,W-10,190,22)};
+      layers.push(plank); styleLayers(["planche"], "fx:bois", 55); layers.find(l=>l.id==="planche").fx.push({t:"extrusion",a:22});
+      const ic=icon({x:46,y:44,s:0.72},{main:shade(t.main,-0.45),second:shade(t.main,-0.35),detail:shade(t.main,-0.2)}); layers.push(...ic, ...nm);
+      ic.concat(nm).forEach(l=>{ l.fx=[{t:"gravure",a:60}]; }); }
+    else if(plan.kind==="ecusson"){ layers.push({visible:true,locked:false,id:"ecusson",name:"Écusson",group:"mark",fill:t.main,subs:START_SHAPES.ecusson[1]()});
+      const ic=icon({x:48,y:34,s:0.8},{main:t.light,second:shade(t.light,-0.25),detail:t.main}); layers.push(...ic); styleIt(ic, plan.style, 45);
+      layers.push(...nameLayers(info.name, f, G, {x:268, baseline:GLYPHS.baseline, middle:128, align:"left", lines:1, fill:t.text, scale:0.8})); }
+    else if(plan.kind==="demi"){ const ic=icon({x:28,y:28,s:1},t); ic.forEach(l=>{ l.subs=clipHalf(l.subs.map(s=>samplePoly(s,4).map(p=>({x:p.x,y:p.y,i:null,o:null}))),128); }); const icv=ic.filter(l=>l.subs.length);
+      layers.push(...icv); styleIt(icv, plan.style, 55);
+      layers.push(...nameLayers(info.name, f, G, {x:160, baseline:118, align:"left", lines:plan.lines, fill:t.text, scale:0.75})); }
+    else if(plan.kind==="entrelacs"){ layers.push({visible:true,locked:false,id:"ecusson",name:"Écusson",group:"mark",fill:t.main,subs:START_SHAPES.ecusson[1]()});
+      if(plan.second&&ICONS[plan.second]){ const top=placeIcon(plan.second,{x:38,y:-70,s:0.9},{main:t.second,second:t.second,detail:t.second}); layers.splice(0,0,...top); }
+      const L=plan.letters.slice(0,2), ms=monoLayers(L, f, G, {cx:128,cy:118,w:176,h:128}, t.light);
+      if(ms.length===2){ const dx=(bounds([ms[1]]).x0-bounds([ms[0]]).x1)+44; ms[1].subs.forEach(s=>s.forEach(n=>moveNode(n,-dx/2,10))); ms[0].subs.forEach(s=>s.forEach(n=>moveNode(n,dx/2,-6))); ms[1].fill=t.second; ms[1].fx=[{t:"cerne",a:30,c:t.main}]; }
+      layers.push(...ms); layers.push(...nameLayers(info.name, f, G, {x:268, baseline:GLYPHS.baseline, middle:128, align:"left", lines:1, fill:t.text, scale:0.8})); }
+    else if(plan.kind==="mono3d"){ const ms=monoLayers(plan.letters.slice(0,2), f, G, {cx:128,cy:128,w:220,h:190}, t.main);
+      ms.forEach(l=>{ l.subs.forEach(s=>s.forEach(n=>{ for(const p of [n,n.i,n.o]) if(p){ p.x=r2(p.x-(p.y-128)*0.28); p.y=r2(128+(p.y-128)*0.86); } })); });
+      layers.push(...ms); styleIt(ms, plan.style, 60);
+      layers.push(...nameLayers(info.name, f, G, {x:268, baseline:GLYPHS.baseline, middle:128, align:"left", lines:1, fill:t.text, scale:0.8})); }
+    ensureZones();
+    return {doc:{layers:clone(layers), pals:clone(pals), groups:clone(groups)}, missing};
+  });
+}
+function conceptSVG(doc, k){
+  const ls=doc.layers.filter(l=>l.visible!==false); if(!ls.length) return "";
+  return withDoc({layers:clone(doc.layers), pals:clone(doc.pals), groups:clone(doc.groups)}, ()=>{ const b=bounds(layers), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*0.08; let defs="", body="";
+    layers.forEach(l=>{ const r=layerSVG(l,{pfx:"c"+k}); defs+=r.defs; body+=r.body; });
+    return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${body}</svg>`; });
+}
+
 /* ---------- First open: brand, tagline, keywords, then a starting point ----------
    Shown while no brand name is known (and not postponed with "Plus tard"); the "Marque et départ" button reopens it.
    Starting points: keep the drawing, blank page, the name alone, a shape + the name, an imported image, the example.
@@ -2486,63 +2931,23 @@ function keyLetters(name, letters){
   const parts=String(name).trim().split(/[\s\-_.']+/).filter(Boolean);
   return (parts.length>1?parts.slice(0,2).map(p=>[...p][0]).join(""):[...(parts[0]||"A")][0]).toUpperCase();
 }
-const PROP_LAYOUTS=["mono","letters","name"];
-function makeProposals(info, round){
-  const moods=rankMoods(info.keywords), out=[];
-  for(let i=0;i<6;i++){
-    const k=moods[(i+round)%moods.length], m=MOODS[k], j=Math.floor((i+round)/moods.length)+round;
-    out.push({mood:k, colors:m.c[j%m.c.length], shape:m.s[(i+j)%m.s.length], font:m.f[(i+2*j)%m.f.length], layout:PROP_LAYOUTS[(i+round)%3]});
-  }
-  return out;
-}
-/* glyphs of a string, fitted into a box (monogram) or set on the word line (name) */
-async function glyphLetters(str, fontId, fit){
-  const f=fontById(fontId)||fontById("instrument"); const G=await loadGlyphs(f.gkey);
-  if(fit){ const {letters}=layoutText(str, f, G, 0, 0, 1); if(!letters.length) return {f,letters};
-    const b=bounds(letters.map(l=>({subs:l.subs}))), s=Math.min(fit.w/(b.x1-b.x0||1), fit.h/(b.y1-b.y0||1));
-    const ox=fit.cx-(b.x0+b.x1)/2*s, oy=fit.cy-(b.y0+b.y1)/2*s, T=p=>p&&{x:r2(ox+p.x*s),y:r2(oy+p.y*s)};
-    return {f, letters:letters.map(l=>({ch:l.ch, subs:l.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)})))}))}; }
-  const {letters}=layoutText(str, f, G, 0, GLYPHS.baseline, f.k); return {f, letters};
-}
-async function proposalLayers(p, info){
-  const [bg,fg,ac]=p.colors, out=[], mark=p.layout!=="name", Lt=keyLetters(info.name, info.letters);
-  const word=(id,name,ch,fill,font,subs,group)=>Object.assign({visible:true,locked:false,id,name,group,fill,font,subs},ch?{ch}:{});
-  if(p.layout==="mono"){
-    out.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[p.shape][0],group:"mark",fill:bg,subs:START_SHAPES[p.shape][1]()});
-    const box=p.shape==="arche"?{cx:128,cy:146,w:116,h:96}:p.shape==="ecusson"?{cx:128,cy:116,w:116,h:96}:p.shape==="losange"?{cx:128,cy:128,w:92,h:80}:{cx:128,cy:128,w:124,h:104};
-    const {f,letters}=await glyphLetters(Lt.toUpperCase(), p.font, box);
-    letters.forEach((g,i)=>out.push(word("mono-"+(i+1),"Monogramme "+g.ch,g.ch,fg,f.id,g.subs,"mark")));
-  } else if(p.layout==="letters"){
-    const {f,letters}=await glyphLetters(Lt.toUpperCase(), p.font, {cx:128,cy:128,w:200,h:180});
-    letters.forEach((g,i)=>out.push(word("mono-"+(i+1),"Monogramme "+g.ch,g.ch,i===letters.length-1&&letters.length>1?ac:bg,f.id,g.subs,"mark")));
-  }
-  const {f,letters}=await glyphLetters(info.name, p.font, null);
-  if(letters.length){ const nb=bounds(letters.map(l=>({subs:l.subs}))), dx=(mark?301:28)-nb.x0;
-    letters.forEach((g,i)=>{ const L=word("lettre-"+(i+1),(g.ch==="—"?"Barre":"Lettre "+g.ch)+" · "+(i+1),g.ch==="—"?null:g.ch,p.layout==="name"&&i===0?ac:bg,f.id,g.subs,"word");
-      L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,0))); stamp(L, GLYPHS.baseline); out.push(L); }); }
-  return out;
-}
-function proposalSVG(ls){
-  if(!ls.length) return "";
-  const b=bounds(ls), pad=16;
-  return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ls.map(l=>`<path d="${pathD(l.subs)}" fill="${l.fill}"/>`).join("")}</svg>`;
-}
-const prop={round:0, list:[], layers:[], pick:0, busy:0};
+const prop={round:0, list:[], docs:[], pick:0, busy:0};
 function startInfo(){ return {name:$("#stName").value.trim().slice(0,80), tagline:$("#stTag").value.trim().slice(0,160),
   keywords:$("#stKw").value.split(/[,;\n]/).map(k=>k.trim().slice(0,40)).filter(Boolean).slice(0,12), letters:$("#stLet").value.replace(/\s+/g,"").slice(0,3)}; }
 async function renderProposals(){
   const el=$("#stProps"); if(startChoice!=="proposal"){ el.hidden=true; return; } el.hidden=false;
-  const info=startInfo(); if(!info.name){ el.innerHTML=`<p class="muted">Indiquez le nom de la marque pour voir les propositions.</p>`; return; }
+  const info=startInfo(); if(!info.name){ el.innerHTML=`<p class="muted">Indiquez le nom de la marque pour voir les concepts.</p>`; return; }
   const n=++prop.busy; el.setAttribute("aria-busy","true");
-  if(!prop.layers.length) el.innerHTML=`<p class="muted">Préparation des propositions…</p>`;
+  if(!prop.docs.length) el.innerHTML=`<p class="muted">Préparation des concepts…</p>`;
   try{
-    await loadFonts(); const list=makeProposals(info, prop.round), lays=[];
-    for(const p of list) lays.push(await proposalLayers(p, info).catch(()=>[]));
+    await loadFonts(); const {plans, kw}=conceptPlan(info, prop.round), docs=[];
+    for(const p of plans) docs.push(await buildConcept(p, info).catch(()=>null));
     if(n!==prop.busy) return;
-    prop.list=list; prop.layers=lays; if(prop.pick>=list.length) prop.pick=0;
-    const moodName={nature:"nature",luxe:"élégant",tech:"tech",artisan:"artisanal",chaleur:"chaleureux",fun:"joyeux",minimal:"minimal",mer:"mer",solide:"solide",creatif:"créatif"};
-    el.innerHTML=`<div class="props">${lays.map((ls,i)=>`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}" title="${esc(moodName[list[i].mood]+" · "+(fontById(list[i].font)||{}).name)}">${proposalSVG(ls)}<span>${esc(moodName[list[i].mood])} · ${esc((fontById(list[i].font)||{name:""}).name)}</span></button>`).join("")}</div>
-      <div class="row"><button type="button" id="stMore">Autres propositions</button><span class="muted">Inspirées de vos mots-clés${info.keywords.length?"":" (ajoutez-en pour des propositions plus ciblées)"} · tout reste modifiable.</span></div>`;
+    prop.list=plans; prop.docs=docs; if(prop.pick>=plans.length||!docs[prop.pick]) prop.pick=docs.findIndex(Boolean);
+    const found=kw.subjects.map(s=>ICONS[s]&&ICONS[s].n).filter(Boolean);
+    el.innerHTML=`<p class="muted" style="margin:0 0 8px">${found.length?"Sujets repérés : "+esc(found.join(", ")):"Aucun sujet illustré repéré dans les mots-clés"}${kw.material?" · matière : "+esc(kw.material):""}${kw.unknown.length&&!found.length?" · « "+esc(kw.unknown[0])+" » sera à dessiner par Claude":""}.</p>
+      <div class="props">${docs.map((d,i)=>d?`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}">${conceptSVG(d.doc,i)}<b>${esc(plans[i].title)}</b><span>${esc(plans[i].desc)} · ${esc((fontById(plans[i].font)||{name:""}).name)}${d.missing?" · à dessiner par Claude":""}</span></button>`:"").join("")}</div>
+      <div class="row"><button type="button" id="stMore">Autres concepts</button><span class="muted">Tout reste modifiable : formes, styles, couleurs, police.</span></div>`;
   } finally { if(n===prop.busy) el.removeAttribute("aria-busy"); }
 }
 let propT=null;
@@ -2558,7 +2963,7 @@ function isExample(){ return JSON.stringify(layers.map(l=>[l.id,l.subs]))===JSON
 function openStart(){
   const d=$("#startDlg"), canKeep=layers.length>0 && !isExample();
   $("#stName").value=brand.name||""; $("#stTag").value=brand.tagline||""; $("#stKw").value=(brand.keywords||[]).join(", "); $("#stLet").value=brand.letters||"";
-  prop.round=0; prop.pick=0; prop.layers=[]; $("#stProps").innerHTML="";
+  prop.round=0; prop.pick=0; prop.docs=[]; $("#stProps").innerHTML="";
   startChoice=canKeep?"keep":"word";
   $("#stKeep").hidden=!canKeep;
   $("#stShapes").innerHTML=Object.keys(START_SHAPES).map(k=>`<button type="button" data-shape="${k}" title="${START_SHAPES[k][0]}" aria-label="${START_SHAPES[k][0]}">${shapeThumb(k)}</button>`).join("");
@@ -2568,7 +2973,7 @@ function renderStart(){
   document.querySelectorAll("#startDlg [data-start]").forEach(b=>{ const on=b.dataset.start===startChoice; b.classList.toggle("on",on); b.setAttribute("aria-checked",String(on)); });
   document.querySelectorAll("#stShapes [data-shape]").forEach(b=>b.classList.toggle("on",b.dataset.shape===startShape));
   $("#stShapes").hidden=startChoice!=="shape";
-  if(startChoice==="proposal"){ if(!prop.layers.length) renderProposals(); else $("#stProps").hidden=false; } else $("#stProps").hidden=true;
+  if(startChoice==="proposal"){ if(!prop.docs.length) renderProposals(); else $("#stProps").hidden=false; } else $("#stProps").hidden=true;
   $("#stGo").textContent=startChoice==="image"?"Continuer : choisir l'image":"Commencer";
 }
 $("#startDlg").addEventListener("click",e=>{
@@ -2580,7 +2985,10 @@ async function applyStart(choice, info, shape){
   const b0=snapshot(), u0=undoStack.length;
   if(choice!=="keep"){
     groups=[]; curPal="main"; pals=[{id:"main",name:"Principale",colors:[]}]; sel={layer:null,node:null};
-    layers = choice==="example" ? clone(ORIGIN) : choice==="proposal" ? clone(prop.layers[prop.pick]||[]) : [];
+    layers = choice==="example" ? clone(ORIGIN) : [];
+    if(choice==="proposal"){ const c=prop.docs[prop.pick], plan=prop.list[prop.pick]; layers=clone(c.doc.layers); pals=clone(c.doc.pals); groups=clone(c.doc.groups);
+      if(c.missing){ const b=bounds(layers.filter(l=>l.id==="motif-provisoire")); notes.push({id:"n"+Date.now().toString(36), n:notes.reduce((m,x)=>Math.max(m,x.n),0)+1, x:r2((b.x0+b.x1)/2), y:r2((b.y0+b.y1)/2), audio:null, at:new Date().toISOString(),
+        text:`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
     if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
     ensureZones(); wordText=brand.name;
     if(choice==="word"||choice==="shape"||choice==="example"){
@@ -2598,7 +3006,7 @@ $("#stGo").onclick=async()=>{
   if(!name){ $("#stMsg").textContent="Indiquez le nom de la marque : il sert au logo et aux noms des fichiers."; $("#stName").focus(); return; }
   const info=startInfo();
   $("#stGo").disabled=true;
-  try{ if(startChoice==="proposal"){ clearTimeout(propT); await renderProposals(); if(!(prop.layers[prop.pick]||[]).length){ $("#stMsg").textContent="Les propositions n'ont pas pu être préparées. Rechargez la page."; return; } }
+  try{ if(startChoice==="proposal"){ clearTimeout(propT); await renderProposals(); if(!prop.docs[prop.pick]){ $("#stMsg").textContent="Les concepts n'ont pas pu être préparés. Rechargez la page."; return; } }
     await applyStart(startChoice, info, startShape); } finally{ $("#stGo").disabled=false; }
   $("#startDlg").close(); try{ localStorage.removeItem(WELCOME_SKIP); }catch(_){}
   if(startChoice==="image") impOpen();

@@ -12,6 +12,10 @@
 
 Make the workshop a distributable tool. Anyone should be able to load it as an artifact, or through a skill, and design their logo and brand book with Claude.
 
+## Styles
+
+- Layer effects are data (`L.fx = [{t, a, c?}]`, max 4) rendered by `applyFx` inside `layerSVG`, so canvas, previews and exports match. Transformations rewrite curves into new layers (own group + palette). When Claude edits a styled layer through a patch, keep its `fx` unless asked.
+
 ## Storage
 
 - Projects and collections live on the user's device (IndexedDB `atelier-logo`, localStorage fallback); files `.atelier.json` (`format: "atelier-logo"`) carry projects between devices.
@@ -28,7 +32,7 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
    - Change the header mark.
    - Neutral palette: the workshop UI keeps its own look, separate from the logo being edited.
 2. **Fonts.** The fonts must re-shape the word the user types. Today `fonts.js` is prebaked for "Simulimmo", so one-click previews are tied to that word.
-3. **First open.** Ask for the brand name, the tagline and a few keywords; offer the typed word, a few starting shapes, an imported image, logo proposals generated from the keywords and key letters (moods -> colours, shapes, typefaces, monogram), the example; "Page vierge" is a plain text link next to "Plus tard".
+3. **First open.** Ask for the brand name, the tagline and a few keywords; offer the typed word, a few starting shapes, an imported image, logo concepts generated from the keywords (subjects -> pictograms, material, style + matching typeface, supports; a subject outside the library becomes a placeholder + bubble brief for Claude to draw), the example; "Page vierge" is a plain text link next to "Plus tard".
    - **Import and vectorise**: a JPEG/PNG, a photo of a hand drawing or a signature. Remove the paper texture and shadows, trace the contours, fit editable Bézier curves (detail slider, thin-stroke mode for signatures).
    - Two sources: pick a file, or take a photo. The artifact frame refuses getUserMedia (camera), so "Prendre une photo" is `<input type="file" accept="image/*" capture="environment">`: it opens the camera on tablets and phones; on a computer it opens the file picker (photo taken with the webcam app, or dropped in).
    - Uses: signature logo / photo watermark (transparent PNG), seamless textures and patterns (tile preview, pattern export).
