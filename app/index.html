@@ -317,6 +317,40 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 #histList .hl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #histList li.off .hl{text-decoration:line-through;color:var(--muted)}
 #histList .ht{font-size:11.5px;color:var(--muted);flex:none}
+.bookdlg{max-width:min(1040px,96vw);width:100%}
+.bhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bsteps{display:flex;gap:4px;margin:12px 0;flex-wrap:wrap}.bsteps button{font-size:12.5px;padding:5px 10px}
+.bsteps button.on{background:var(--night);color:var(--ivory);border-color:var(--night)}
+.bbody{min-height:380px;max-height:62vh;overflow:auto}
+.bfoot{margin-top:12px}.bfoot .sp,.bvbar .sp{flex:1}
+.bthemes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bthemes button{display:flex;flex-direction:column;gap:4px;align-items:stretch;text-align:left;padding:8px;border-radius:10px;background:#fff}
+.bthemes button.on{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
+.bthemes .bprev{display:block;aspect-ratio:595/842;max-height:220px;margin:0 auto;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.bthemes .bprev svg{width:100%;height:100%;display:block}
+.bthemes button>span:last-child{font-size:12px;color:var(--muted)}
+.broles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.brole label{font-weight:500;font-size:13px}.brole input[type=color]{width:44px;height:32px;padding:0 2px;border:1px solid var(--line);border-radius:7px}
+.brole input[type=text]{width:90px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font:13px ui-monospace,monospace}
+.bchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.bchips button{width:22px;height:22px;padding:0;border-radius:6px;border:1px solid rgba(0,0,0,.15)}
+.bpal{display:flex;height:26px;border-radius:8px;overflow:hidden;margin-top:16px;border:1px solid var(--line)}
+.btype{display:grid;grid-template-columns:1fr 1fr;gap:16px}.btype select{width:100%;padding:6px;border:1px solid var(--line);border-radius:7px;margin:4px 0 8px}
+.bspec{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow:hidden}
+.bmood{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}.bmood button{border-radius:999px;padding:5px 12px}
+.bmood button.on{background:var(--night);color:var(--ivory);border-color:var(--night)}
+.bfield{display:flex;flex-direction:column;gap:4px;font-size:13px;flex:1}.bfield textarea{min-height:70px}
+.bfield input{padding:6px 8px;border:1px solid var(--line);border-radius:7px}
+.bsecs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px;margin-bottom:14px}
+.bformats{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.bformats button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;min-width:150px;background:#fff;border-radius:10px}
+.bformats button.on{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
+.bfshape{display:block;height:54px;border:1.5px solid var(--ink);border-radius:3px}.bformats button span:last-child{font-size:12px;color:var(--muted)}
+.bookview{max-width:min(1100px,97vw);width:100%;height:94vh;padding:0;display:none;flex-direction:column}
+.bookview[open]{display:flex}
+.bvbar{padding:10px 14px;border-bottom:1px solid var(--line);background:var(--paper)}.bvbar select{padding:5px;border:1px solid var(--line);border-radius:7px}
+.bpages{flex:1;overflow:auto;padding:20px;background:#E9E9E6;display:flex;flex-direction:column;align-items:center;gap:20px}
+.bpage{width:min(100%,820px);box-shadow:0 2px 10px rgba(0,0,0,.15);background:#fff;flex:none}.bpage svg{display:block;width:100%;height:100%}
+@media (max-width:760px){.bthemes{grid-template-columns:repeat(2,1fr)}.btype{grid-template-columns:1fr}}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
 @media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
@@ -335,6 +369,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
     <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
     <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
+    <button id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
     <button id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
@@ -542,6 +577,17 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
   <ul id="histList" tabindex="-1"></ul>
 </div>
 <dialog id="choiceDlg"><h2 id="chTitle"></h2><p id="chText"></p><div class="row" id="chBtns" style="justify-content:flex-end"></div></dialog>
+<dialog id="bookDlg" class="bookdlg" aria-labelledby="bookTitle">
+  <div class="bhead"><h2 id="bookTitle">Votre charte graphique</h2><span class="muted">Quelques choix, et la charte se construit à partir de votre logo.</span></div>
+  <nav class="bsteps" id="bookSteps" aria-label="Étapes"></nav>
+  <div class="bbody" id="bookBody"></div>
+  <div class="row bfoot"><button id="bookCancel">Fermer</button><span class="sp"></span><button id="bookPrev">Précédent</button><button id="bookNext" class="primary">Suivant</button><button id="bookGen" class="primary" hidden>Générer la charte</button></div>
+</dialog>
+<dialog id="bookView" class="bookview" aria-label="Charte graphique">
+  <div class="row bvbar"><b>Charte graphique</b><select id="bookFmt" aria-label="Format des pages"><option value="a4">A4 portrait</option><option value="a4l">A4 paysage</option><option value="slides">Slides 16:9</option></select>
+    <span class="muted" id="bookMsg" role="status"></span><span class="sp"></span><button id="bookEdit">Modifier les réponses</button><button id="bookZip">Pack de fichiers (.zip)</button><button id="bookPdf" class="primary">Exporter en PDF</button><button id="bookClose">Fermer</button></div>
+  <div class="bpages" id="bookPages"></div>
+</dialog>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2031,7 +2077,7 @@ async function applyFont(f, ids){
 let wordText=GLYPHS.word;
 /* The brand the user is designing for (asked on first open). Export names and titles derive from it. */
 let brand={name:"", tagline:"", keywords:[], letters:""};
-function validBrand(v){ return v&&typeof v.name==="string"&&v.name.length<=80&&(v.letters===undefined||(typeof v.letters==="string"&&v.letters.length<=6))&&typeof v.tagline==="string"&&v.tagline.length<=160&&Array.isArray(v.keywords)&&v.keywords.length<=12&&v.keywords.every(k=>typeof k==="string"&&k.length<=40); }
+function validBrand(v){ return v&&typeof v.name==="string"&&v.name.length<=80&&(v.book===undefined||validBook(v.book))&&(v.letters===undefined||(typeof v.letters==="string"&&v.letters.length<=6))&&typeof v.tagline==="string"&&v.tagline.length<=160&&Array.isArray(v.keywords)&&v.keywords.length<=12&&v.keywords.every(k=>typeof k==="string"&&k.length<=40); }
 const brandLabel=()=>brand.name.trim()||wordText.trim()||"Logo";
 const glyphLoads={};
 function loadGlyphs(key){
@@ -2992,6 +3038,285 @@ function conceptSVG(doc, k){
     layers.forEach(l=>{ const r=layerSVG(l,{pfx:"c"+k}); defs+=r.defs; body+=r.body; });
     return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${body}</svg>`; });
 }
+
+/* ---------- Brand book ----------
+   1. A questionnaire (style, exact colours, typefaces, mood, sections and format) whose answers are kept with the brand.
+   2. Pages built as SVG from the user's logo; all text is drawn from the glyph files (exact typefaces on screen and in the PDF).
+   3. Exports: a PDF written here (one high-resolution JPEG per page, no external library) and a ZIP of deposit files. */
+const BOOK_THEMES={
+  editorial:{n:"Éditorial classique", d:"Papier crème, titres à empattements, beaucoup d'air.", bg:"#FBF8F2", ink:"#1E1E1E", muted:"#6E6860", panel:"#F1ECE2", title:"playfair", body:"lato", cover:"center"},
+  minimal:{n:"Moderne minimal", d:"Blanc, grille stricte, une seule famille.", bg:"#FFFFFF", ink:"#111111", muted:"#7A7A7A", panel:"#F3F3F3", title:"inter", body:"inter", cover:"left"},
+  bold:{n:"Audacieux", d:"Grands aplats de la couleur principale, titres compacts.", bg:"#FFFFFF", ink:"#111111", muted:"#666666", panel:"#F2F2F2", title:"bebas", body:"poppins", cover:"block"},
+  warm:{n:"Artisanal chaleureux", d:"Tons papier kraft, serif doux, esprit atelier.", bg:"#F4ECDF", ink:"#2E241B", muted:"#7A6A58", panel:"#EADFCC", title:"fraunces", body:"lato", cover:"center"},
+  luxe:{n:"Luxe", d:"Fond noir, capitales fines, accents de la couleur d'accent.", bg:"#121212", ink:"#F2EEE6", muted:"#A59F94", panel:"#1E1E1E", title:"cinzel", body:"raleway", cover:"center", dark:true},
+  tech:{n:"Tech", d:"Mode sombre, grotesque géométrique, grille visible.", bg:"#0E1116", ink:"#E8EDF2", muted:"#8B96A3", panel:"#171C23", title:"spacegrotesk", body:"inter", cover:"left", dark:true},
+};
+const BOOK_SECTIONS=[["cover","Couverture"],["intro","La marque et son ambiance"],["logo","Logo et variantes"],["space","Zone de protection et tailles minimales"],["colors","Couleurs"],["type","Typographie"],["bgs","Fonds autorisés"],["donts","À ne pas faire"],["apps","Applications"],["files","Fichiers fournis"]];
+const BOOK_FORMATS={a4:{n:"A4 portrait",d:"pour imprimer",w:595.28,h:841.89}, a4l:{n:"A4 paysage",d:"pour imprimer ou projeter",w:841.89,h:595.28}, slides:{n:"Slides 16:9",d:"pour présenter",w:960,h:540}};
+const MOOD_WORDS=["chaleureux","premium","naturel","audacieux","rassurant","joyeux","minimal","artisanal","élégant","technique","engagé","poétique","authentique","dynamique","sobre","créatif"];
+const ROLES=[["primary","Principale"],["secondary","Secondaire"],["accent","Accent"],["light","Fond clair"],["dark","Fond sombre / texte"]];
+function validBook(v){ return v&&typeof v==="object"&&BOOK_THEMES[v.theme]&&BOOK_FORMATS[v.format]&&v.colors&&ROLES.every(([k])=>HEX.test(v.colors[k]))&&typeof v.title==="string"&&typeof v.body==="string"
+  &&Array.isArray(v.mood)&&v.mood.length<=16&&Array.isArray(v.sections)&&v.sections.every(s=>BOOK_SECTIONS.some(x=>x[0]===s))&&(v.voice===undefined||(typeof v.voice==="string"&&v.voice.length<=400))
+  &&(v.site===undefined||(typeof v.site==="string"&&v.site.length<=80))&&(v.email===undefined||(typeof v.email==="string"&&v.email.length<=80)); }
+const lum=hex=>{ const c=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]; };
+const contrast=(a,b)=>{ const x=lum(a), y=lum(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); };
+const satOf=hex=>{ const h=hex2hsl(hex); return h.s*(1-Math.abs(h.l-50)/50); };
+function logoColors(){ const w=new Map();
+  for(const L of layers.filter(l=>l.visible!==false&&l.subs.length)){ const c=baseOf(L).toUpperCase(), b=bounds([L]); w.set(c,(w.get(c)||0)+(b.x1-b.x0)*(b.y1-b.y0)); }
+  return [...w.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0]); }
+function harmonies(hex){ const h=hex2hsl(hex); return [hsl2hex((h.h+180)%360,h.s,h.l), hsl2hex((h.h+30)%360,h.s,h.l), hsl2hex((h.h+330)%360,h.s,h.l), hsl2hex((h.h+120)%360,h.s,h.l), hsl2hex(h.h,h.s,Math.min(95,h.l+30)), hsl2hex(h.h,h.s,Math.max(8,h.l-30))]; }
+function defaultBook(){
+  const cs=logoColors(), byL=cs.slice().sort((a,b)=>lum(a)-lum(b));
+  const dark=byL.length&&lum(byL[0])<0.08?byL[0]:"#1A1A1A", light=byL.length&&lum(byL[byL.length-1])>0.75?byL[byL.length-1]:"#F7F5F0";
+  const mids=cs.filter(c=>c!==dark&&c!==light), primary=mids[0]||cs[0]||"#2B4C7E";
+  const rest=mids.slice(1).sort((a,b)=>satOf(b)-satOf(a)), accent=rest[0]||harmonies(primary)[0], secondary=rest[1]||harmonies(primary)[1];
+  const mood=rankMoods(brand.keywords||[]), theme={luxe:"luxe",tech:"tech",artisan:"warm",chaleur:"warm",nature:"warm",fun:"bold",minimal:"minimal",creatif:"bold",solide:"minimal",mer:"editorial"}[mood[0]]||"editorial";
+  const wordFont=(wordLayers()[0]||{}).font, wf=fontById(wordFont);
+  const kw=wordsOf(brand.keywords||[]);
+  return {theme, format:"a4", colors:{primary,secondary,accent,light,dark}, title:wf&&wf.gkey&&!wf.strike?wf.id:BOOK_THEMES[theme].title, body:BOOK_THEMES[theme].body,
+    mood:MOOD_WORDS.filter(m=>kw.includes(plainText(m).replace(/(s|x)$/,""))).slice(0,5), sections:BOOK_SECTIONS.map(s=>s[0]), voice:"", site:"", email:""};
+}
+/* ---- text drawn from glyph files ---- */
+const BK={G:{}, f:{}, n:0};
+async function bookFonts(ids){ await loadFonts(); for(const id of new Set(ids)){ if(BK.G[id]) continue; const f=fontById(id)||fontById("inter"); BK.f[id]=f; BK.G[id]=await loadGlyphs(f.gkey); } }
+function advance(str, f, G, sc){ const chars=[...(f.upper?str.toUpperCase():str)]; let pen=0; chars.forEach((ch,i)=>{ pen+=(G.adv[ch]!==undefined?G.adv[ch]:G.upem*0.3)+((G.kern&&G.kern[ch+(chars[i+1]||"")])||0); }); return pen*sc; }
+function tx(str, id, size, x, y, o={}){
+  const f=BK.f[id]||BK.f[Object.keys(BK.f)[0]], G=BK.G[id]||BK.G[Object.keys(BK.G)[0]]; if(!f||!G||!str) return {svg:"", w:0};
+  const sc=size/G.upem, w=advance(str,f,G,sc), dx=o.anchor==="middle"?-w/2:o.anchor==="end"?-w:0;
+  const {letters}=layoutText(String(str), Object.assign({},f,{strike:false}), G, 0, 0, sc);
+  const d=letters.map(l=>pathD(l.subs)).join("");
+  return {svg:d?`<path transform="translate(${r2(x+dx)} ${r2(y)})" d="${d}" fill="${o.fill||"#000"}"${o.op?` opacity="${o.op}"`:""}/>`:"", w};
+}
+function para(str, id, size, x, y, maxW, o={}){
+  const f=BK.f[id], G=BK.G[id]; if(!f||!G) return {svg:"",h:0}; const sc=size/G.upem, lh=size*(o.lh||1.45), lines=[];
+  for(const block of String(str).split("\n")){ let cur=""; for(const w of block.split(/\s+/).filter(Boolean)){ const t=cur?cur+" "+w:w; if(advance(t,f,G,sc)>maxW&&cur){ lines.push(cur); cur=w; } else cur=t; } lines.push(cur); }
+  return {svg:lines.map((l,i)=>tx(l,id,size,x,y+i*lh,o).svg).join(""), h:lines.length*lh, lines:lines.length}; }
+/* ---- the logo, placed on a page ---- */
+const visibleLayers=group=>layers.filter(l=>l.visible!==false&&l.subs.length&&(!group||l.group===group));
+function stacked(){ const mk=visibleLayers("mark"), wd=visibleLayers("word"); if(!mk.length||!wd.length) return null;
+  const bm=bounds(mk), bw=bounds(wd), s=Math.min(1,(bm.x1-bm.x0)*1.6/(bw.x1-bw.x0||1)), gap=(bm.y1-bm.y0)*0.18;
+  const cx=(bm.x0+bm.x1)/2, T=p=>p&&{x:r2(cx+(p.x-(bw.x0+bw.x1)/2)*s), y:r2(bm.y1+gap+(p.y-bw.y0)*s)};
+  return mk.concat(wd.map(L=>Object.assign({},L,{subs:L.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)})))}))); }
+function place(ls, box, o={}){ // fit layers into box {x,y,w,h}; o.mono: one flat colour; o.tf: extra transform inside
+  if(!ls||!ls.length) return {svg:"",b:null}; const b=bounds(ls), W=b.x1-b.x0||1, H=b.y1-b.y0||1, s=Math.min(box.w/W, box.h/H);
+  const tx_=box.x+(box.w-W*s)*(o.align==="left"?0:0.5)-b.x0*s, ty_=box.y+(box.h-H*s)/2-b.y0*s; const k=++BK.n; let defs="", body="";
+  for(const L of ls){ if(o.recolor){ body+=`<path d="${pathD(L.subs)}" fill="${o.recolor(baseOf(L))}"/>`; continue; }
+    if(o.mono){ const line=(L.fx||[]).find(e=>e.t==="contour"); const d=pathD(L.subs);
+      body+=line?`<path d="${d}" fill="none" stroke="${o.mono}" stroke-width="${r2(Math.max(W,H)*(0.006+line.a/100*0.03))}" stroke-linejoin="round"/>`:`<path d="${d}" fill="${o.mono}"/>`; }
+    else { const r=layerSVG(L,{pfx:"bk"+k}); defs+=r.defs; body+=r.body; } }
+  return {svg:`<g transform="translate(${r2(tx_)} ${r2(ty_)}) scale(${r2(s*1000)/1000})${o.tf||""}">${defs?`<defs>${defs}</defs>`:""}${body}</g>`, b:{x:tx_+b.x0*s, y:ty_+b.y0*s, w:W*s, h:H*s, s}}; }
+function bestOn(bg, cfg){ // colour logo if it reads on bg, else a light or dark mono version
+  const cs=logoColors(), ok=cs.length&&cs.slice(0,2).every(c=>contrast(c,bg)>=2.2); return ok?null:(lum(bg)<0.35?"#FFFFFF":cfg.colors.dark); }
+/* ---- page helpers ---- */
+const bRect=(x,y,w,h,fill,o="")=>`<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" fill="${fill}"${o}/>`;
+const okMark=(x,y,s,ok)=>ok?`<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(s)}" fill="#2E8B57"/><path d="M${r2(x-s*0.45)} ${r2(y)}l${r2(s*0.32)} ${r2(s*0.34)} ${r2(s*0.58)} ${r2(-s*0.62)}" fill="none" stroke="#fff" stroke-width="${r2(s*0.22)}" stroke-linecap="round" stroke-linejoin="round"/>`
+  :`<circle cx="${r2(x)}" cy="${r2(y)}" r="${r2(s)}" fill="#C0392B"/><path d="M${r2(x-s*0.4)} ${r2(y-s*0.4)}L${r2(x+s*0.4)} ${r2(y+s*0.4)}M${r2(x+s*0.4)} ${r2(y-s*0.4)}L${r2(x-s*0.4)} ${r2(y+s*0.4)}" stroke="#fff" stroke-width="${r2(s*0.22)}" stroke-linecap="round"/>`;
+const cmyk=hex=>{ const [r,g,b]=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255), k=1-Math.max(r,g,b); if(k>=1) return "0 0 0 100"; return [r,g,b].map(v=>Math.round((1-v-k)/(1-k)*100)).concat([Math.round(k*100)]).join(" "); };
+const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(" ");
+const mix=(a,b,t)=>"#"+[1,3,5].map(i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-t)+parseInt(b.slice(i,i+2),16)*t).toString(16).padStart(2,"0")).join("").toUpperCase();
+/* ---- pages ---- */
+function bookPages(cfg){
+  const F=BOOK_FORMATS[cfg.format], W=F.w, H=F.h, th=BOOK_THEMES[cfg.theme], C=cfg.colors, T=cfg.title, B=cfg.body, land=W>H;
+  const m=Math.round(Math.min(W,H)*0.075), cw=W-2*m, ink=th.ink, muted=th.muted, name=brand.name||wordText||"Marque";
+  const S=k=>Math.min(W,H)*k;   // sizes relative to the short side
+  const pages=[], titleOf=Object.fromEntries(BOOK_SECTIONS);
+  const all=visibleLayers(), mk=visibleLayers("mark"), wd=visibleLayers("word"), st=stacked();
+  const fitSize=(str,id,size,maxW)=>{ const w=tx(str,id,size,0,0).w; return w>maxW?size*maxW/w:size; };
+  const head=(title,sub)=>tx(title,T,fitSize(title,T,S(0.062),cw),m,m+S(0.07),{fill:ink}).svg+(sub?para(sub,B,S(0.019),m,m+S(0.07)+S(0.045),Math.min(cw,S(1.1)),{fill:muted}).svg:"");
+  const top=m+S(0.07)+S(0.1);
+  const page=(id, content, opt={})=>{ const n=pages.length+1, bg=opt.bg||th.bg;
+    const foot=opt.noFoot?"":tx(name,B,S(0.015),m,H-m*0.55,{fill:opt.footInk||muted}).svg+tx((titleOf[id]||"")+"   "+n,B,S(0.015),W-m,H-m*0.55,{fill:opt.footInk||muted,anchor:"end"}).svg;
+    pages.push({id, svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${r2(W)} ${r2(H)}" width="${r2(W)}" height="${r2(H)}">${bRect(0,0,W,H,bg)}${content}${foot}</svg>`}); };
+  const want=s=>cfg.sections.includes(s);
+  if(want("cover")){ const dark=th.cover==="block"||th.dark, bg=th.cover==="block"?C.primary:th.bg, fg=th.cover==="block"?(lum(C.primary)<0.4?"#FFFFFF":C.dark):ink;
+    const lg=place(all,{x:m,y:H*(land?0.2:0.24),w:th.cover==="left"?cw*0.62:cw,h:H*(land?0.36:0.28)},{mono:dark?bestOn(bg,cfg):null, align:th.cover==="left"?"left":"center"});
+    const ax=th.cover==="left"?m:W/2, an=th.cover==="left"?"start":"middle";
+    let c=lg.svg+tx("Charte graphique",T,S(0.07),ax,H*(land?0.74:0.7),{fill:fg,anchor:an}).svg;
+    if(brand.tagline) c+=tx(brand.tagline,B,S(0.024),ax,H*(land?0.74:0.7)+S(0.055),{fill:fg,anchor:an,op:0.8}).svg;
+    c+=tx(new Date().toLocaleDateString("fr-FR",{month:"long",year:"numeric"}),B,S(0.017),ax,H-m,{fill:fg,anchor:an,op:0.7}).svg;
+    if(th.cover!=="block") c+=bRect(0,H-S(0.018),W,S(0.018),C.primary);
+    page("cover", c, {bg, noFoot:true}); }
+  if(want("intro")){ let c=head(name, brand.tagline||"");
+    let y=top+S(0.06); const chips=(list,label,fill,txt)=>{ if(!list.length) return; c+=tx(label,B,S(0.017),m,y,{fill:muted}).svg; y+=S(0.035); let x=m;
+      for(const w of list){ const t=tx(w,B,S(0.022),0,0), pw=t.w+S(0.04); if(x+pw>W-m){ x=m; y+=S(0.055); } c+=`<rect x="${r2(x)}" y="${r2(y-S(0.03))}" width="${r2(pw)}" height="${r2(S(0.045))}" rx="${r2(S(0.022))}" fill="${fill}"/>`+tx(w,B,S(0.022),x+S(0.02),y,{fill:txt}).svg; x+=pw+S(0.012); }
+      y+=S(0.08); };
+    chips(cfg.mood,"Ambiance",C.primary,lum(C.primary)<0.4?"#FFFFFF":C.dark); chips(brand.keywords||[],"Mots-clés",th.panel,ink);
+    if(cfg.voice){ c+=tx("Ton et voix",B,S(0.017),m,y,{fill:muted}).svg; const p=para(cfg.voice,B,S(0.022),m,y+S(0.04),Math.min(cw,S(1.2)),{fill:ink}); c+=p.svg; y+=p.h+S(0.06); }
+    const lg=place(all,{x:m,y:Math.max(y,H*0.6),w:cw,h:H-m*1.6-Math.max(y,H*0.6)},{align:"left",mono:th.dark?bestOn(th.bg,cfg):null}); c+=lg.svg;
+    page("intro", c); }
+  if(want("logo")){ let c=head("Le logo","La version principale, et les variantes à utiliser selon la place et le fond.");
+    const avail=H-m*1.6-top, pw=land?cw*0.42:cw, ph=land?avail:H*0.24; c+=bRect(m,top,pw,ph,th.dark?"#FFFFFF":th.panel)+place(all,{x:m+pw*0.1,y:top+ph*0.15,w:pw*0.8,h:ph*0.7}).svg;
+    const vars=[["Version verticale",st,null,th.panel],["Symbole",mk.length?mk:null,null,th.panel],["Mot",wd.length?wd:null,null,th.panel],["Négatif",all,"#FFFFFF",C.dark],["Monochrome",all,C.dark,"#FFFFFF"],["Sur la couleur principale",all,bestOn(C.primary,cfg)||null,C.primary]].filter(v=>v[1]);
+    const gx=land?m+pw+S(0.04):m, gwAll=land?cw-pw-S(0.04):cw, gy=land?top:top+ph+S(0.05), cols=2, gw=(gwAll-(cols-1)*S(0.03))/cols, gh=(H-m*1.6-gy)/Math.ceil(vars.length/cols)-S(0.01);
+    vars.forEach(([lab,ls,mono,bg],i)=>{ const x=gx+(i%cols)*(gw+S(0.03)), y=gy+Math.floor(i/cols)*(gh+S(0.01));
+      c+=bRect(x,y,gw,gh-S(0.035),bg,` stroke="${th.dark?"none":"#E2DED6"}" stroke-width="0.6"`)+place(ls,{x:x+gw*0.12,y:y+gh*0.12,w:gw*0.76,h:gh*0.62},{mono}).svg+tx(lab,B,S(0.016),x,y+gh-S(0.008),{fill:muted}).svg; });
+    page("logo", c); }
+  if(want("space")){ let c=head("Zone de protection et tailles minimales","Laissez toujours au moins une unité X libre autour du logo. X vaut un quart de la hauteur du logo.");
+    const bw=cw*(land?0.55:0.8), bh=H*(land?0.38:0.26), lg=place(all,{x:m+bw*0.15,y:top+bh*0.18,w:bw*0.7,h:bh*0.64}), b=lg.b, X=b.h/4;
+    c+=bRect(m,top,bw,bh,th.panel)+lg.svg+`<rect x="${r2(b.x-X)}" y="${r2(b.y-X)}" width="${r2(b.w+2*X)}" height="${r2(b.h+2*X)}" fill="none" stroke="${C.accent}" stroke-width="1" stroke-dasharray="4 3"/>`;
+    for(const [x,y,w,h] of [[b.x-X,b.y-X,X,X],[b.x+b.w,b.y+b.h,X,X]]) c+=`<rect x="${r2(x)}" y="${r2(y)}" width="${r2(w)}" height="${r2(h)}" fill="${C.accent}" opacity=".25"/>`+tx("X",B,S(0.02),x+w/2,y+h/2+S(0.007),{fill:ink,anchor:"middle"}).svg;
+    const y0=land?top:top+bh+S(0.08), x0=land?m+bw+S(0.05):m, mm=2.8346;
+    c+=tx("Tailles minimales",T,S(0.03),x0,y0+S(0.03),{fill:ink}).svg;
+    const rows=[["Impression : logo complet",30,all,"30 mm"],["Impression : symbole",12,mk.length?mk:all,"12 mm"],["Écran : logo complet",150/96*25.4,all,"150 px"],["Écran : symbole",32/96*25.4,mk.length?mk:all,"32 px"]].map(([lab,w,ls,val])=>{ const bb=bounds(ls); return {lab,ls,val,w:w*mm,h:Math.max(4,w*mm*(bb.y1-bb.y0)/(bb.x1-bb.x0||1))}; });
+    const need=rows.reduce((a,r)=>a+r.h+S(0.045),0), room=H-m*1.5-(y0+S(0.07)), k=Math.min(1,room/need);   // real size when it fits
+    if(k<1) c+=tx("(échelle réduite)",B,S(0.015),x0+tx("Tailles minimales",T,S(0.03),0,0).w+S(0.02),y0+S(0.03),{fill:muted}).svg;
+    let yy=y0+S(0.07); const colW=Math.max(30*mm,150/96*25.4*mm)*k+S(0.04);
+    rows.forEach(r=>{ const w=r.w*k, h=r.h*k; c+=place(r.ls,{x:x0,y:yy,w,h},{align:"left"}).svg+tx(r.lab,B,S(0.017),x0+colW,yy+h/2-S(0.004),{fill:ink}).svg+tx(r.val+" de large au minimum",B,S(0.015),x0+colW,yy+h/2+S(0.022),{fill:muted}).svg; yy+=h+S(0.045)*k; });
+    page("space", c); }
+  if(want("colors")){ let c=head("Couleurs","Les valeurs exactes. Proportions conseillées : 60 % fond clair, 30 % principale, 10 % accent.");
+    const cols=land?5:3, sw=(cw-(cols-1)*S(0.025))/cols, sh=S(land?0.2:0.17);
+    ROLES.forEach(([k,lab],i)=>{ const x=m+(i%cols)*(sw+S(0.025)), y=top+Math.floor(i/cols)*(sh+S(0.2)), col=C[k], t=lum(col)<0.45?"#FFFFFF":"#111111";
+      c+=`<rect x="${r2(x)}" y="${r2(y)}" width="${r2(sw)}" height="${r2(sh)}" rx="4" fill="${col}" stroke="${lum(col)>0.9?"#DDD":"none"}"/>`+tx(lab,B,S(0.02),x+S(0.015),y+S(0.035),{fill:t}).svg;
+      [["HEX",col],["RVB",rgb(col)],["CMJN",cmyk(col)]].forEach(([a,v],j)=>{ c+=tx(a+"  "+v,B,S(0.015),x,y+sh+S(0.03)+j*S(0.026),{fill:ink}).svg; });
+      const cw2=contrast(col,"#FFFFFF"), cb=contrast(col,"#000000"); c+=tx("Texte "+(cw2>=cb?"blanc":"noir")+" : contraste "+(Math.max(cw2,cb)).toFixed(1)+(Math.max(cw2,cb)>=4.5?" (AA)":""),B,S(0.013),x,y+sh+S(0.03)+3*S(0.026),{fill:muted}).svg;
+      [0.75,0.5,0.25].forEach((t2,j)=>{ c+=bRect(x+j*sw/3,y+sh-S(0.025),sw/3,S(0.025),mix(col,"#FFFFFF",1-t2)); }); });
+    const yb=top+Math.ceil(ROLES.length/cols)*(sh+S(0.2))+S(0.02), bh=S(0.045);
+    if(yb+bh<H-m*1.4){ c+=tx("Proportions",B,S(0.017),m,yb,{fill:muted}).svg; c+=bRect(m,yb+S(0.015),cw*0.6,bh,C.light,` stroke="#DDD" stroke-width="0.5"`)+bRect(m+cw*0.6,yb+S(0.015),cw*0.3,bh,C.primary)+bRect(m+cw*0.9,yb+S(0.015),cw*0.1,bh,C.accent); }
+    page("colors", c); }
+  if(want("type")){ let c=head("Typographie","Deux familles : une pour les titres, une pour les textes.");
+    const half=land?cw/2-S(0.03):cw, fT=BK.f[T], fB=BK.f[B];
+    c+=tx("Aa",T,S(land?0.2:0.16),m,top+S(land?0.17:0.14),{fill:C.primary}).svg+tx(fT?fT.name:"",T,S(0.035),m+S(land?0.3:0.24),top+S(0.06),{fill:ink}).svg+tx("Titres",B,S(0.017),m+S(land?0.3:0.24),top+S(0.1),{fill:muted}).svg;
+    c+=para("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789 éèàçô « ! ? » €",T,S(0.026),m,top+S(0.24),half,{fill:ink,lh:1.35}).svg;
+    const bx=land?m+cw/2+S(0.03):m, by=land?top:top+S(0.42);
+    c+=tx("Aa",B,S(land?0.2:0.16),bx,by+S(land?0.17:0.14),{fill:C.secondary}).svg+tx(fB?fB.name:"",B,S(0.035),bx+S(land?0.3:0.24),by+S(0.06),{fill:ink}).svg+tx("Textes",B,S(0.017),bx+S(land?0.3:0.24),by+S(0.1),{fill:muted}).svg;
+    c+=para("Portez ce vieux whisky au juge blond qui fume. "+(brand.tagline?brand.tagline+". ":"")+"Les textes courants utilisent cette famille, en corps 9 à 11 pt, avec un interlignage d'environ 1,4.",B,S(0.02),bx,by+S(0.24),half,{fill:ink}).svg;
+    const hy=land?top+S(0.42):by+S(0.45), hx=land?m:m, step=land?S(0.058):S(0.07); [["Titre 1",T,0.05],["Titre 2",T,0.034],["Texte courant",B,0.02],["Légende",B,0.015]].forEach(([l,f,s],i)=>{ if(hy+i*step<H-m*1.3) c+=tx(l,f,S(s),hx,hy+i*step,{fill:ink}).svg; });
+    page("type", c); }
+  if(want("bgs")){ let c=head("Fonds autorisés","Le logo garde toujours un contraste suffisant avec son fond.");
+    const bgs=[["Blanc","#FFFFFF"],["Fond clair",C.light],["Principale",C.primary],["Secondaire",C.secondary],["Fond sombre",C.dark],["Dégradé","grad"]];
+    const cols=land?3:2, gw=(cw-(cols-1)*S(0.03))/cols, gh=(H-m*1.6-top)/Math.ceil(bgs.length/cols)-S(0.04);
+    c+=`<defs><linearGradient id="bkgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.primary}"/><stop offset="1" stop-color="${C.secondary}"/></linearGradient></defs>`;
+    bgs.forEach(([lab,bg],i)=>{ const x=m+(i%cols)*(gw+S(0.03)), y=top+Math.floor(i/cols)*(gh+S(0.04)), mid=bg==="grad"?mix(C.primary,C.secondary,0.5):bg, mono=bestOn(mid,cfg);
+      const ok=contrast(mono||logoColors()[0]||C.dark, mid)>=2.2;
+      c+=bRect(x,y,gw,gh-S(0.035),bg==="grad"?"url(#bkgrad)":bg,` stroke="#DDD" stroke-width="0.5"`)+place(all,{x:x+gw*0.12,y:y+gh*0.15,w:gw*0.76,h:gh*0.55},{mono}).svg+tx(lab+(mono?" : version "+(mono==="#FFFFFF"?"blanche":"sombre"):""),B,S(0.016),x+S(0.03),y+gh-S(0.008),{fill:muted}).svg+okMark(x+S(0.012),y+gh-S(0.014),S(0.011),ok); });
+    page("bgs", c); }
+  if(want("donts")){ let c=head("À ne pas faire","Le logo s'utilise tel quel : ni déformé, ni recoloré, ni recomposé.");
+    const b=bounds(all), cx=(b.x0+b.x1)/2, cy=(b.y0+b.y1)/2, hue=c0=>hsl2hex((hex2hsl(c0).h+150)%360,hex2hsl(c0).s,hex2hsl(c0).l);
+    const moved=st&&wd.length?wd.concat(mk.map(L=>Object.assign({},L,{subs:L.subs.map(s=>s.map(n=>({x:n.x+(b.x1-b.x0)*0.5,y:n.y+(b.y1-b.y0)*0.6,i:n.i&&{x:n.i.x+(b.x1-b.x0)*0.5,y:n.i.y+(b.y1-b.y0)*0.6},o:n.o&&{x:n.o.x+(b.x1-b.x0)*0.5,y:n.o.y+(b.y1-b.y0)*0.6}})))}))):null;
+    const tiles=[["Ne pas déformer",all,{tf:` translate(${cx} ${cy}) scale(1.45 0.7) translate(${-cx} ${-cy})`}],["Ne pas pivoter",all,{tf:` rotate(-14 ${cx} ${cy})`}],["Ne pas changer les couleurs",all,{recolor:hue}],
+      ["Pas d'effets non prévus",all.map(L=>Object.assign({},L,{fx:[{t:"ombre",a:90},{t:"neon",a:60}]})),{}],["Pas de fond qui nuit à la lecture",all,{bg:mix(logoColors()[0]||C.dark,"#FFFFFF",0.25)}],["Ne pas recomposer",moved||all,{tf:moved?"":` scale(-1 1) translate(${-2*cx} 0)`}]];
+    const cols=land?3:2, gw=(cw-(cols-1)*S(0.03))/cols, gh=(H-m*1.6-top)/Math.ceil(tiles.length/cols)-S(0.04);
+    tiles.forEach(([lab,ls,o],i)=>{ const x=m+(i%cols)*(gw+S(0.03)), y=top+Math.floor(i/cols)*(gh+S(0.04));
+      c+=bRect(x,y,gw,gh-S(0.035),o.bg||th.panel)+place(ls,{x:x+gw*0.15,y:y+gh*0.15,w:gw*0.7,h:gh*0.55},{tf:o.tf||"",recolor:o.recolor}).svg+okMark(x+S(0.015),y+gh-S(0.014),S(0.011),false)+tx(lab,B,S(0.016),x+S(0.035),y+gh-S(0.008),{fill:muted}).svg; });
+    page("donts", c); }
+  if(want("apps")){ let c=head("Applications","Quelques exemples d'usage, à adapter.");
+    const cardW=land?cw*0.3:cw*0.45, cardH=cardW*55/85, y=top;
+    c+=`<g>${bRect(m,y,cardW,cardH,C.light,` stroke="#DDD" stroke-width="0.5"`)}${place(all,{x:m+cardW*0.12,y:y+cardH*0.25,w:cardW*0.76,h:cardH*0.5}).svg}</g>`;
+    const bx=m+cardW+S(0.03); c+=bRect(bx,y,cardW,cardH,C.dark)+(mk.length?place(mk,{x:bx+cardW*0.08,y:y+cardH*0.12,w:cardW*0.2,h:cardH*0.3},{mono:bestOn(C.dark,cfg)}).svg:"")
+      +tx(name,T,S(0.026),bx+cardW*0.08,y+cardH*0.66,{fill:"#FFFFFF"}).svg+tx([cfg.site,cfg.email].filter(Boolean).join("   ")||"site.fr   contact@site.fr",B,S(0.014),bx+cardW*0.08,y+cardH*0.82,{fill:"#FFFFFF",op:0.75}).svg;
+    c+=tx("Carte de visite (85 x 55 mm), recto et verso",B,S(0.015),m,y+cardH+S(0.03),{fill:muted}).svg;
+    const ay=land?y:y+cardH+S(0.08), ax=land?bx+cardW+S(0.04):m, r=S(0.09);
+    c+=`<circle cx="${r2(ax+r)}" cy="${r2(ay+r)}" r="${r2(r)}" fill="${C.primary}"/>`+place(mk.length?mk:all,{x:ax+r*0.45,y:ay+r*0.45,w:r*1.1,h:r*1.1},{mono:bestOn(C.primary,cfg)}).svg+tx("Avatar des réseaux sociaux",B,S(0.015),ax,ay+2*r+S(0.03),{fill:muted}).svg;
+    const wy=land?y+cardH+S(0.09):ay+2*r+S(0.08), wh=S(0.09); c+=bRect(m,wy,cw,wh,th.dark?"#FFFFFF":"#FFFFFF",` stroke="#DDD" stroke-width="0.5"`)+place(all,{x:m+S(0.03),y:wy+wh*0.22,w:cw*0.3,h:wh*0.56},{align:"left"}).svg;
+    ["Accueil","Atelier","Contact"].forEach((t,i)=>{ c+=tx(t,B,S(0.016),W-m-S(0.03)-i*S(0.13),wy+wh/2+S(0.006),{fill:C.dark,anchor:"end"}).svg; });
+    c+=bRect(m,wy+wh,cw,S(0.12),C.primary)+tx(brand.tagline||name,T,S(0.034),m+S(0.03),wy+wh+S(0.075),{fill:lum(C.primary)<0.4?"#FFFFFF":C.dark}).svg+tx("En-tête de site web",B,S(0.015),m,wy+wh+S(0.15),{fill:muted}).svg;
+    page("apps", c); }
+  if(want("files")){ let c=head("Fichiers fournis","Le pack de dépôt contient :");
+    const P=filePfx(); const list=[[P+"-logo-couleur.svg / .png","Logo complet en couleur"],[P+"-logo-negatif.svg / .png","Logo blanc pour fonds sombres"],[P+"-logo-noir.svg / .png","Logo monochrome sombre"],[P+"-logo-vertical.svg / .png","Version verticale"],[P+"-symbole.svg / .png","Symbole seul"],[P+"-mot.svg","Mot seul"],[P+"-favicon-512.png","Icône d'application et favicon"],[P+"-charte.pdf","Ce document"],["LISEZMOI.txt","Couleurs, polices et licences"]];
+    list.forEach(([f,d],i)=>{ const y=top+i*S(0.06); c+=tx(f,B,S(0.019),m,y,{fill:ink}).svg+tx(d,B,S(0.016),m+cw*0.55,y,{fill:muted}).svg+bRect(m,y+S(0.02),cw,0.5,"#D8D3CA"); });
+    page("files", c); }
+  return {pages, W, H};
+}
+/* ---- questionnaire ---- */
+let bookCfg=null, bookStep=0;
+const BOOK_STEPS=["Style","Couleurs","Typographie","Ambiance","Contenu et format"];
+async function openBook(){
+  if(!visibleLayers().length){ toast("Dessinez d'abord votre logo : la charte se construit à partir de lui."); return; }
+  bookCfg=validBook(brand.book)?clone(brand.book):defaultBook(); bookStep=0; $("#bookDlg").showModal(); await renderBookStep(); }
+async function renderBookStep(){
+  const el=$("#bookBody"), cfg=bookCfg;
+  $("#bookSteps").innerHTML=BOOK_STEPS.map((s,i)=>`<button data-bstep="${i}" class="${i===bookStep?"on":""}">${i+1}. ${s}</button>`).join("");
+  $("#bookPrev").disabled=bookStep===0; $("#bookNext").hidden=bookStep===BOOK_STEPS.length-1; $("#bookGen").hidden=bookStep!==BOOK_STEPS.length-1;
+  if(bookStep===0){ el.innerHTML=`<p class="muted">Choisissez l'esprit de la charte. Chaque aperçu utilise votre logo.</p><div class="bthemes">${Object.entries(BOOK_THEMES).map(([k,t])=>`<button data-btheme="${k}" class="${cfg.theme===k?"on":""}"><span class="bprev" data-bp="${k}">…</span><b>${t.n}</b><span>${t.d}</span></button>`).join("")}</div>`;
+    await bookFonts(Object.values(BOOK_THEMES).flatMap(t=>[t.title,t.body]).concat([cfg.title,cfg.body]));
+    for(const k of Object.keys(BOOK_THEMES)){ const c2=Object.assign(clone(cfg),{theme:k,title:BOOK_THEMES[k].title,body:BOOK_THEMES[k].body,format:"a4",sections:["cover"]}); const pg=bookPages(c2).pages[0]; const s=document.querySelector(`[data-bp="${k}"]`); if(s) s.innerHTML=pg.svg; } }
+  if(bookStep===1){ const cs=logoColors();
+    el.innerHTML=`<p class="muted">Les couleurs viennent de votre logo. Ajustez chaque rôle à la valeur exacte voulue (cliquez une pastille ou saisissez un code).</p>
+      <div class="broles">${ROLES.map(([k,l])=>`<div class="brole"><label>${l}</label><div class="row"><input type="color" value="${cfg.colors[k]}" data-bcol="${k}" aria-label="${l}"><input type="text" value="${cfg.colors[k]}" maxlength="7" data-bhex="${k}" aria-label="Code ${l}"></div>
+        <div class="bchips">${[...new Set((k==="light"?["#FFFFFF","#F7F5F0","#FAF7F2"]:k==="dark"?["#111111","#1A1A1A","#22252B"]:[]).concat(cs, harmonies(cfg.colors.primary)))].slice(0,10).map(c=>`<button style="background:${c}" data-bset="${k}" data-c="${c}" title="${c}" aria-label="${c}"></button>`).join("")}</div></div>`).join("")}</div>
+      <div class="bpal">${ROLES.map(([k])=>`<span style="background:${cfg.colors[k]};flex:${k==="light"?6:k==="primary"?3:k==="accent"?1:1.5}"></span>`).join("")}</div>`; }
+  if(bookStep===2){ const lat=(FONTS||[]).filter(f=>f.gkey&&!f.strike);
+    el.innerHTML=`<p class="muted">Police des titres et police des textes. Par défaut : la police de votre mot pour les titres.</p><div class="btype">
+      ${[["title","Titres"],["body","Textes"]].map(([k,l])=>`<div><label>${l}</label><select data-bfont="${k}">${lat.map(f=>`<option value="${f.id}" ${cfg[k]===f.id?"selected":""}>${esc(f.name)}</option>`).join("")}</select><div class="bspec" data-bspec="${k}">…</div></div>`).join("")}</div>`;
+    await bookFonts([cfg.title,cfg.body]);
+    for(const k of ["title","body"]){ const id=cfg[k], t=tx(k==="title"?(brand.name||wordText||"Marque"):"Portez ce vieux whisky au juge blond qui fume.",id,k==="title"?40:18,0,k==="title"?44:24,{fill:"#1D1D1F"}); const s=document.querySelector(`[data-bspec="${k}"]`); if(s) s.innerHTML=`<svg viewBox="0 0 ${r2(Math.max(t.w,10))} ${k==="title"?56:32}" style="max-width:100%;height:${k==="title"?56:32}px">${t.svg}</svg>`; } }
+  if(bookStep===3){ el.innerHTML=`<p class="muted">Les mots qui décrivent l'ambiance de la marque (ils figurent dans la charte).</p>
+      <div class="bmood">${[...new Set(MOOD_WORDS.concat(cfg.mood))].map(w=>`<button data-bmood="${esc(w)}" class="${cfg.mood.includes(w)?"on":""}" aria-pressed="${cfg.mood.includes(w)}">${esc(w)}</button>`).join("")}</div>
+      <label class="bfield">Ton et voix <span class="muted">(facultatif)</span><textarea id="bVoice" maxlength="400" placeholder="Ex. : Simple et chaleureux, on tutoie, on parle du geste et de la matière.">${esc(cfg.voice||"")}</textarea></label>`; }
+  if(bookStep===4){ el.innerHTML=`<p class="muted">Sections à inclure et format des pages.</p><div class="bsecs">${BOOK_SECTIONS.map(([k,l])=>`<label class="chk"><input type="checkbox" data-bsec="${k}" ${cfg.sections.includes(k)?"checked":""}> ${l}</label>`).join("")}</div>
+      <div class="bformats">${Object.entries(BOOK_FORMATS).map(([k,f])=>`<button data-bformat="${k}" class="${cfg.format===k?"on":""}"><span class="bfshape" style="aspect-ratio:${f.w}/${f.h}"></span><b>${f.n}</b><span>${f.d}</span></button>`).join("")}</div>
+      <div class="row"><label class="bfield">Site <input id="bSite" maxlength="80" value="${esc(cfg.site||"")}" placeholder="site.fr"></label><label class="bfield">E-mail <input id="bMail" maxlength="80" value="${esc(cfg.email||"")}" placeholder="contact@site.fr"></label></div>`; }
+}
+function readBookInputs(){ const v=$("#bVoice"); if(v) bookCfg.voice=v.value.slice(0,400); const s=$("#bSite"); if(s) bookCfg.site=s.value.slice(0,80); const e=$("#bMail"); if(e) bookCfg.email=e.value.slice(0,80); }
+$("#bookDlg").addEventListener("click", async e=>{ const b=e.target.closest("button"); if(!b) return; const d=b.dataset;
+  if(d.bstep!==undefined){ readBookInputs(); bookStep=+d.bstep; renderBookStep(); }
+  else if(d.btheme){ bookCfg.theme=d.btheme; const th=BOOK_THEMES[d.btheme]; if(!fontById(bookCfg.body)||bookCfg.body===BOOK_THEMES.editorial.body) bookCfg.body=th.body; document.querySelectorAll("[data-btheme]").forEach(x=>x.classList.toggle("on",x===b)); }
+  else if(d.bset){ bookCfg.colors[d.bset]=d.c; renderBookStep(); }
+  else if(d.bmood){ const i=bookCfg.mood.indexOf(d.bmood); if(i>=0) bookCfg.mood.splice(i,1); else if(bookCfg.mood.length<8) bookCfg.mood.push(d.bmood); b.classList.toggle("on",i<0); b.setAttribute("aria-pressed",String(i<0)); }
+  else if(d.bformat){ bookCfg.format=d.bformat; document.querySelectorAll("[data-bformat]").forEach(x=>x.classList.toggle("on",x===b)); } });
+$("#bookDlg").addEventListener("input", e=>{ const d=e.target.dataset;
+  if(d.bcol){ bookCfg.colors[d.bcol]=e.target.value.toUpperCase(); const h=document.querySelector(`[data-bhex="${d.bcol}"]`); if(h) h.value=bookCfg.colors[d.bcol]; }
+  if(d.bhex&&HEX.test(e.target.value)){ bookCfg.colors[d.bhex]=e.target.value.toUpperCase(); const c=document.querySelector(`[data-bcol="${d.bhex}"]`); if(c) c.value=bookCfg.colors[d.bhex]; } });
+$("#bookDlg").addEventListener("change", e=>{ const d=e.target.dataset;
+  if(d.bfont){ bookCfg[d.bfont]=e.target.value; renderBookStep(); }
+  if(d.bsec){ const s=d.bsec; bookCfg.sections=BOOK_SECTIONS.map(x=>x[0]).filter(k=>k===s?e.target.checked:bookCfg.sections.includes(k)); } });
+$("#bookPrev").onclick=()=>{ readBookInputs(); bookStep=Math.max(0,bookStep-1); renderBookStep(); };
+$("#bookNext").onclick=()=>{ readBookInputs(); bookStep=Math.min(BOOK_STEPS.length-1,bookStep+1); renderBookStep(); };
+$("#bookCancel").onclick=()=>$("#bookDlg").close();
+$("#bookGen").onclick=async()=>{ readBookInputs(); if(!bookCfg.sections.length){ toast("Cochez au moins une section."); return; }
+  brand=Object.assign({},brand,{book:clone(bookCfg)}); scheduleSave("palette"); projectTouch(); $("#bookDlg").close(); await showBook(); };
+$("#bookBtn").onclick=openBook;
+/* ---- viewer and exports ---- */
+let bookDoc=null;
+async function showBook(){
+  const cfg=brand.book; await bookFonts([cfg.title,cfg.body]); bookDoc=bookPages(cfg);
+  $("#bookFmt").value=cfg.format; $("#bookPages").innerHTML=bookDoc.pages.map((p,i)=>`<div class="bpage" style="aspect-ratio:${bookDoc.W}/${bookDoc.H}" aria-label="Page ${i+1}">${p.svg}</div>`).join("");
+  $("#bookMsg").textContent=bookDoc.pages.length+" pages · "+BOOK_FORMATS[cfg.format].n; $("#bookView").showModal(); }
+$("#bookFmt").onchange=async e=>{ brand.book.format=e.target.value; scheduleSave("palette"); await showBook(); };
+$("#bookEdit").onclick=()=>{ $("#bookView").close(); openBook(); };
+$("#bookClose").onclick=()=>$("#bookView").close();
+function svgToJpeg(svg, W, H, scale){ return new Promise((ok,ko)=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement("canvas"); c.width=Math.round(W*scale); c.height=Math.round(H*scale);
+  const g=c.getContext("2d"); g.fillStyle="#FFFFFF"; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height); c.toBlob(b=>b?ok(b):ko(new Error("canvas")),"image/jpeg",0.92); };
+  img.onerror=()=>ko(new Error("image")); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg); }); }
+/* minimal PDF: one JPEG image per page (DCTDecode), sizes in points */
+async function buildPdf(doc, title){
+  const enc=new TextEncoder(), parts=[], offs=[]; let len=0; const push=x=>{ const b=typeof x==="string"?enc.encode(x):x; parts.push(b); len+=b.length; };
+  const imgs=[]; for(const p of doc.pages){ const blob=await svgToJpeg(p.svg, doc.W, doc.H, 2.6); imgs.push({bytes:new Uint8Array(await blob.arrayBuffer()), w:Math.round(doc.W*2.6), h:Math.round(doc.H*2.6)}); }
+  const n=imgs.length, kids=[]; for(let i=0;i<n;i++) kids.push((4+3*i)+" 0 R");
+  const obj=(id,body)=>{ offs[id]=len; push(id+" 0 obj\n"); push(body); push("\nendobj\n"); };
+  push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
+  obj(2,`<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${n} >>`);
+  const t=String(title).replace(/[()\\]/g," ").replace(/[^\x20-\x7E]/g,c=>({é:"e",è:"e",ê:"e",à:"a",ç:"c",ô:"o",É:"E",î:"i",û:"u"}[c]||" "));
+  obj(3,`<< /Title (${t}) /Producer (Atelier du Logo par John Apple) >>`);
+  imgs.forEach((im,i)=>{ const pid=4+3*i, cid=pid+1, iid=pid+2, W=r2(doc.W), H=r2(doc.H), cs=`q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q`;
+    obj(pid,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${iid} 0 R >> >> /Contents ${cid} 0 R >>`);
+    obj(cid,`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`);
+    offs[iid]=len; push(`${iid} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${im.w} /Height ${im.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${im.bytes.length} >>\nstream\n`); push(im.bytes); push("\nendstream\nendobj\n"); });
+  const total=4+3*n, xref=len; let x=`xref\n0 ${total}\n0000000000 65535 f \n`; for(let i=1;i<total;i++) x+=String(offs[i]).padStart(10,"0")+" 00000 n \n";
+  push(x); push(`trailer\n<< /Size ${total} /Root 1 0 R /Info 3 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(parts,{type:"application/pdf"}); }
+async function saveBlob(name, blob){ if(caps.downloads){ await caps.downloads.save({filename:name, data:blob}); return; }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+$("#bookPdf").onclick=async()=>{ if(!bookDoc) return; $("#bookMsg").textContent="Préparation du PDF…";
+  try{ const blob=await buildPdf(bookDoc, brandLabel()+" - Charte graphique"), name=filePfx()+"-charte"+(brand.book.format==="a4"?"":"-"+brand.book.format)+".pdf"; await saveBlob(name, blob); $("#bookMsg").textContent="PDF enregistré : "+name+" ("+Math.round(blob.size/1024)+" Ko)"; }
+  catch(err){ $("#bookMsg").textContent=err&&err.message==="image"?"Conversion impossible dans ce navigateur.":dlError(err); } };
+function standalone(ls, mono, pad){ const g=place(ls,{x:0,y:0,w:1000,h:1000},{mono}); if(!g.b) return ""; const p=(pad||0.06)*Math.max(g.b.w,g.b.h);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(g.b.x-p)} ${r2(g.b.y-p)} ${r2(g.b.w+2*p)} ${r2(g.b.h+2*p)}" width="${r2(g.b.w+2*p)}" height="${r2(g.b.h+2*p)}"><title>${esc(brandLabel())}</title>${g.svg}</svg>`; }
+async function buildBookZip(){
+  const JSZip=await loadJSZip(), zip=new JSZip(), P=filePfx(), cfg=brand.book, all=visibleLayers(), mk=visibleLayers("mark"), st=stacked();
+  const files=[["logo-couleur",all,null],["logo-negatif",all,"#FFFFFF"],["logo-noir",all,cfg.colors.dark],["logo-vertical",st,null],["symbole",mk.length?mk:null,null],["mot",visibleLayers("word").length?visibleLayers("word"):null,null]].filter(f=>f[1]);
+  for(const [n,ls,mono] of files){ const svg=standalone(ls,mono); zip.file(P+"-"+n+".svg", svg); if(n!=="mot") zip.file(P+"-"+n+".png", await rasterize(svg, 2048, "", "png")); }
+  const icon=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" rx="112" fill="${cfg.colors.primary}"/>${place(mk.length?mk:all,{x:96,y:96,w:320,h:320},{mono:bestOn(cfg.colors.primary,cfg)}).svg}</svg>`;
+  zip.file(P+"-favicon-512.png", await rasterize(icon, 512, "", "png"));
+  if(bookDoc) zip.file(P+"-charte.pdf", await buildPdf(bookDoc, brandLabel()+" - Charte graphique"));
+  zip.file("LISEZMOI.txt", "Pack de dépôt : "+brandLabel()+"\n\nCouleurs\n"+ROLES.map(([k,l])=>"- "+l+" : "+cfg.colors[k]+"  RVB "+rgb(cfg.colors[k])+"  CMJN "+cmyk(cfg.colors[k])).join("\n")+
+    "\n\nPolices\n- Titres : "+(fontById(cfg.title)||{}).name+"\n- Textes : "+(fontById(cfg.body)||{}).name+"\n- Logo : "+usedFonts().join(", ")+"\nPolices libres (SIL OFL 1.1 ou Apache 2.0), converties en contours dans les fichiers du logo.\n\nCréé avec l'Atelier du Logo par John Apple.\n");
+  return zip.generateAsync({type:"blob"}); }
+$("#bookZip").onclick=async()=>{ $("#bookMsg").textContent="Préparation du pack de fichiers…";
+  try{ const blob=await buildBookZip(), name=filePfx()+"-pack-de-depot.zip"; await saveBlob(name, blob); $("#bookMsg").textContent="Pack enregistré : "+name; }
+  catch(err){ $("#bookMsg").textContent=err&&err.message==="jszip"?"Impossible de charger l'outil d'archive : exportez le PDF seul.":dlError(err); } };
+window.__book={bookPages, buildPdf, buildBookZip, defaultBook, get doc(){ return bookDoc; }};
 
 /* ---------- First open: brand, tagline, keywords, then a starting point ----------
    Shown while no brand name is known (and not postponed with "Plus tard"); the "Marque et départ" button reopens it.

@@ -20,6 +20,10 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 
 - `hist` entries store per-layer diffs (`d.ents[id] = [before, after]` as stable JSON, plus order and palettes). `toggleEntry` puts a property back only if it still holds this entry's value, so later changes are never overwritten. Use `commit(before, label)` with a clear French label for new actions; Claude's patches are recorded as "Claude : <note>". The history is saved in the project (`doc.hist`).
 
+## Brand book
+
+- Answers live in `brand.book` (theme, format, colour roles, title/body fonts, mood, voice, sections, site, email). Pages are SVG built by `bookPages(cfg)`; all text is drawn from glyph files (`tx`, `para`), so the PDF shows the exact typefaces. `buildPdf` writes the PDF itself (one JPEG per page); `buildBookZip` makes the deposit pack.
+
 ## Storage
 
 - Projects and collections live on the user's device (IndexedDB `atelier-logo`, localStorage fallback); files `.atelier.json` (`format: "atelier-logo"`) carry projects between devices.
@@ -40,7 +44,7 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
    - **Import and vectorise**: a JPEG/PNG, a photo of a hand drawing or a signature. Remove the paper texture and shadows, trace the contours, fit editable Bézier curves (detail slider, thin-stroke mode for signatures).
    - Two sources: pick a file, or take a photo. The artifact frame refuses getUserMedia (camera), so "Prendre une photo" is `<input type="file" accept="image/*" capture="environment">`: it opens the camera on tablets and phones; on a computer it opens the file picker (photo taken with the webcam app, or dropped in).
    - Uses: signature logo / photo watermark (transparent PNG), seamless textures and patterns (tile preview, pattern export).
-4. **Brand book.** Generate the brand-book page (logo variants, backgrounds, colours, type, clear space, deposit files) from the user's logo, as was done for Simulimmo.
+4. **Brand book.** (done: questionnaire, pages, PDF, deposit pack) Generate the brand-book page (logo variants, backgrounds, colours, type, clear space, deposit files) from the user's logo, as was done for Simulimmo.
    - Before generating, once the logo is done: a series of questions with choices to pick (style, exact colours, type, mood), so the book matches what the user wants rather than Claude's defaults.
    - PDF export: A4 portrait for print, and landscape for slides.
 5. **Distribution.**
