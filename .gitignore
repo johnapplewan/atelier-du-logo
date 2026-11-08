@@ -2,3 +2,4 @@ node_modules/
 tests/*.png
 tests/*.json
 .DS_Store
+about.local.json

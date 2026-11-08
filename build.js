@@ -59,5 +59,17 @@ function layoutWord(str, G) {
 const glyphs = { word: DEFAULT_WORD, baseline: BASELINE, letters: layoutWord(DEFAULT_WORD, loadGlyphFile("instrument")) };
 const template = fs.readFileSync(path.join(root, "src/template.html"), "utf8");
 if (!template.includes("__GLYPHS__")) throw new Error("src/template.html has no __GLYPHS__ placeholder");
-fs.writeFileSync(path.join(root, "app/index.html"), template.replace("__GLYPHS__", () => JSON.stringify(glyphs)));
+// Support links for "À propos", kept out of git: about.local.json ({paypal, wero}, git-ignored) or env vars.
+// In the artifact they normally come from the db doc "atelier/about" instead. The Wero number is encoded
+// ("~" + base64 of the reversed text) and only decoded when a visitor clicks "Afficher le numéro".
+function aboutLinks() {
+  let o = {};
+  const f = path.join(root, "about.local.json");
+  if (fs.existsSync(f)) o = JSON.parse(fs.readFileSync(f, "utf8"));
+  const paypal = process.env.ATELIER_PAYPAL || o.paypal || "", wero = process.env.ATELIER_WERO || o.wero || "";
+  const enc = wero ? "~" + Buffer.from([...wero].reverse().join(""), "utf8").toString("base64") : "";
+  return { paypal, wero: enc };
+}
+const about = aboutLinks();
+fs.writeFileSync(path.join(root, "app/index.html"), template.replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
 console.log("app/index.html written (default word: " + DEFAULT_WORD + ")");

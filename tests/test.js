@@ -107,9 +107,11 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   await p.click("#aboutBtn");
   const ab = await p.evaluate(() => [document.querySelector("#aboutDlg").open, /éditeur vectoriel/.test(document.querySelector("#aboutDlg").textContent), document.querySelector("#abSupport").innerHTML]);
   check("about: presentation shown, no support button while links are empty", () => { assert.ok(ab[0] && ab[1]); assert.strictEqual(ab[2], ""); });
-  await p.evaluate(() => { ABOUT.paypal = "https://www.paypal.com/paypalme/exemple"; ABOUT.wero = "06 00 00 00 00"; renderAbout(); });
-  const sup = await p.evaluate(() => [document.querySelector("#abSupport a.paypal").getAttribute("href"), /Wero/.test(document.querySelector("#abSupport").textContent)]);
-  check("about: PayPal link and Wero identifier once configured", () => assert.deepStrictEqual(sup, ["https://www.paypal.com/paypalme/exemple", true]));
+  // Wero as build.js encodes it: "~" + base64 of the reversed number, shown only after a click
+  await p.evaluate(() => { setAbout({ paypal: "https://www.paypal.com/paypalme/exemple", wero: "~" + btoa("06 00 00 00 12".split("").reverse().join("")) }); renderAbout(); });
+  const sup = await p.evaluate(() => [document.querySelector("#abSupport a.paypal").getAttribute("href"), /12/.test(document.querySelector("#abSupport").textContent)]);
+  await p.click("#abWeroShow"); const shown = await p.textContent("#abWeroVal");
+  check("about: PayPal link; Wero number hidden until « Afficher le numéro »", () => { assert.deepStrictEqual(sup, ["https://www.paypal.com/paypalme/exemple", false]); assert.strictEqual(shown, "06 00 00 00 12"); });
   await p.click("#abClose");
 
   // tablet: tap a node and drag it by touch
