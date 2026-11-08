@@ -1,0 +1,2 @@
+Instrument Serif (Rodrigo Fuenzalida, Jordan Egstad) and Inter (Rasmus Andersson) are used for the workshop interface.
+Both are licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org
