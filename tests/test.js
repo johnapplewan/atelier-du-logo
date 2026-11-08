@@ -16,7 +16,7 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   await p.screenshot({ path: __dirname + "/s1.png" });
 
   // pen: select the frame and move its first node (84,28) up by 14
-  await p.keyboard.press("p");
+  await p.keyboard.press("a");
   let q = await ws(45, 200); await p.mouse.click(q.x, q.y);
   const selLayer = (await p.evaluate(() => __atelier.sel)).layer;
   check("frame selected", () => assert.strictEqual(selLayer, "cadre"));

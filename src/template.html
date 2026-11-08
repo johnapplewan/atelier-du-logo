@@ -36,7 +36,7 @@ aside{background:var(--paper);overflow:auto;padding:14px;min-height:0}
 aside.left{border-right:1px solid var(--line)}
 aside.right{border-left:1px solid var(--line)}
 section{margin-bottom:20px}
-.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
 .tools button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-size:11px}
 .tools svg{width:18px;height:18px}
 .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -56,7 +56,7 @@ label.chk{display:flex;align-items:center;gap:6px;font-size:13px}
 .ib.act{color:var(--brass)}
 #stage{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--cream)}
 #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;display:block}
-#cv.t-move{cursor:default}#cv.t-points{cursor:crosshair}#cv.t-bubble{cursor:copy}#cv.t-hand,#cv.panning{cursor:grab}
+#cv.t-move{cursor:default}#cv.t-points,#cv.t-pen,#cv.t-pencil{cursor:crosshair}#cv.t-bubble{cursor:copy}#cv.t-hand,#cv.panning{cursor:grab}
 .zoom{position:absolute;right:12px;bottom:12px;display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:4px;align-items:center}
 .zoom button{border:0;padding:4px 8px}
 .zoom span{min-width:46px;text-align:center;font-size:12px;color:var(--muted)}
@@ -381,13 +381,16 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
       <h2>Outils</h2>
       <div class="tools" role="toolbar" aria-label="Outils">
         <button data-tool="move" title="Sélection et déplacement de calque (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3l14 8-6 1.5L10 19z"/></svg>Calque</button>
-        <button data-tool="points" title="Plume : points et poignées (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20c4-1 6-4 8-8s4-7 8-8"/><rect x="2.5" y="18.5" width="3" height="3" fill="currentColor"/><rect x="18.5" y="2.5" width="3" height="3" fill="currentColor"/><circle cx="12" cy="12" r="1.8"/></svg>Plume</button>
+        <button data-tool="pen" title="Plume : créer un tracé · clic = point, clic-glisser = courbe, clic sur le 1er point = fermer, Entrée = tracé ouvert (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l5 9-5 9-5-9z"/><circle cx="12" cy="12" r="1.6"/><path d="M12 13.6V21"/></svg>Plume</button>
+        <button data-tool="pencil" title="Crayon : dessin à main levée, sensible à la pression du stylet (N)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg>Crayon</button>
+        <button data-tool="points" title="Points : déplacer les points et leurs poignées · Alt+glisser un point = sortir ses poignées · double-clic = point anguleux / lisse (A)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20c4-1 6-4 8-8s4-7 8-8"/><rect x="2.5" y="18.5" width="3" height="3" fill="currentColor"/><rect x="18.5" y="2.5" width="3" height="3" fill="currentColor"/><circle cx="12" cy="12" r="1.8"/></svg>Points</button>
         <button data-tool="shape" title="Formes : rectangle, arrondi, ellipse, polygone, étoile (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="10" height="10" rx="2"/><circle cx="15.5" cy="15.5" r="5.5"/></svg>Forme</button>
         <button data-tool="text" title="Texte : cliquez pour écrire un nouveau texte (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg>Texte</button>
         <button data-tool="bubble" title="Bulle d'annotation (B)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H10l-4 4v-4H4z"/></svg>Bulle</button>
         <button data-tool="hand" title="Déplacer la vue (H ou Espace)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 12V6a1.5 1.5 0 013 0v5V4.5a1.5 1.5 0 013 0V11V6a1.5 1.5 0 013 0v8c0 4-2.5 6-6 6-2.5 0-4-1-5.5-3L4 13.5a1.4 1.4 0 012.2-1.7L8 14"/></svg>Vue</button>
       </div>
       <div id="shapeOpts" class="shapeopts" hidden></div>
+      <div id="drawOpts" class="shapeopts" hidden></div>
       <button id="importBtn" class="wide" title="Fichier ou photo d'un dessin, d'une signature, d'une texture : transformé en courbes">Importer une image…</button>
     </section>
     <section>
@@ -649,6 +652,7 @@ function validLayers(v){
     && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && l.live.family.length<=60
          && Number.isFinite(l.live.w0) && Number.isFinite(l.live.h0) && Number.isFinite(l.live.bx) && Number.isFinite(l.live.by) && l.subs.length===1 && l.subs[0].length===4))
     && validFx(l.fx)
+    && (l.open===undefined || typeof l.open==="boolean") && (l.sw===undefined || (Number.isFinite(l.sw) && l.sw>0 && l.sw<=400))
     && typeof l.fill==="string" && /^#[0-9a-fA-F]{6}$/.test(l.fill) && Array.isArray(l.subs)
     && l.subs.every(s => Array.isArray(s) && s.length>=2 && s.every(n => n && Number.isFinite(n.x) && Number.isFinite(n.y) && pt(n.i) && pt(n.o))));
 }
@@ -662,23 +666,25 @@ function segPts(a,b){ return [a, H(a,"o"), H(b,"i"), b]; }
 function isLine(a,b){ return !a.o && !b.i; }
 function bez(p,t){ const u=1-t; return {x:u*u*u*p[0].x+3*u*u*t*p[1].x+3*u*t*t*p[2].x+t*t*t*p[3].x, y:u*u*u*p[0].y+3*u*u*t*p[1].y+3*u*t*t*p[2].y+t*t*t*p[3].y}; }
 const f2 = n => String(r2(n));
-function pathD(subs){
+/* open = drawn line (no closing segment): pen paths left open, pencil strokes */
+function pathD(subs, open){
   let d="";
   for(const s of subs){
     d += "M"+f2(s[0].x)+" "+f2(s[0].y);
-    for(let j=1;j<=s.length;j++){
+    for(let j=1;j<=(open?s.length-1:s.length);j++){
       const a=s[j-1], b=s[j%s.length];
       if(isLine(a,b)) d += "L"+f2(b.x)+" "+f2(b.y);
       else { const p=segPts(a,b); d += "C"+f2(p[1].x)+" "+f2(p[1].y)+" "+f2(p[2].x)+" "+f2(p[2].y)+" "+f2(b.x)+" "+f2(b.y); }
     }
-    d += "Z";
+    if(!open) d += "Z";
   }
   return d;
 }
+const layerD=L=>pathD(L.subs, !!L.open);
 function nearestOnLayer(L, pt){
   let best=null;
   L.subs.forEach((s,si)=>{
-    for(let j=0;j<s.length;j++){
+    for(let j=0;j<(L.open?s.length-1:s.length);j++){
       const p=segPts(s[j], s[(j+1)%s.length]);
       let bt=0, bd=Infinity;
       for(let i=0;i<=32;i++){ const t=i/32, q=bez(p,t), d=(q.x-pt.x)**2+(q.y-pt.y)**2; if(d<bd){bd=d;bt=t;} }
@@ -850,12 +856,17 @@ function renderArt(){
 function renderOverlay(){
   const k=view.k, L=layerById(sel.layer);
   let h="";
-  for(const id of selLayers()){ const M=layerById(id); if(M && M!==L && M.visible) h += `<path d="${pathD(M.subs)}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" pointer-events="none"/>`; }
+  for(const id of selLayers()){ const M=layerById(id); if(M && M!==L && M.visible) h += `<path d="${layerD(M)}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" pointer-events="none"/>`; }
   if(L && L.visible){
-    h += `<path d="${pathD(L.subs)}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" pointer-events="none"/>`;
-    if(tool==="points" && !L.locked){
+    h += `<path d="${layerD(L)}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" pointer-events="none"/>`;
+    if((tool==="points"||tool==="pen") && !L.locked){
       const sz=7/k;
       const sn=selPoints().length>1 ? null : sel.node;
+      if(showAllHandles){ // every handle of the layer, ready to drag
+        L.subs.forEach((sub,si)=>sub.forEach((nd,ni)=>{ for(const key of ["i","o"]){ const p=nd[key]; if(!p) continue;
+          h += `<line x1="${nd.x}" y1="${nd.y}" x2="${p.x}" y2="${p.y}" stroke="${C.brass}" stroke-width="${0.8/k}" opacity=".8" pointer-events="none"/>`;
+          h += `<circle data-h="${si},${ni},${key}" cx="${p.x}" cy="${p.y}" r="${3.8/k}" fill="#fff" stroke="${C.brass}" stroke-width="${1.1/k}"/>`; } }));
+      }
       if(sn){
         const sub=L.subs[sn.s], n=sub[sn.n], prev=sub[(sn.n-1+sub.length)%sub.length], next=sub[(sn.n+1)%sub.length];
         const hs=[[n,"i",sn.n],[n,"o",sn.n],[prev,"o",(sn.n-1+sub.length)%sub.length],[next,"i",(sn.n+1)%sub.length]];
@@ -865,12 +876,12 @@ function renderOverlay(){
       }
     }
   }
-  if(tool==="points"){
+  if(tool==="points"||tool==="pen"){
     // nodes of the selected layer and of every layer holding selected points
     const ids=new Set(selPoints().map(x=>x.l)); if(L && L.visible && !L.locked) ids.add(L.id);
     const sz=7/k;
     for(const id of ids){ const M=layerById(id); if(!M||!M.visible||M.locked||M.kind==="live") continue;
-      if(M!==L) h += `<path d="${pathD(M.subs)}" fill="none" stroke="${C.brass}" stroke-width="${1/k}" stroke-dasharray="${4/k} ${3/k}" pointer-events="none"/>`;
+      if(M!==L) h += `<path d="${layerD(M)}" fill="none" stroke="${C.brass}" stroke-width="${1/k}" stroke-dasharray="${4/k} ${3/k}" pointer-events="none"/>`;
       M.subs.forEach((s,si)=>s.forEach((n,ni)=>{
         const on = isSel(id,si,ni);
         h += `<rect data-node="${esc(id)}|${si}|${ni}" x="${n.x-sz/2}" y="${n.y-sz/2}" width="${sz}" height="${sz}" fill="${on?C.brass:"#fff"}" stroke="${on?C.night:C.brass}" stroke-width="${1.3/k}"/>`;
@@ -899,6 +910,12 @@ function renderOverlay(){
     const a=drag.start, b=drag.cur;
     h += `<rect x="${Math.min(a.x,b.x)}" y="${Math.min(a.y,b.y)}" width="${Math.abs(a.x-b.x)}" height="${Math.abs(a.y-b.y)}" fill="rgba(79,91,213,.10)" stroke="${C.brass}" stroke-width="${1/k}" stroke-dasharray="${4/k} ${3/k}" pointer-events="none"/>`;
   }
+  if(tool==="pen" && penPath && penPath.length){ const near=penCursor&&penPath.length>1&&Math.hypot(penCursor.x-penPath[0].x,penCursor.y-penPath[0].y)<9/k;
+    h += `<path d="${pathD([penPath],true)}" fill="none" stroke="${C.brass}" stroke-width="${1.6/k}" pointer-events="none"/>`;
+    if(penCursor && !(drag&&drag.type==="penhandle")){ const a=penPath[penPath.length-1]; h += `<path d="M${a.x} ${a.y}${a.o?`C${a.o.x} ${a.o.y} ${penCursor.x} ${penCursor.y} ${penCursor.x} ${penCursor.y}`:`L${penCursor.x} ${penCursor.y}`}" fill="none" stroke="${C.brass}" stroke-width="${1/k}" stroke-dasharray="${4/k} ${3/k}" pointer-events="none"/>`; }
+    penPath.forEach((n,i)=>{ for(const key of ["i","o"]) if(n[key]) h += `<line x1="${n.x}" y1="${n.y}" x2="${n[key].x}" y2="${n[key].y}" stroke="${C.brass}" stroke-width="${0.8/k}" pointer-events="none"/><circle cx="${n[key].x}" cy="${n[key].y}" r="${3/k}" fill="#fff" stroke="${C.brass}" stroke-width="${1/k}" pointer-events="none"/>`;
+      h += `<rect x="${n.x-4/k}" y="${n.y-4/k}" width="${8/k}" height="${8/k}" fill="${i===0&&near?C.brass:"#fff"}" stroke="${C.brass}" stroke-width="${1.3/k}" pointer-events="none"/>`; }); }
+  if(drag && drag.type==="pencil" && drag.pts.length>1) h += `<polyline points="${drag.pts.map(p=>r2(p.x)+","+r2(p.y)).join(" ")}" fill="none" stroke="${C.night}" stroke-width="${Math.max(1/k, drawPrefs.size*(drawPrefs.mode==="brush"?0.8:1))}" stroke-linecap="round" stroke-linejoin="round" opacity=".55" pointer-events="none"/>`;
   ovl.innerHTML = h;
 }
 function renderPins(){
@@ -1010,7 +1027,7 @@ $("#layers").addEventListener("click", e=>{ if(window.__tp) return;
 let sizeLock=true;
 function renderInspector(){
   const el=$("#inspector"), L=layerById(sel.layer);
-  if(!L){ el.innerHTML=`<h2>Sélection</h2><p class="empty">Cliquez sur une forme ou un calque. Avec la Plume, cliquez un point pour le déplacer, ou un segment pour ajouter un point.</p>`; return; }
+  if(!L){ el.innerHTML=`<h2>Sélection</h2><p class="empty">Cliquez sur une forme ou un calque. Avec l'outil Points, cliquez un point pour le déplacer, ou un segment pour ajouter un point.</p>`; return; }
   const npts=L.subs.reduce((a,s)=>a+s.length,0);
   const ids=selLayers(), multiL=ids.length>1;
   const zoneOf=ids.map(id=>layerById(id).zone), same=zoneOf.every(z=>z===zoneOf[0]);
@@ -1028,6 +1045,8 @@ function renderInspector(){
       <p class="muted" style="margin:4px 0 0">Palette : ${esc(LP.name)}${G?" (groupe « "+esc(G.name)+" »)":""}</p></div>
     <div class="rotrow"><span class="muted">Rotation</span><button data-rot="-90" title="−90°">↺ 90°</button><button data-rot="-15" title="−15° ( [ )">↺ 15°</button><button data-rot="15" title="+15° ( ] )">↻ 15°</button><button data-rot="90" title="+90°">↻ 90°</button>
       <input type="number" id="rotDeg" value="0" step="1" aria-label="Angle en degrés"><button id="rotGo">OK</button></div>
+    ${!multiL&&L.open?`<div class="stylebox"><label class="geo">Épaisseur du trait <input type="range" id="swR" min="0.5" max="60" step="0.5" value="${L.sw||4}"><span id="swV">${L.sw||4}</span></label>
+      <div class="row"><button id="closePath">Fermer le tracé</button><button id="toShape">Convertir en forme pleine</button></div></div>`:""}
     ${multiL?`<p class="muted">Maj + clic pour ajouter ou retirer un calque.</p>`:""}
     <p class="muted">${L.subs.length} contour${L.subs.length>1?"s":""} · ${npts} points${L.locked?" · verrouillé":""}</p>`;
   const sn=sel.node, many=selPoints();
@@ -1040,7 +1059,7 @@ function renderInspector(){
       <div class="row" style="margin-top:8px"><button id="delPt" class="danger">Supprimer le point</button></div>
       <div class="row"><button id="cornerPt" title="Retire les poignées">Point anguleux</button><button id="smoothPt" title="Poignées alignées">Point lisse</button></div>`;
   } else if(tool!=="points"){
-    h+=`<p class="muted">Passez à la Plume (P) pour éditer les points.</p>`;
+    h+=`<p class="muted">Passez à l'outil Points (A) pour éditer les points.</p>`;
   }
   el.innerHTML=h;
   el.querySelectorAll("[data-rot]").forEach(b=>b.addEventListener("click",()=>rotateSelection(+b.dataset.rot)));
@@ -1057,6 +1076,10 @@ function renderInspector(){
   $("#opR").onchange=()=>{ if(opBefore){ const b=opBefore; opBefore=null; commit(b); } };
   $("#blendSel").onchange=e=>{ const v=e.target.value; if(!BLEND_IDS.has(v)) return; const b=snapshot(); SL.forEach(M=>{ if(v==="normal") delete M.blend; else M.blend=v; }); commit(b); };
   bindStyleSection(SL);
+  if($("#swR")){ let sb=null; $("#swR").oninput=e=>{ if(!sb) sb=snapshot(); L.sw=+e.target.value; $("#swV").textContent=e.target.value; renderArt(); };
+    $("#swR").onchange=()=>{ if(sb){ const b=sb; sb=null; commit(b,"Épaisseur du trait"); } };
+    $("#closePath").onclick=()=>{ const b=snapshot(); delete L.open; delete L.sw; commit(b,"Tracé fermé"); };
+    $("#toShape").onclick=()=>strokeToShape(L); }
   if($("#rotGo")) $("#rotGo").addEventListener("click",()=>{ const d=parseFloat($("#rotDeg").value); if(Number.isFinite(d)&&d) rotateSelection(d); });
   el.querySelectorAll("[data-zone]").forEach(b=>b.addEventListener("click",()=>{ const b0=snapshot(), z=+b.dataset.zone; ids.forEach(id=>{ layerById(id).zone=z; }); commit(b0); }));
   if(tool==="points" && many.length>1){
@@ -1081,8 +1104,9 @@ function deleteNode(){
   // group by contour, delete from the highest index down
   const groups={}; for(const p of pts){ const k=p.l+"|"+p.s; (groups[k]=groups[k]||[]).push(p.n); }
   for(const k in groups){ const [l,si]=k.split("|"); const s=layerById(l).subs[+si];
-    for(const n of groups[k].sort((a,b)=>b-a)){ if(s.length<=3){ kept++; continue; } s.splice(n,1); } }
-  if(kept) toast("Un contour garde au moins 3 points : "+kept+" point(s) conservé(s).");
+    const min=layerById(l).open?2:3;
+    for(const n of groups[k].sort((a,b)=>b-a)){ if(s.length<=min){ kept++; continue; } s.splice(n,1); } }
+  if(kept) toast("Un contour garde au moins 3 points (2 pour un trait) : "+kept+" point(s) conservé(s).");
   sel.multi=[]; sel.node=null; commit(b);
 }
 
@@ -1109,22 +1133,25 @@ let fitted=false;
 /* ---------- Tools ---------- */
 const HINTS = {
   move:"Calque : Maj+clic = ajouter · glisser dans le vide = sélection multiple · rond au-dessus ou R / Maj+R = rotation · Ctrl+G grouper · Ctrl+D dupliquer.",
-  points:"Plume : glisser dans le vide = sélection multiple · Maj+clic = ajouter · Maj = précision ×0,1 · Ctrl = poignée horizontale/verticale · Alt = poignée opposée en miroir · Alt+flèches = 0,1 · Suppr = supprimer.",
+  pen:"Plume : clic = point anguleux · clic-glisser = courbe (Alt : poignées indépendantes) · clic sur le 1er point = forme fermée · Entrée = tracé ouvert · Retour arrière = dernier point · Échap = terminer.",
+  pencil:"Crayon : dessinez à main levée (pression du stylet prise en compte) · revenir au point de départ = forme fermée · Lissage et mode dans les options de l'outil.",
+  points:"Points : Alt+glisser un point = sortir ses poignées · double-clic = anguleux / lisse · glisser dans le vide = sélection multiple · Maj+clic = ajouter · Maj = précision ×0,1 · Ctrl = poignée horizontale/verticale · Alt = poignée opposée en miroir · Alt+flèches = 0,1 · Suppr = supprimer.",
   bubble:"Bulle : cliquez sur le dessin pour poser une annotation, puis écrivez ou enregistrez une note vocale.",
   hand:"Vue : glissez pour déplacer. Ctrl + molette ou boutons pour zoomer.",
   text:"Texte : cliquez sur le dessin pour créer un bloc, tapez le texte à droite puis Entrée. Le bouton F change sa police.",
   shape:"Forme : glissez pour dessiner · Maj = proportions égales · Alt = depuis le centre."
 };
 function setTool(t){
+  if(tool==="pen" && t!=="pen" && penPath) finishPen(false);
   tool=t; cv.setAttribute("class","t-"+t);
   document.querySelectorAll("[data-tool]").forEach(b=>{ b.classList.toggle("on",b.dataset.tool===t); b.setAttribute("aria-pressed",b.dataset.tool===t); });
-  $("#hint").textContent=HINTS[t]; if(t!=="points") sel.node=null; renderOverlay(); renderInspector(); if(window.renderMini) renderMini(); renderShapeOpts();
+  $("#hint").textContent=HINTS[t]; if(t!=="points"&&t!=="pen") sel.node=null; renderOverlay(); renderInspector(); if(window.renderMini) renderMini(); renderShapeOpts(); renderDrawOpts();
 }
 document.querySelectorAll("[data-tool]").forEach(b=>b.addEventListener("click",()=>setTool(b.dataset.tool)));
 
 /* ---------- Collapsible panels ---------- */
 const mainEl=document.querySelector("main");
-const TOOL_LABEL={move:"Calque (V)",points:"Plume (P)",shape:"Forme (M)",text:"Texte (T)",bubble:"Bulle (B)",hand:"Vue (H)"};
+const TOOL_LABEL={move:"Calque (V)",pen:"Plume (P)",pencil:"Crayon (N)",points:"Points (A)",shape:"Forme (M)",text:"Texte (T)",bubble:"Bulle (B)",hand:"Vue (H)"};
 function toolIcon(t){ return document.querySelector(`.tools [data-tool="${t}"] svg`).outerHTML; }
 function renderMini(){
   $("#miniTool").innerHTML=toolIcon(tool); $("#miniTool").title="Outil : "+TOOL_LABEL[tool]+" · cliquer pour changer";
@@ -1169,6 +1196,10 @@ cv.addEventListener("pointerdown", e=>{
   if(tool==="bubble"){ addNote(w); return; }
   if(tool==="shape"){ drag={type:"shape", start:w, cur:null}; return; }
   if(tool==="text"){ addTextBlock({x:r2(w.x), y:r2(w.y)}); return; }
+  if(tool==="pen"){ const P={x:snapV(w.x),y:snapV(w.y)};
+    if(penPath && penPath.length>1 && Math.hypot(w.x-penPath[0].x,w.y-penPath[0].y)<9/view.k){ finishPen(true); return; }
+    if(!penPath) penPath=[]; const node={x:P.x,y:P.y,i:null,o:null}; penPath.push(node); drag={type:"penhandle", node, start:P}; renderOverlay(); return; }
+  if(tool==="pencil"){ const pr=e.pointerType==="pen"&&e.pressure>0?e.pressure:0.5; drag={type:"pencil", pts:[{x:w.x,y:w.y,p:pr}], pen:e.pointerType==="pen"}; return; }
   const lid=t.dataset && t.dataset.layer;
   if(tool==="move"){
     if(lid){
@@ -1184,7 +1215,13 @@ cv.addEventListener("pointerdown", e=>{
     if(t.dataset.h){ const [s,n,key]=t.dataset.h.split(","); const node=L.subs[+s][+n];
       drag={type:"handle",p:node[key],key,anchor:node,start:w,ox:node[key].x,oy:node[key].y,before:snapshot()}; return; }
     if(t.dataset.node){
-      const parts=t.dataset.node.split("|"), nl=parts[0], s=+parts[1], n=+parts[2];
+      const parts=t.dataset.node.split("|"), nl=parts[0], s=+parts[1], n=+parts[2], now=performance.now();
+      if(lastNodeTap && now-lastNodeTap.t<380 && lastNodeTap.key===t.dataset.node && !e.shiftKey && !layerById(nl).locked){
+        lastNodeTap=null; const b=snapshot(), kind=smoothNodeAt(layerById(nl),s,n); sel.layer=nl; sel.node={s,n}; sel.multi=[{l:nl,s,n}]; commit(b, "Point "+kind); toast("Point "+kind+"."); return; }
+      lastNodeTap={t:now, key:t.dataset.node};
+      if(e.altKey && !layerById(nl).locked){ // pull symmetric handles out of the point
+        const nd=layerById(nl).subs[s][n], before=snapshot(); nd.o={x:nd.x,y:nd.y}; nd.i={x:nd.x,y:nd.y};
+        sel.layer=nl; sel.node={s,n}; sel.multi=[{l:nl,s,n}]; drag={type:"handle",p:nd.o,key:"o",anchor:nd,start:w,ox:nd.x,oy:nd.y,before,pull:true}; renderAll(); return; }
       if(e.shiftKey){ // add / remove from the selection
         const cur=selPoints(); const i=cur.findIndex(x=>x.l===nl&&x.s===s&&x.n===n);
         if(i>=0) cur.splice(i,1); else cur.push({l:nl,s,n});
@@ -1208,6 +1245,7 @@ cv.addEventListener("pointerdown", e=>{
 });
 cv.addEventListener("pointermove", e=>{
   if(pointers.has(e.pointerId)) pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(tool==="pen" && penPath && !drag){ penCursor=screenToWorld(e); renderOverlay(); }
   if(pinch && pointers.size===2){ const [a,b]=[...pointers.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y), cx=(a.x+b.x)/2, cy=(a.y+b.y)/2;
     const r=cv.getBoundingClientRect(); view.tx+=cx-pinch.cx; view.ty+=cy-pinch.cy; zoomAt(d/pinch.d, cx-r.left, cy-r.top); pinch={d,cx,cy}; return; }
   if(!drag) return;
@@ -1232,6 +1270,10 @@ cv.addEventListener("pointermove", e=>{
   if(drag.type==="rotate"){ let a=Math.atan2(w.y-drag.c.y,w.x-drag.c.x)-drag.a0; let deg=a*180/Math.PI; if(e.shiftKey) deg=Math.round(deg/15)*15; a=deg*Math.PI/180;
     drag.group.forEach((L,i)=>{ L.subs=clone(drag.orig[i]); L.subs.forEach(s=>s.forEach(n=>rotNode(n,drag.c,a))); });
     $("#hint").textContent="Rotation "+Math.round(deg*10)/10+"°"+(e.shiftKey?" (pas de 15°)":" · Maj = pas de 15°"); renderArt(); renderOverlay(); return; }
+  if(drag.type==="penhandle"){ const n=drag.node, dx=w.x-n.x, dy=w.y-n.y; if(Math.hypot(dx,dy)<3/view.k){ n.o=null; n.i=null; renderOverlay(); return; }
+    n.o={x:snapV(w.x),y:snapV(w.y)}; if(!e.altKey || !n.i) n.i={x:r2(2*n.x-n.o.x),y:r2(2*n.y-n.o.y)}; penCursor=w; renderOverlay(); return; }
+  if(drag.type==="pencil"){ const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e]; for(const ev of (evs.length?evs:[e])){ const q=screenToWorld(ev), last=drag.pts[drag.pts.length-1];
+      if(Math.hypot(q.x-last.x,q.y-last.y)>0.6/view.k) drag.pts.push({x:q.x,y:q.y,p:drag.pen&&ev.pressure>0?ev.pressure:0.5}); } renderOverlay(); return; }
   if(drag.type==="pin"){ drag.note.x=r2(drag.ox+w.x-drag.start.x); drag.note.y=r2(drag.oy+w.y-drag.start.y); drag.moved=true; renderPins(); return; }
   // Maj = precise movement (x0.1, no grid); Ctrl/Cmd on a handle = horizontal/vertical lock; Alt on a handle = mirror the opposite handle
   const last=drag.last||drag.start, fine=e.shiftKey, f=fine?0.1:1;
@@ -1259,6 +1301,8 @@ function endPointer(e){
   if(!drag) return;
   const d=drag; drag=null; cv.classList.remove("panning"); $("#hint").textContent=HINTS[tool];
   if(d.type==="pin"){ if(d.moved) scheduleSave("notes"); return; }
+  if(d.type==="penhandle"){ renderOverlay(); return; }
+  if(d.type==="pencil"){ finishPencil(d.pts); return; }
   if(d.type==="shape"){ if(d.cur){ d.box=shapeBox(d,e); finishShape(d); } renderAll(); return; }
   if(d.type==="gp"){ return; }
   if(d.type==="lmarquee"){
@@ -1282,7 +1326,7 @@ function endPointer(e){
     }
     renderAll(); return;
   }
-  if(d.before) commit(d.before);
+  if(d.before) commit(d.before, d.pull?"Poignées sorties":undefined);
 }
 cv.addEventListener("pointerup", endPointer); cv.addEventListener("pointercancel", endPointer);
 
@@ -1296,6 +1340,9 @@ function startNodesDrag(w, main, before){
 window.addEventListener("keydown", e=>{
   if(e.target.closest && e.target.closest("input,textarea,select,dialog")) return;
   const mod=e.ctrlKey||e.metaKey;
+  if(tool==="pen" && penPath){
+    if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); finishPen(false); return; }
+    if(e.key==="Backspace"||e.key==="Delete"){ e.preventDefault(); penPath.pop(); if(!penPath.length) penPath=null; renderOverlay(); return; } }
   if(mod && e.key.toLowerCase()==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if(mod && e.key.toLowerCase()==="y"){ e.preventDefault(); redo(); return; }
   if(mod && e.key.toLowerCase()==="a" && tool==="points"){ const L=layerById(sel.layer); if(L){ e.preventDefault(); sel.multi=[]; L.subs.forEach((s,si)=>s.forEach((n,ni)=>sel.multi.push({l:L.id,s:si,n:ni}))); renderAll(); } return; }
@@ -1316,7 +1363,7 @@ window.addEventListener("keydown", e=>{
   if(e.key===" "){ spaceDown=true; cv.classList.add("panning"); e.preventDefault(); return; }
   if(e.key==="Delete"||e.key==="Backspace"){ if(tool==="points"&&sel.node){ e.preventDefault(); deleteNode(); } return; }
   const k=e.key.toLowerCase();
-  if(k==="v") setTool("move"); else if(k==="m") setTool("shape"); else if(k==="t") setTool("text"); else if(k==="p"||k==="a") setTool("points"); else if(k==="b") setTool("bubble"); else if(k==="h") setTool("hand");
+  if(k==="v") setTool("move"); else if(k==="m") setTool("shape"); else if(k==="t") setTool("text"); else if(k==="a") setTool("points"); else if(k==="p") setTool("pen"); else if(k==="n") setTool("pencil"); else if(k==="b") setTool("bubble"); else if(k==="h") setTool("hand");
   else if(k==="0") fit(); else if(k==="+"||k==="=") zoomCenter(1.25); else if(k==="-") zoomCenter(0.8);
   else if(e.key.startsWith("Arrow")){
     const L=layerById(sel.layer); if((!L||L.locked) && !(tool==="points"&&selPoints().length)) return; e.preventDefault();
@@ -1688,6 +1735,9 @@ function layerSVG0(L, opts){
     return liveSVG(L,opts,m?`url(#${m[1]})`:primary(p),r.defs); }
   const p=paintOf(L), d=pathD(L.subs), id=(opts.pfx||"g")+"-"+L.id.replace(/[^\w-]/g,"");
   const attrs=opts.attrs||"";
+  if(L.open){ const od=pathD(L.subs,true), col=typeof p==="string"?p:(p.c?p.c[0]:mixHex(p.p.map(q=>q.c))), sw=r2(L.sw||4);
+    const hit=/data-layer/.test(attrs)?`<path ${attrs} d="${od}" fill="none" stroke="rgba(0,0,0,0)" stroke-width="${r2(Math.max(sw+10,14))}"/>`:"";
+    return {defs:"", body:`${hit}<path ${attrs} d="${od}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`}; }
   if(typeof p==="string") return {defs:"", body:`<path ${attrs} d="${d}" fill="${p}"/>`};
   if(p.t==="lin"){
     const r=p.a*Math.PI/180, dx=Math.cos(r)/2, dy=Math.sin(r)/2;
@@ -1963,10 +2013,95 @@ function renderShapeOpts(){
   el.innerHTML=`<div class="kinds">${kinds.map(([k,t])=>`<button data-sk="${k}" class="${k===shapeKind?"on":""}">${t}</button>`).join("")}</div>
     ${shapeKind==="round"?`<label class="geo">Rayon <input type="number" min="0" max="200" value="${shapeR}" data-so="r"></label>`:""}
     ${shapeKind==="poly"||shapeKind==="star"?`<label class="geo">${shapeKind==="star"?"Branches":"Côtés"} <input type="number" min="3" max="24" value="${shapeSides}" data-so="n"></label>`:""}
-    <p class="muted" style="margin:6px 0 0">Glissez sur le dessin. Maj = proportions égales, Alt = depuis le centre. Ensuite, la Plume édite ses points.</p>`;
+    <p class="muted" style="margin:6px 0 0">Glissez sur le dessin. Maj = proportions égales, Alt = depuis le centre. Ensuite, l'outil Points (A) édite ses points.</p>`;
 }
 $("#shapeOpts").addEventListener("click",e=>{ const b=e.target.closest("[data-sk]"); if(b){ shapeKind=b.dataset.sk; renderShapeOpts(); } });
 $("#shapeOpts").addEventListener("change",e=>{ const k=e.target.dataset.so; if(k==="r") shapeR=Math.max(0,+e.target.value||0); if(k==="n") shapeSides=Math.max(3,Math.min(24,+e.target.value||6)); });
+
+/* ---------- Pen (Plume) and pencil (Crayon) ----------
+   Pen: click = corner point, click-drag = smooth point (Alt: independent handles), click on the first point = closed
+   shape, Enter / Escape = open path (a drawn line, L.open + L.sw). Pencil: freehand, smoothed and fitted into editable
+   curves; "Trait" makes a line, "Pinceau" a filled brush shape whose width follows the stylus pressure. */
+let penPath=null, penCursor=null, showAllHandles=false, drawN=0;
+const drawPrefs={mode:"line", size:4, smooth:45, pressure:true};
+try{ const v=JSON.parse(localStorage.getItem("atelier-logo-draw")||"null"); if(v){ Object.assign(drawPrefs, v); showAllHandles=!!v.handles; } }catch(_){}
+const saveDrawPrefs=()=>{ try{ localStorage.setItem("atelier-logo-draw", JSON.stringify(Object.assign({handles:showAllHandles}, drawPrefs))); }catch(_){} };
+function drawFill(){ const ref=layerById(sel.layer), P=palOf(ref||{}); const z=ref&&Number.isInteger(ref.zone)?ref.zone:0; return {zone:z, fill:primary(P.colors[z]||palette[0]||EX.ink), grp:ref&&ref.grp}; }
+function finishPen(closed){
+  const pts=penPath; penPath=null; penCursor=null;
+  if(!pts || pts.length<2 || (closed && pts.length<3 && !pts.some(n=>n.o))){ renderOverlay(); if(pts&&pts.length===1) toast("Un tracé a besoin d'au moins deux points."); return; }
+  const b=snapshot(), c=drawFill(), id=newLayerId("trace");
+  const L={visible:true, locked:false, id, name:(closed?"Forme":"Trait")+" à la plume "+(++drawN), group:"mark", fill:c.fill, zone:c.zone, subs:[pts.map(n=>({x:r2(n.x),y:r2(n.y),i:n.i&&{x:r2(n.i.x),y:r2(n.i.y)},o:n.o&&{x:r2(n.o.x),y:r2(n.o.y)}}))]};
+  if(!closed){ L.open=true; L.sw=drawPrefs.size; const s=L.subs[0]; s[0].i=null; s[s.length-1].o=null; }
+  if(c.grp) L.grp=c.grp;
+  layers.push(L); sel={layer:id,node:null,layers:[id]}; commit(b, closed?"Forme à la plume":"Trait à la plume");
+  toast(closed?"Forme fermée créée.":"Tracé ouvert créé : son épaisseur se règle à droite.");
+}
+/* open polyline -> nodes with smooth handles (ends without outer handles) */
+function fitOpen(poly, cornerCos){
+  const n=poly.length; return poly.map((p,i)=>{ if(i===0||i===n-1){ const q=poly[i===0?1:n-2], l=Math.hypot(q.x-p.x,q.y-p.y)/3, ux=(q.x-p.x)/(l*3||1), uy=(q.y-p.y)/(l*3||1);
+      const h={x:r2(p.x+ux*l),y:r2(p.y+uy*l)}; return {x:r2(p.x),y:r2(p.y),i:i===0?null:h,o:i===0?h:null}; }
+    const a=poly[i-1], c=poly[i+1], ux=p.x-a.x, uy=p.y-a.y, vx=c.x-p.x, vy=c.y-p.y, lu=Math.hypot(ux,uy)||1, lv=Math.hypot(vx,vy)||1;
+    if((ux*vx+uy*vy)/(lu*lv)<cornerCos) return {x:r2(p.x),y:r2(p.y),i:null,o:null};
+    const tx=c.x-a.x, ty=c.y-a.y, lt=Math.hypot(tx,ty)||1;
+    return {x:r2(p.x),y:r2(p.y),i:{x:r2(p.x-tx/lt*lu/3),y:r2(p.y-ty/lt*lu/3)},o:{x:r2(p.x+tx/lt*lv/3),y:r2(p.y+ty/lt*lv/3)}}; }); }
+/* centreline with widths -> closed outline (round caps) */
+function brushOutline(pts, widths){
+  const L1=[], L2=[], n=pts.length;
+  pts.forEach((p,i)=>{ const a=pts[Math.max(0,i-1)], b=pts[Math.min(n-1,i+1)], nx=-(b.y-a.y), ny=b.x-a.x, l=Math.hypot(nx,ny)||1, w=widths[i]/2;
+    L1.push({x:p.x+nx/l*w,y:p.y+ny/l*w}); L2.push({x:p.x-nx/l*w,y:p.y-ny/l*w}); });
+  const cap=(c,from,w,dir)=>{ const out=[]; const a0=Math.atan2(from.y-c.y,from.x-c.x); for(let k=1;k<8;k++){ const a=a0+dir*Math.PI*k/8; out.push({x:c.x+Math.cos(a)*w,y:c.y+Math.sin(a)*w}); } return out; };
+  return L1.concat(cap(pts[n-1],L1[n-1],widths[n-1]/2,-1), L2.reverse(), cap(pts[0],L2[L2.length-1],widths[0]/2,-1)); }
+function finishPencil(raw){
+  if(raw.length<3){ renderOverlay(); return; }
+  const k=view.k||1, tol=(0.4+drawPrefs.smooth/100*3.2)/k, len=raw.reduce((s,p,i)=>i?s+Math.hypot(p.x-raw[i-1].x,p.y-raw[i-1].y):0,0);
+  if(len<4/k){ renderOverlay(); return; }
+  // light smoothing of the samples, then simplification
+  const sm=raw.map((p,i)=>{ const a=raw[Math.max(0,i-1)], c=raw[Math.min(raw.length-1,i+1)]; return {x:(a.x+2*p.x+c.x)/4, y:(a.y+2*p.y+c.y)/4, p:(a.p+2*p.p+c.p)/4}; });
+  const closed=len>30/k && Math.hypot(sm[0].x-sm[sm.length-1].x, sm[0].y-sm[sm.length-1].y)<12/k;
+  const b=snapshot(), c=drawFill(), id=newLayerId("crayon"), L={visible:true, locked:false, id, group:"mark", fill:c.fill, zone:c.zone};
+  if(c.grp) L.grp=c.grp;
+  if(drawPrefs.mode==="brush"){
+    const ws=sm.map(p=>drawPrefs.size*(drawPrefs.pressure?(0.25+1.5*p.p):1));
+    const poly=brushOutline(sm, ws); const s=fitNodes(rdpClosed(poly, tol*0.6), 0.15);
+    L.name="Coup de pinceau "+(++drawN); L.subs=[area3(s)<0?s.reverse():s];
+  } else if(closed){
+    const s=fitNodes(rdpClosed(sm.slice(0,-1), tol), -0.2); L.name="Forme au crayon "+(++drawN); L.subs=[s]; L.open=true; L.sw=drawPrefs.size; s.push({x:s[0].x,y:s[0].y,i:s[0].i,o:null}); s[0].i=null;
+  } else {
+    const s=fitOpen(rdp(sm, tol), -0.2); L.name="Trait au crayon "+(++drawN); L.subs=[s]; L.open=true; L.sw=drawPrefs.size;
+  }
+  layers.push(L); sel={layer:id,node:null,layers:[id]}; commit(b, L.name.replace(/ \d+$/,""));
+}
+/* a stroked line -> filled shape (its outline), editable like any shape */
+function strokeToShape(L){
+  const b=snapshot(), w=L.sw||4, out=[];
+  for(const s of L.subs){ const pts=[]; for(let j=0;j<s.length-1;j++){ const p=segPts(s[j],s[j+1]); for(let t=0;t<1;t+=1/12) pts.push(bez(p,t)); } pts.push(s[s.length-1]);
+    const o=fitNodes(rdpClosed(brushOutline(pts, pts.map(()=>w)), Math.max(0.15,w*0.04)), 0.2); out.push(area3(o)<0?o.reverse():o); }
+  L.subs=out; delete L.open; delete L.sw; commit(b, "Trait converti en forme"); }
+function smoothNodeAt(L, s, n){ const sub=L.subs[s], nd=sub[n], len=sub.length, open=L.open;
+  const a=sub[(n-1+len)%len], c=sub[(n+1)%len];
+  if(nd.i||nd.o){ nd.i=null; nd.o=null; return "anguleux"; }
+  const first=open&&n===0, last=open&&n===len-1, tx=(last?nd.x:c.x)-(first?nd.x:a.x), ty=(last?nd.y:c.y)-(first?nd.y:a.y), lt=Math.hypot(tx,ty)||1;
+  const li=first?0:Math.hypot(nd.x-a.x,nd.y-a.y)/3, lo=last?0:Math.hypot(c.x-nd.x,c.y-nd.y)/3;
+  nd.i=first?null:{x:r2(nd.x-tx/lt*li),y:r2(nd.y-ty/lt*li)}; nd.o=last?null:{x:r2(nd.x+tx/lt*lo),y:r2(nd.y+ty/lt*lo)}; return "lisse"; }
+let lastNodeTap=null;   // double tap on a point (click events never fire here: the canvas captures the pointer)
+function renderDrawOpts(){
+  const el=$("#drawOpts"); if(!el) return; el.hidden=!["pen","pencil","points"].includes(tool); if(el.hidden) return;
+  el.innerHTML=(tool==="pencil"?`<div class="kinds"><button data-dm="line" class="${drawPrefs.mode==="line"?"on":""}">Trait</button><button data-dm="brush" class="${drawPrefs.mode==="brush"?"on":""}">Pinceau</button></div>
+      <label class="geo">${drawPrefs.mode==="brush"?"Largeur":"Épaisseur"} <input type="range" min="0.5" max="40" step="0.5" value="${drawPrefs.size}" data-do="size"><span>${drawPrefs.size}</span></label>
+      <label class="geo">Lissage <input type="range" min="0" max="100" value="${drawPrefs.smooth}" data-do="smooth"></label>
+      ${drawPrefs.mode==="brush"?`<label class="chk"><input type="checkbox" data-do="pressure" ${drawPrefs.pressure?"checked":""}> Pression du stylet</label>`:""}
+      <p class="muted" style="margin:6px 0 0">Revenez au point de départ pour fermer la forme. Le tracé devient des courbes modifiables avec l'outil Points.</p>`
+    : tool==="pen"?`<label class="geo">Épaisseur des traits ouverts <input type="range" min="0.5" max="40" step="0.5" value="${drawPrefs.size}" data-do="size"><span>${drawPrefs.size}</span></label>
+      <label class="chk"><input type="checkbox" data-do="handles" ${showAllHandles?"checked":""}> Afficher toutes les poignées</label>
+      <p class="muted" style="margin:6px 0 0">Clic = point anguleux, clic-glisser = courbe. Cliquez le premier point pour fermer, Entrée pour un tracé ouvert.</p>`
+    : `<label class="chk"><input type="checkbox" data-do="handles" ${showAllHandles?"checked":""}> Afficher toutes les poignées</label>
+      <p class="muted" style="margin:6px 0 0">Alt + glisser un point : sortir ses poignées. Double-clic : point anguleux ou lisse.</p>`);
+}
+$("#drawOpts").addEventListener("click",e=>{ const b=e.target.closest("[data-dm]"); if(b){ drawPrefs.mode=b.dataset.dm; saveDrawPrefs(); renderDrawOpts(); } });
+$("#drawOpts").addEventListener("input",e=>{ const k=e.target.dataset.do; if(!k) return;
+  if(k==="handles"){ showAllHandles=e.target.checked; renderOverlay(); } else if(k==="pressure") drawPrefs.pressure=e.target.checked; else { drawPrefs[k]=+e.target.value; const sp=e.target.nextElementSibling; if(sp&&sp.tagName==="SPAN") sp.textContent=e.target.value; }
+  saveDrawPrefs(); });
 
 /* ---------- Fonts: "F" menu (56 typefaces, loaded on demand from fonts.js) ---------- */
 let FONTS=null, fontsLoading=null, fontScope="sel", fontFilter="";
@@ -2590,7 +2725,7 @@ function impAdd(){
   const L={visible:true, locked:false, id, name:imp.o.tile?"Motif importé":imp.o.thin?"Signature":"Image vectorisée", group:"mark", fill:imp.o.ink?imp.res.ink:primary(palette[0]||EX.ink), subs:placed.subs};
   if(placed.tile) L.tile=placed.tile;
   layers.push(L); ensureZones(); sel={layer:id,node:null,layers:[id]}; commit(b, "Import : "+L.name); $("#impDlg").close(); fit();
-  toast((imp.o.tile?"Motif ajouté : exportez-le en mosaïque depuis Exporter.":"Image vectorisée ajoutée : la Plume modifie ses points.")+" (Annuler pour revenir)");
+  toast((imp.o.tile?"Motif ajouté : exportez-le en mosaïque depuis Exporter.":"Image vectorisée ajoutée : l'outil Points modifie ses points.")+" (Annuler pour revenir)");
 }
 for(const id of ["#impFile","#impCam"]) $(id).addEventListener("change",e=>{ impLoad(e.target.files[0]); e.target.value=""; });
 $("#impDlg").addEventListener("dragover",e=>{ e.preventDefault(); $("#impDlg").classList.add("drop"); });
@@ -2639,7 +2774,7 @@ function seeded(str){ let h=2166136261; for(const ch of String(str)){ h^=ch.char
 /* r: {defs, body} of the plain layer; returns the styled version */
 function applyFx(L, r, opts){
   if(!Array.isArray(L.fx)||!L.fx.length||!L.subs.length) return r;
-  const b=bounds([L]), S=Math.max(b.x1-b.x0,b.y1-b.y0)||1, d=pathD(L.subs);
+  const b=bounds([L]), S=Math.max(b.x1-b.x0,b.y1-b.y0)||1, d=layerD(L);
   const base=baseOf(L);
   const id=(opts.pfx||"g")+"-fx-"+L.id.replace(/[^\w-]/g,"");
   let defs=r.defs, body=r.body, under="", over="", wrap=[];
