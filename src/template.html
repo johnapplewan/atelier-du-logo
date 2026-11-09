@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atelier du Logo par John Apple</title>
 <link rel="stylesheet" href="vendor/fonts/ui.css">
 <link rel="manifest" href="manifest.webmanifest">
@@ -404,7 +404,43 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
 #stage.rulers .claudebar,#stage.rulers .glyphbar{top:30px}#stage.rulers .mini{top:30px;left:30px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
-@media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
+.menubtn,.mbar{display:none}
+/* ---------- Phone and tablet (portrait): full canvas, bottom tab bar, panels as sheets ---------- */
+@media (max-width:900px){
+  header{padding:8px 10px;gap:8px;flex-wrap:nowrap;padding-top:max(8px,env(safe-area-inset-top))}
+  header .brand h1{font-size:20px} header .sub,#projName,#status span{display:none}
+  .menubtn{display:inline-flex;align-items:center;gap:4px;order:5}
+  header .group{flex-wrap:nowrap;gap:5px}
+  header .group [data-sec],header .group .sec{display:none}
+  header.menuopen{flex-wrap:wrap}
+  header.menuopen .group{flex-wrap:wrap;width:100%;order:6}
+  header.menuopen .group [data-sec],header.menuopen .group .sec{display:inline-flex}
+  main,main.noleft,main.noright,main.noleft.noright{display:block;position:relative;grid-template-columns:none}
+  #stage{position:absolute;inset:0}
+  .mini,.mini-open,.mini-open.right,.collapse,.hint{display:none!important}
+  aside,main.noleft aside.left,main.noright aside.right{display:none;visibility:visible;position:absolute;left:0;right:0;bottom:0;z-index:20;max-height:58%;overflow:auto;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));border:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -8px 30px rgba(20,20,25,.14);-webkit-overflow-scrolling:touch}
+  aside::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:-4px auto 10px}
+  aside>section,aside>.detached{display:none;margin-bottom:14px}
+  body.sheet-tools aside.left,body.sheet-layers aside.left,body.sheet-palette aside.left,body.sheet-selection aside.right,body.sheet-notes aside.right{display:block}
+  body.sheet-tools #toolsSec,body.sheet-tools #gridSec,body.sheet-layers #layersSec,body.sheet-palette #palSec,body.sheet-selection #inspector,body.sheet-selection #fontSec,body.sheet-notes #notesSec,body.sheet-notes #noteEditor{display:block}
+  aside.right>section:first-of-type{padding-left:0}
+  .mbar{display:flex;justify-content:space-around;background:var(--paper);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));flex:none}
+  .mbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;font-size:11px;padding:6px 2px;border-radius:10px;color:var(--muted);position:relative;min-height:48px}
+  .mbar button svg,.mbar .mbi svg{width:22px;height:22px}
+  .mbar .mbi{display:flex;height:22px}
+  .mbar button.on{color:var(--ink);background:var(--cream)}
+  .mbcount{position:absolute;top:2px;right:calc(50% - 22px);background:var(--brass);color:#fff;font-size:10px;border-radius:9px;padding:0 5px;line-height:16px}
+  .tools button{min-height:52px}
+  aside .ib{min-width:34px;min-height:34px}
+  input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px}
+  header .group .winwrap,header.menuopen .group .winwrap{display:none}
+  /* detached panel windows are narrow too: they keep the plain panel layout */
+  body.panelwin aside,body.panelwin aside>section,body.panelwin aside>div{display:block!important;position:static;max-height:none;box-shadow:none;border-radius:0;padding:14px}
+  body.panelwin aside::before{display:none}
+  button,select,input[type=checkbox],input[type=radio]{touch-action:manipulation}
+  dialog{padding:16px;max-height:calc(100vh - 24px);overflow:auto}
+}
+@media (max-width:420px){ header .brand h1{display:none} .menubtn span{display:none} #redo{display:none} }
 </style>
 </head>
 <body>
@@ -416,15 +452,16 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <div class="spacer"></div>
   <span id="projName" class="projname"></span>
   <div id="status" role="status"><i></i><span>Chargement…</span></div>
-  <div class="group">
+  <button id="menuBtn" class="menubtn" aria-expanded="false" aria-controls="hdrGroup" title="Menu">☰<span> Menu</span></button>
+  <div class="group" id="hdrGroup">
     <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
-    <span class="winwrap"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
-    <button id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
-    <button id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
-    <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
-    <button id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
-    <button id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
+    <span class="winwrap sec"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
+    <button data-sec="1" id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
+    <button data-sec="1" id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
+    <button data-sec="1" id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
+    <button data-sec="1" id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
+    <button data-sec="1" id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
 </header>
@@ -447,7 +484,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
       <div id="drawOpts" class="shapeopts" hidden></div>
       <button id="importBtn" class="wide" title="Fichier ou photo d'un dessin, d'une signature, d'une texture : transformé en courbes">Importer une image…</button>
     </section>
-    <section>
+    <section id="gridSec">
       <h2>Grille</h2>
       <div class="row">
         <label class="chk"><input type="checkbox" id="gridOn"> Afficher</label>
@@ -522,6 +559,13 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     <section id="noteEditor"></section>
   </aside>
 </main>
+<nav class="mbar" id="mbar" aria-label="Panneaux">
+  <button data-sheet="tools" id="mbTools"><span class="mbi" id="mbToolIcon"></span><span>Outils</span></button>
+  <button data-sheet="layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>Calques</span></button>
+  <button data-sheet="selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="3 2"/><path d="M9 12h6M12 9v6"/></svg><span>Sélection</span></button>
+  <button data-sheet="palette"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1.4" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="currentColor"/><circle cx="15.5" cy="10" r="1.4" fill="currentColor"/></svg><span>Palette</span></button>
+  <button data-sheet="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H10l-4 4v-4H4z"/></svg><span>Bulles</span><b class="mbcount" id="mbNotes" hidden></b></button>
+</nav>
 
 <dialog id="exportDlg">
   <h2>Exporter le logo</h2>
@@ -1045,7 +1089,7 @@ function renderPins(){
       <text x="0" y="-19" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#fff" pointer-events="none">${n.n}</text></g>`;
   }).join("");
 }
-function renderAll(){ renderPalette(); renderFontSec(); renderTextRow(); renderDirRow(); if(!$("#fontMenu").hidden) renderFontMenu(); renderArt(); renderOverlay(); renderPins(); renderLayers(); renderInspector(); renderNotes(); renderNoteEditor(); updateButtons(); }
+function renderAll(){ try{ renderMbar(); }catch(_){} renderPalette(); renderFontSec(); renderTextRow(); renderDirRow(); if(!$("#fontMenu").hidden) renderFontMenu(); renderArt(); renderOverlay(); renderPins(); renderLayers(); renderInspector(); renderNotes(); renderNoteEditor(); updateButtons(); }
 function updateButtons(){ $("#undo").disabled=!canUndo(); $("#histBtn").disabled=!hist.length; $("#redo").disabled=!canRedo(); }
 
 const ICON = {
@@ -1279,7 +1323,7 @@ const HINTS = {
 };
 function setTool(t){
   if(tool==="pen" && t!=="pen" && penPath) finishPen(false);
-  tool=t; cv.setAttribute("class","t-"+t);
+  tool=t; cv.setAttribute("class","t-"+t); try{ renderMbar(); }catch(_){}
   document.querySelectorAll("[data-tool]").forEach(b=>{ b.classList.toggle("on",b.dataset.tool===t); b.setAttribute("aria-pressed",b.dataset.tool===t); });
   $("#hint").textContent=HINTS[t]; if(window.flashHint) flashHint(); if(window.renderGuides) renderGuides(); if(t!=="points"&&t!=="pen") sel.node=null; renderOverlay(); renderInspector(); if(window.renderMini) renderMini(); renderShapeOpts(); renderDrawOpts();
 }
@@ -1306,6 +1350,26 @@ $("#showRight").onclick=()=>setPanels(panelsOpen().left,true);
 $("#miniTool").onclick=()=>{ const f=$("#flyout"); f.hidden=!f.hidden; $("#miniTool").setAttribute("aria-expanded",String(!f.hidden)); };
 $("#flyout").addEventListener("click",e=>{ const b=e.target.closest("[data-ft]"); if(!b) return; setTool(b.dataset.ft); $("#flyout").hidden=true; });
 try{ const pp=JSON.parse(localStorage.getItem("atelier-logo-panels")||"null"); if(pp) setPanels(pp.left!==false, pp.right!==false); }catch(_){}
+
+/* ---------- Phone / tablet: the bottom tab bar opens one panel at a time as a sheet over the canvas ---------- */
+const mobileMQ=window.matchMedia("(max-width:900px)");
+let sheet=null;
+function openSheet(k){
+  sheet=k; for(const n of ["tools","layers","selection","palette","notes"]) document.body.classList.toggle("sheet-"+n, n===k);
+  document.querySelectorAll("#mbar [data-sheet]").forEach(b=>b.classList.toggle("on", b.dataset.sheet===k));
+}
+function renderMbar(){
+  const ic=$("#mbToolIcon"); if(ic) ic.innerHTML=toolIcon(tool);
+  const c=$("#mbNotes"), n=notes.filter(x=>!x.done).length; if(c){ c.hidden=!n; c.textContent=n; }
+}
+$("#mbar").addEventListener("click",e=>{ const b=e.target.closest("[data-sheet]"); if(!b) return; openSheet(sheet===b.dataset.sheet?null:b.dataset.sheet); renderMbar(); });
+// a tap on the drawing closes the sheet, so the whole canvas is free to work on
+$("#cv").addEventListener("pointerdown",()=>{ if(mobileMQ.matches && sheet) openSheet(null); });
+$("#menuBtn").onclick=()=>{ const h=document.querySelector("header"), o=!h.classList.contains("menuopen"); h.classList.toggle("menuopen",o); $("#menuBtn").setAttribute("aria-expanded",String(o)); };
+$("#hdrGroup").addEventListener("click",e=>{ if(e.target.closest("[data-sec]")){ document.querySelector("header").classList.remove("menuopen"); $("#menuBtn").setAttribute("aria-expanded","false"); } });
+mobileMQ.addEventListener("change",()=>{ if(!mobileMQ.matches) openSheet(null); });
+// choosing a tool closes the Tools sheet: the canvas is free to draw on
+$("#toolsSec").addEventListener("click",e=>{ if(mobileMQ.matches && e.target.closest(".tools [data-tool]")) openSheet(null); });
 
 /* ---------- Panel windows ----------
    « Fenêtres » moves a panel's own DOM into a separate window (window.open, same origin), e.g. on a second
@@ -1720,9 +1784,10 @@ window.__buildZip=buildZip;
 function addNote(w){
   const n={id:"n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6), n:(notes.reduce((m,x)=>Math.max(m,x.n),0)+1), x:r2(w.x), y:r2(w.y), text:"", audio:null, at:new Date().toISOString()};
   notes.push(n); selNote=n.id; renderPins(); renderNotes(); renderNoteEditor(); scheduleSave("notes");
+  if(mobileMQ.matches) setTimeout(()=>openSheet("notes"),0);
   setTimeout(()=>{ const ta=$("#noteText"); if(ta) ta.focus(); },30);
 }
-function renderNotes(){
+function renderNotes(){ try{ renderMbar(); }catch(_){}
   renderSendBox();
   const ul=$("#notes");
   if(!notes.length){ ul.innerHTML=`<li class="empty">Aucune annotation. Choisissez l'outil Bulle puis cliquez sur le dessin.</li>`; return; }

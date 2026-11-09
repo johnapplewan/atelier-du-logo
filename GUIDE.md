@@ -62,7 +62,11 @@ Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des c
 - **Exporter** : SVG, PNG ou JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP.
 - **Charte** : un questionnaire (style, couleurs, typographies, ton), puis les pages de la charte. Vous l'exportez en PDF (A4 portrait, paysage ou slides) ou en pack de dépôt.
 
-## 6. Plusieurs écrans
+## 6. Tablette et téléphone
+
+Le dessin occupe tout l'écran. La barre du bas ouvre les panneaux (Outils, Calques, Sélection, Palette, Bulles) ; touchez le dessin pour les refermer. Le menu ☰ donne accès à À propos, Projets, Charte et Marque et départ. Zoomez à deux doigts. Le Crayon tient compte de la pression du stylet.
+
+## 7. Plusieurs écrans
 
 Dans l'appli autonome, le bouton **« Fenêtres »** détache les panneaux (Outils, Calques, Sélection, Palette, Bulles) dans des fenêtres séparées. Fermez une fenêtre pour remettre son panneau en place.
 

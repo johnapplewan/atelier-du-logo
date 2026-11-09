@@ -28,6 +28,10 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 - **Bulles d'annotation** (texte et voix), envoyées à Claude. Les retouches de Claude arrivent avec un bandeau pour les annuler.
 - **Export** : SVG, PNG et JPG, par groupe ou par calque, en ZIP.
 
+## Tablette et téléphone
+
+Sous 900 px de large (téléphone, tablette en portrait), le dessin occupe tout l'écran. Une barre d'onglets en bas (Outils, Calques, Sélection, Palette, Bulles) ouvre chaque panneau en volet, et un toucher sur le dessin le referme. Les actions secondaires passent dans le menu ☰. Le dessin se fait au doigt ou au stylet (pression), avec zoom à deux doigts. En paysage, une tablette garde les trois colonnes.
+
 ## Appli autonome
 
 L'atelier fonctionne aussi hors de Claude, comme une application installable utilisable sans connexion :
