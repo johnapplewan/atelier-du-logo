@@ -42,6 +42,12 @@ header .group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .winmenu p{margin:6px 4px 2px;font-size:12px}
 .detached{border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .detached[hidden]{display:none}
+.claudedlg{width:min(640px,94vw)}
+.claudedlg .cdsec{border-top:1px solid var(--line);padding-top:12px;margin:12px 0 0}
+.claudedlg h3{margin:0 0 6px;font-size:15px}
+.claudedlg textarea{width:100%;margin:8px 0;font:12px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical}
+.claudedlg input[type=password],.claudedlg input[type=text]{flex:1;min-width:200px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.linkbtn{border:0;background:none;padding:0;color:var(--brass);text-decoration:underline;cursor:pointer;font-size:12px}
 aside.left>.collapse+.detached{margin-right:30px}
 aside.right>.collapse+.detached{margin-left:30px}
 .detached button{font-size:12px;padding:3px 8px}
@@ -672,6 +678,18 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <h3>Crédits</h3>
   <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js et JSZip (licence MIT). Icônes et interface en Instrument Serif et Inter (OFL). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
   <div class="row" style="justify-content:flex-end"><button id="abClose">Fermer</button></div>
+</dialog>
+<dialog id="claudeDlg" class="claudedlg" aria-labelledby="cdTitle">
+  <div class="row"><h2 id="cdTitle">Travailler avec Claude</h2><span class="sp"></span><button id="cdClose">Fermer</button></div>
+  <section class="cdsec">
+    <h3>Copier-coller avec claude.ai <span class="muted">· gratuit, avec votre compte</span></h3>
+    <p class="muted">1. Posez des bulles sur le dessin, puis « Copier la demande ». 2. Collez-la dans une conversation sur claude.ai (ou l'appli Claude). 3. Copiez toute la réponse de Claude et collez-la ici.</p>
+    <div class="row"><button id="cdCopy">Copier la demande</button><span class="muted" id="cdCopyMsg"></span></div>
+    <textarea id="cdPaste" rows="6" placeholder="Collez ici la réponse de Claude (le bloc json suffit)" spellcheck="false"></textarea>
+    <div class="row"><button id="cdApply" class="primary">Appliquer la réponse</button><span class="muted" id="cdMsg" role="status"></span></div>
+  </section>
+  <section class="cdsec" id="cdApiSec"></section>
+  <section class="cdsec" id="cdMcpSec"></section>
 </dialog>
 <dialog id="scDlg" class="scdlg" aria-labelledby="scTitle">
   <div class="row"><h2 id="scTitle">Raccourcis</h2><span class="sp"></span><label class="chk"><input type="checkbox" id="scHelp"> Afficher les aides à l'écran</label></div>
@@ -1814,12 +1832,15 @@ function renderSendBox(){
     no_session:"Aucune session Claude n'écoute cette page pour l'instant : copiez la demande et collez-la dans la conversation.",
     writers_only:"Seul un éditeur de la page peut envoyer à Claude : copiez la demande.", checking:"Vérification…"}[sendState];
   const html=`<div class="row"><button id="sendAll" class="primary" ${!open.length||sendState!=="available"?"disabled":""}>Envoyer à Claude${open.length?" ("+open.length+")":""}</button>
-    <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button></div>
-    <p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
+    <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button><button id="pasteReply" title="Coller la réponse de Claude (claude.ai)">Coller la réponse</button>${apiReady()?`<button id="askApi" ${open.length?"":"disabled"} title="Envoyer directement avec votre clé API">Demander (clé API)</button>`:""}</div>
+    <p class="muted"><button class="linkbtn" id="cdOpen">Connexions Claude : copier-coller, clé API, Claude Desktop</button></p><p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
   // same content: keep the buttons (replacing them under a click would swallow it)
   if(el.__html===html) return; el.__html=html; el.innerHTML=html;
   $("#sendAll").onclick=()=>sendToClaude(open);
-  $("#copyReq").onclick=async()=>{ try{ await navigator.clipboard.writeText(requestText(open)); $("#sendMsg").textContent="Demande copiée : collez-la dans la conversation avec Claude."; }catch(_){ $("#sendMsg").textContent="Copie refusée par le navigateur."; } };
+  $("#copyReq").onclick=async()=>{ $("#sendMsg").textContent=await copyRequest(open); };
+  $("#pasteReply").onclick=()=>openClaudeDlg(true);
+  $("#cdOpen").onclick=()=>openClaudeDlg(false);
+  if($("#askApi")) $("#askApi").onclick=()=>askClaudeApi(open);
 }
 async function sendToClaude(list){
   list=list.filter(n=>n.text.trim()||n.audio);
@@ -4334,6 +4355,114 @@ function loadPalDoc(v){ if(Array.isArray(v)){ if(validPalette(v)){ pals=[{id:"ma
 function localSave(){ projectTouch(); try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
 function localLoad(){ try{ const v=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return v; }catch(_){ return null; } }
 const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,palette:0};
+/* ---------- Claude exchange: one request / reply format for every connection ----------
+   copy-paste with claude.ai, the API key and the Claude Desktop extension all send claudePrompt() (context +
+   reply format) and apply the JSON reply with applyClaudeReply(): curves as SVG paths, same undo banner and
+   history entry ("Claude : note") as the artifact patch channel. */
+function parsePathD(d){
+  const t=String(d||"").match(/[a-df-z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi)||[]; const subs=[]; let cur=null, i=0, cmd="", x=0, y=0, sx=0, sy=0, lc=null, lq=null;
+  const num=()=>parseFloat(t[i++]), isNum=()=>i<t.length && !/^[a-z]$/i.test(t[i]);
+  const P=(px,py)=>({x:r2(px),y:r2(py)});
+  const close=()=>{ if(cur&&cur.length>1){ const a=cur[0], b=cur[cur.length-1]; if(Math.abs(a.x-b.x)<.01&&Math.abs(a.y-b.y)<.01){ a.i=b.i; cur.pop(); } } };
+  const cubic=(ax,ay,bx,by,ex,ey)=>{ if(!cur){ cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); } cur[cur.length-1].o=P(ax,ay); cur.push({x:r2(ex),y:r2(ey),i:P(bx,by),o:null}); lc={x:bx,y:by}; x=ex; y=ey; };
+  const line=(ex,ey)=>{ if(!cur){ cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); } cur.push({x:r2(ex),y:r2(ey),i:null,o:null}); x=ex; y=ey; };
+  while(i<t.length){
+    if(/^[a-z]$/i.test(t[i])) cmd=t[i++]; else if(!cmd) { i++; continue; }
+    const rel=cmd===cmd.toLowerCase(), C=cmd.toUpperCase(), ox=rel?x:0, oy=rel?y:0; let keepC=false, keepQ=false;
+    if(C==="Z"){ close(); cur=null; x=sx; y=sy; lc=lq=null; continue; }
+    if(!isNum()) continue;
+    if(C==="M"){ const nx=num()+ox, ny=num()+oy; close(); x=sx=nx; y=sy=ny; cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); cmd=rel?"l":"L"; }
+    else if(C==="L"){ line(num()+ox, num()+oy); }
+    else if(C==="H"){ line(num()+ox, y); }
+    else if(C==="V"){ line(x, num()+oy); }
+    else if(C==="C"){ const a=num()+ox, b=num()+oy, c=num()+ox, e=num()+oy, f=num()+ox, g=num()+oy; cubic(a,b,c,e,f,g); keepC=true; }
+    else if(C==="S"){ const ax=lc?2*x-lc.x:x, ay=lc?2*y-lc.y:y, c=num()+ox, e=num()+oy, f=num()+ox, g=num()+oy; cubic(ax,ay,c,e,f,g); keepC=true; }
+    else if(C==="Q"||C==="T"){ let qx, qy; if(C==="Q"){ qx=num()+ox; qy=num()+oy; } else { qx=lq?2*x-lq.x:x; qy=lq?2*y-lq.y:y; }
+      const ex=num()+ox, ey=num()+oy, x0=x, y0=y; cubic(x0+2/3*(qx-x0), y0+2/3*(qy-y0), ex+2/3*(qx-ex), ey+2/3*(qy-ey), ex, ey); lq={x:qx,y:qy}; keepQ=true; }
+    else if(C==="A"){ num(); num(); num(); num(); num(); line(num()+ox, num()+oy); }
+    else { i++; }
+    if(!keepC && C!=="S" && C!=="C") lc=null; if(!keepQ) lq=null;
+  }
+  close();
+  return subs.filter(s=>s.length>=2);
+}
+const effFill=L=>Number.isInteger(L.zone)?primary(palOf(L).colors[L.zone]||L.fill):L.fill;
+function claudeContext(list){
+  return { atelier:"Atelier du Logo", marque:{nom:brand.name||"", slogan:brand.tagline||"", motsCles:brand.keywords||"", mot:wordText},
+    repere:"Coordonnées en unités du dessin, y vers le bas. Le symbole occupe le carré 0..256 à gauche ; le mot commence vers x=300.",
+    palette:(curPalObj()||{colors:[]}).colors.map(primary),
+    calques:layers.map(L=>{ const o={id:L.id, nom:L.name, groupe:L.group==="word"?"mot":"symbole", couleur:effFill(L), d:pathD(L.subs, L.open)};
+      if(L.open) o.trait=L.sw||2; if(L.locked) o.verrouille=true; if(!L.visible) o.masque=true; if(L.fx&&L.fx.length) o.effets=L.fx.map(f=>f.t); return o; }),
+    bulles:list.map(n=>{ const L=layerAt(n.x,n.y); return {n:n.n, x:Math.round(n.x), y:Math.round(n.y), calque:L?L.id:null, demande:n.text.trim()||(n.audio?"(note vocale, non transmise)":"")}; }) };
+}
+const REPLY_FORMAT=`Réponds avec ton explication, puis UN SEUL bloc \`\`\`json au format suivant :
+{
+  "note": "résumé court de ce que tu as changé",
+  "calques": [ { "id": "id existant ou nouveau", "d": "tracé SVG (M, L, C, Q, Z en coordonnées absolues)", "couleur": "#RRGGBB", "nom": "nom lisible" } ],
+  "supprimer": [ "id" ],
+  "reponses": [ { "n": 1, "texte": "réponse affichée dans la bulle 1", "fait": true } ]
+}
+Règles : ne mets dans "calques" que ce que tu modifies ou ajoutes (un id inconnu crée un nouveau calque ; "groupe": "symbole" ou "mot" pour un nouveau calque). "d", "couleur" et "nom" sont facultatifs : un champ absent reste tel quel. Formes fermées par Z ; pas d'arcs (A), utilise des courbes C. Ne touche pas aux calques verrouillés. Réponds à chaque bulle dans "reponses".`;
+function claudePrompt(list){
+  return `Bonjour Claude. Je dessine mon logo dans l'Atelier du Logo (éditeur vectoriel). Traite ${list.length>1?"les "+list.length+" bulles":"la bulle"} ci-dessous en modifiant les tracés.\n\n`+
+    "```json\n"+JSON.stringify(claudeContext(list))+"\n```\n\n"+REPLY_FORMAT;
+}
+function extractReply(text){
+  const s=String(text||""), blocks=[...s.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)].map(m=>m[1]);
+  const tryParse=v=>{ try{ const o=JSON.parse(v); return o&&typeof o==="object"&&!Array.isArray(o)?o:null; }catch(_){ return null; } };
+  for(const b of blocks.reverse()){ const o=tryParse(b.trim()); if(o) return o; }
+  const a=s.indexOf("{"), b=s.lastIndexOf("}"); return a>=0&&b>a?tryParse(s.slice(a,b+1)):null;
+}
+function applyClaudeReply(o){
+  if(!o||typeof o!=="object") return {ok:false, msg:"Réponse illisible : il faut le bloc json de Claude."};
+  if(glyphMode) return {ok:false, msg:"Quittez l'édition de glyphe avant d'appliquer la réponse."};
+  const note=String(o.note||"").slice(0,140), before=snapshot(), skipped=[]; let added=0, edited=0, removed=0;
+  const hex=v=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v.trim())?v.trim().toUpperCase():null;
+  for(const c of Array.isArray(o.calques)?o.calques:[]){
+    if(!c||typeof c!=="object") continue;
+    const id=String(c.id||"").trim().slice(0,60), L=id&&layerById(id), subs=c.d!==undefined?parsePathD(c.d):null, col=hex(c.couleur||c.fill);
+    if(L){ if(L.locked){ skipped.push(L.name); continue; }
+      if(subs&&subs.length){ L.subs=subs; delete L.kind; delete L.live; }
+      if(col){ L.fill=col; delete L.zone; }
+      if(c.nom) L.name=String(c.nom).slice(0,60);
+      edited++; }
+    else if(subs&&subs.length){
+      const ref=layerById(sel.layer), nid=id&&/^[\w-]+$/.test(id)?id:newLayerId("claude");
+      const N={visible:true, locked:false, id:nid, name:String(c.nom||"Forme de Claude").slice(0,60), group:/^(mot|word)$/.test(c.groupe)?"word":"mark", fill:col||(ref?effFill(ref):"#1D1D1F"), subs};
+      layers.push(N); added++; }
+  }
+  for(const id of Array.isArray(o.supprimer)?o.supprimer:[]){ const L=layerById(String(id)); if(!L) continue; if(L.locked){ skipped.push(L.name); continue; } layers=layers.filter(l=>l!==L); removed++; }
+  if(!validLayers(layers)){ restoreSnap(before); return {ok:false, msg:"Réponse refusée : elle aurait abîmé le dessin."}; }
+  groups=groups.filter(g=>layers.some(l=>l.grp===g.id));
+  ensureZones(); fixSel();
+  const changed=snapshot()!==before;
+  if(changed){ record(before, "Claude"+(note?" : "+note.slice(0,70):"")); setClaudeUndo({before, note, at:Date.now()}); scheduleSave("shape"); }
+  let answered=0;
+  for(const r of Array.isArray(o.reponses)?o.reponses:[]){ const n=notes.find(x=>x.n===+r.n); if(!n) continue; n.reply=String(r.texte||r.text||"").slice(0,2000); n.done=r.fait!==false; answered++; }
+  if(answered) scheduleSave("notes");
+  renderAll();
+  const parts=[]; if(edited) parts.push(edited+" calque"+(edited>1?"s":"")+" modifié"+(edited>1?"s":"")); if(added) parts.push(added+" ajouté"+(added>1?"s":"")); if(removed) parts.push(removed+" supprimé"+(removed>1?"s":"")); if(answered) parts.push(answered+" bulle"+(answered>1?"s":"")+" répondue"+(answered>1?"s":""));
+  if(skipped.length) parts.push("verrouillé, laissé tel quel : "+skipped.join(", "));
+  return {ok:changed||answered>0, msg:parts.length?parts.join(" · ")+".":"Rien à changer dans cette réponse."};
+}
+async function copyRequest(list){
+  list=list.filter(n=>n.text.trim()||n.audio); if(!list.length) return "Écrivez d'abord une demande dans une bulle.";
+  try{ await navigator.clipboard.writeText(claudePrompt(list)); return "Demande copiée : collez-la dans une conversation sur claude.ai, puis « Coller la réponse »."; }
+  catch(_){ openClaudeDlg(false); $("#cdPaste").value=claudePrompt(list); $("#cdPaste").select(); return "Copie refusée par le navigateur : la demande est sélectionnée dans la fenêtre Claude, copiez-la (Ctrl+C)."; }
+}
+function openClaudeDlg(focusPaste){
+  $("#cdMsg").textContent=""; $("#cdCopyMsg").textContent=""; renderApiSec(); renderMcpSec();
+  if(!$("#claudeDlg").open) $("#claudeDlg").showModal(); if(focusPaste){ $("#cdPaste").value=""; $("#cdPaste").focus(); }
+}
+$("#cdClose").onclick=()=>$("#claudeDlg").close();
+$("#cdCopy").onclick=async()=>{ $("#cdCopyMsg").textContent=await copyRequest(notes.filter(n=>!n.done)); };
+$("#cdApply").onclick=()=>{ const o=extractReply($("#cdPaste").value), r=applyClaudeReply(o); $("#cdMsg").textContent=r.msg; if(r.ok){ $("#cdPaste").value=""; toast("Réponse de Claude appliquée. "+r.msg); } };
+/* placeholders, filled by the API and Claude Desktop sections below */
+function apiReady(){ return false; }
+async function askClaudeApi(){}
+function renderApiSec(){ $("#cdApiSec").hidden=true; }
+function renderMcpSec(){ $("#cdMcpSec").hidden=true; }
+
 /* Claude's edits: atelier/patch holds only the changed layers, merged by id */
 function applyPatch(d){
   if(!d || !Number.isFinite(d.at)) return;
