@@ -1,0 +1,15 @@
+{
+  "name": "atelier-du-logo-mcpb",
+  "version": "1.0.0",
+  "description": "Claude Desktop extension for the Atelier du Logo (builds app/downloads/atelier-du-logo.mcpb)",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "esbuild": "^0.28.2",
+    "zod": "^4.6.7"
+  },
+  "private": true
+}

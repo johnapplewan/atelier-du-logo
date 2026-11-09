@@ -1,0 +1,84 @@
+{
+  "manifest_version": "0.3",
+  "name": "atelier-du-logo",
+  "display_name": "Atelier du Logo par John Apple",
+  "version": "1.0.0",
+  "description": "Dessinez votre logo avec Claude : l'atelier s'ouvre dans votre navigateur, Claude lit vos bulles, voit le logo et modifie les tracés.",
+  "long_description": "L'Atelier du Logo est un éditeur vectoriel de logo et de charte graphique. Cette extension le sert en local (hors ligne) et donne à Claude des outils pour lire le projet ouvert et ses bulles d'annotation, voir un aperçu du logo, exporter le SVG et appliquer des modifications que vous pouvez annuler. Vos projets restent dans votre navigateur.",
+  "author": {
+    "name": "John Apple",
+    "url": "https://johnapplewan.github.io/atelier-du-logo/"
+  },
+  "homepage": "https://johnapplewan.github.io/atelier-du-logo/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johnapplewan/atelier-du-logo"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "ATELIER_PORT": "${user_config.port}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "atelier_ouvrir",
+      "description": "Ouvre l'atelier dans le navigateur (servi en local, hors ligne)."
+    },
+    {
+      "name": "atelier_etat",
+      "description": "Projet ouvert : marque, palette, calques en tracés SVG, bulles non traitées."
+    },
+    {
+      "name": "atelier_apercu",
+      "description": "Image PNG du logo."
+    },
+    {
+      "name": "atelier_svg",
+      "description": "Le logo complet en SVG."
+    },
+    {
+      "name": "atelier_appliquer",
+      "description": "Modifie les tracés et répond aux bulles, avec annulation possible."
+    }
+  ],
+  "tools_generated": false,
+  "keywords": [
+    "logo",
+    "design",
+    "vectoriel",
+    "svg",
+    "charte graphique"
+  ],
+  "user_config": {
+    "port": {
+      "type": "number",
+      "title": "Port local",
+      "description": "Port de l'atelier sur cet ordinateur (http://127.0.0.1:port).",
+      "default": 4718,
+      "min": 1024,
+      "max": 65535,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

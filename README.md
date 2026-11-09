@@ -39,6 +39,19 @@ L'atelier fonctionne aussi hors de Claude, comme une application installable uti
 - Hors artifact, les exports sont enregistrés directement par le navigateur ; les polices de l'interface et JSZip sont servis localement (`app/vendor/`).
 - **Liens de soutien** (À propos) : le lien PayPal est dans le code ; le numéro Wero n'y est jamais. Dans l'artifact, il se lit dans le doc `atelier/about` de la base (`{"wero": "…"}`, écriture réservée au propriétaire). Sur GitHub Pages, il vient du secret `ATELIER_WERO` (Settings > Secrets and variables > Actions), lu par le workflow au moment du build. En local, il vient de `about.local.json` (ignoré par git) ou de la variable `ATELIER_WERO` au moment de `npm run build`. Il est encodé dans la page et ne s'affiche qu'au clic sur « Afficher le numéro ».
 
+## Travailler avec Claude
+
+Trois façons, dans « Connexions Claude » (sous les bulles) :
+
+- **Dans l'artifact** : « Envoyer à Claude » transmet les bulles à la conversation, Claude modifie le dessin par le canal `atelier/patch`.
+- **Copier-coller avec claude.ai** (gratuit) : « Copier la demande » copie le contexte (marque, calques en tracés SVG, bulles) et le format de réponse ; on colle la réponse de Claude avec « Coller la réponse ».
+- **Clé API Anthropic** (appli autonome, payé à l'usage) : « Demander (clé API) » envoie les bulles et une image du logo à Claude Opus 5.5 via le SDK officiel (`app/vendor/anthropic-sdk.js`, sortie JSON structurée, `fallbacks: "default"`). La clé reste dans le navigateur.
+- **Claude Desktop** : l'extension `app/downloads/atelier-du-logo.mcpb` sert l'atelier en local (hors ligne, http://127.0.0.1:4718) et donne à Claude les outils `atelier_ouvrir`, `atelier_etat`, `atelier_apercu`, `atelier_svg`, `atelier_appliquer`. La page lui répond par `/bridge/events` (SSE) et `/bridge/result`.
+
+Toutes les réponses passent par `applyClaudeReply` : bandeau « Annuler la modification de Claude », entrée « Claude : note » dans l'historique, calques verrouillés intouchés.
+
+Reconstruire l'extension après une modification de l'appli : `npm run build` puis `npm run mcpb`. Le SDK Anthropic se met à jour avec `npm run sdk`.
+
 ## Arborescence
 
 | Dossier | Contenu |
@@ -49,6 +62,8 @@ L'atelier fonctionne aussi hors de Claude, comme une application installable uti
 | `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` puis `trim.cjs` → `fonts.js` (métadonnées seules), `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
 | `app/vendor/` | opentype.js et JSZip (MIT), polices de l'interface Instrument Serif et Inter (OFL) |
 | `src/sw.js` | Source du service worker (hors ligne) |
+| `tools/mcpb/` | Extension Claude Desktop : `server.js` (serveur MCP + pont vers la page), `build.mjs` → `app/downloads/atelier-du-logo.mcpb` |
+| `tools/claude-sdk/` | Empaquetage du SDK Anthropic pour le navigateur → `app/vendor/anthropic-sdk.js` |
 | `tests/` | Tests Playwright (Chromium) sur `app/` servi en local : `npm test` |
 
 ## Licences

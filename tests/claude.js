@@ -74,6 +74,12 @@ const { chromium, assert, open, worldToScreen, check, done } = require("./helper
   const badKey = await p.textContent("#sendMsg");
   check("bad key explained in French", () => assert.match(badKey, /Clé API refusée/));
 
+  // Claude Desktop section: extension download
+  await p.click("#cdOpen");
+  const [mdl] = await Promise.all([p.waitForEvent("download"), p.click("#cdMcpDl")]);
+  check("Claude Desktop extension downloadable from « Connexions Claude »", () => assert.strictEqual(mdl.suggestedFilename(), "atelier-du-logo.mcpb"));
+  await p.click("#cdClose");
+
   done(errors.filter(e => !/status of 401/.test(e))); // the 401 above is the bad-key scenario
   await browser.close();
 })();
