@@ -39,6 +39,7 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
   - sceaux au nom écrit en cercle ;
   - six logotypes à détail ;
   - versions sombres sur plaque.
+- **60 pictogrammes**, dont 36 métiers : bâtiment (casque, grue, truelle), immobilier (immeuble), industrie (engrenage, usine, clé à molette, éclair), beauté (flacon, rouge à lèvres, ciseaux, miroir), informatique (écran, code, puce, nuage), architecture (compas, équerre, colonne), food et restauration (toque, couverts, cloche, croissant, verre de vin), hôtellerie (lit, clé d'hôtel), et santé, droit, finance, joaillerie, photo, musique, sport, auto, formation, animaux, mode, peinture. Les mots-clés les appellent : « restaurant », « coiffure », « avocat », « développeur »…
 - **Jusqu'à 26 propositions illustrées** quand un sujet est reconnu : chaque composition dans plusieurs styles (low poly, gravure, line art, pixel…), des sceaux, emblèmes et signatures illustrés, et la planche gravée pour le bois.
 - **Sans sujet reconnu**, les compositions premium utilisent les initiales.
 - **Si le sujet n'est pas dans la bibliothèque**, la proposition garde une place vide et une bulle demande à Claude de le dessiner.

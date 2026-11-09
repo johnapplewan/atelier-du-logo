@@ -159,6 +159,10 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   const later = await q.evaluate(() => document.querySelector("#startDlg").open);
   check("'Plus tard' postpones the welcome", () => assert.strictEqual(later, false));
 
+  // trades: keywords call up profession pictograms
+  const trades = await p.evaluate(() => ["restaurant", "coiffure", "développeur", "avocat", "bâtiment", "parfum", "architecte", "hôtel"].map(k => readKeywords([k]).subjects[0]));
+  check("trade keywords call up profession pictograms", () => assert.deepStrictEqual(trades, ["couverts", "ciseaux", "code", "balance", "casque", "flacon", "compas", "cloche"]));
+
   done(errors.concat(e2));
   await browser.close();
 })();
