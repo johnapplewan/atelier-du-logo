@@ -3583,6 +3583,67 @@ Object.assign(SUBJECTS,{
   pinceau:"peinture peintre decoration decorateur deco art",
   graphique:"finance comptable comptabilite expert conseil gestion investissement banque",
 });
+/* ---------- Refined pictograms (premium) ----------
+   Monoline drawings with real Bézier curves (200 x 200 box): parts {name, tone, d, line}. line = stroked open path of
+   constant weight FINE_W with round caps; without line, a filled accent. Used first by the premium layouts. */
+const FINE_W=7;
+const FI={ k:0.5523,
+  circle:(cx,cy,r)=>{ const k=0.5523*r; return `M${cx} ${cy-r} C${cx+k} ${cy-r} ${cx+r} ${cy-k} ${cx+r} ${cy} C${cx+r} ${cy+k} ${cx+k} ${cy+r} ${cx} ${cy+r} C${cx-k} ${cy+r} ${cx-r} ${cy+k} ${cx-r} ${cy} C${cx-r} ${cy-k} ${cx-k} ${cy-r} ${cx} ${cy-r}`; },
+  dot:(cx,cy,r)=>FI.circle(cx,cy,r)+" Z",
+  sparkle:(cx,cy,r)=>{ const q=r*0.14; return `M${cx} ${cy-r} C${cx+q} ${cy-q} ${cx+q} ${cy-q} ${cx+r} ${cy} C${cx+q} ${cy+q} ${cx+q} ${cy+q} ${cx} ${cy+r} C${cx-q} ${cy+q} ${cx-q} ${cy+q} ${cx-r} ${cy} C${cx-q} ${cy-q} ${cx-q} ${cy-q} ${cx} ${cy-r} Z`; },
+};
+const L_=(name,d,tone="main")=>({name,tone,d,line:true}), F_=(name,d,tone="second")=>({name,tone,d});
+const FINE={
+  cloche:()=>[L_("Cloche","M36 140 C36 96 64 66 100 66 C136 66 164 96 164 140"), L_("Plateau","M22 152 L178 152"), L_("Tige","M100 66 L100 56"), F_("Bouton",FI.dot(100,48,8))],
+  couverts:()=>[L_("Fourchette","M66 36 L66 76 M80 36 L80 76 M94 36 L94 76 M66 76 C66 96 94 96 94 76 M80 92 L80 168"), L_("Couteau","M126 168 L126 36 C144 48 148 84 142 108 L126 108")],
+  toque:()=>[L_("Toque","M66 128 C40 126 38 88 64 86 C62 58 96 48 106 72 C118 50 156 60 150 90 C172 92 166 128 134 128"), L_("Bandeau","M66 128 L66 156 L134 156 L134 128"), L_("Plis","M88 128 L88 108 M112 128 L112 108")],
+  vin:()=>[L_("Verre","M66 36 C62 78 76 106 100 108 C124 106 138 78 134 36 L66 36 M100 108 L100 164 M74 166 L126 166"), F_("Vin","M70 64 L130 64 C128 88 116 100 100 100 C84 100 72 88 70 64 Z")],
+  tasse:()=>[L_("Tasse","M52 86 L140 86 L140 112 C140 144 120 164 96 164 C72 164 52 144 52 112 L52 86 M140 96 C166 96 166 134 140 134 M36 178 L156 178"), L_("Vapeur","M82 66 C72 54 92 46 82 30 M108 66 C98 54 118 46 108 30","second")],
+  ble:()=>{ let d="M100 186 L100 40 "; for(let i=0;i<4;i++){ const y=64+i*28; d+=`M100 ${y+16} C86 ${y+12} 78 ${y} 80 ${y-14} C92 ${y-8} 100 ${y+2} 100 ${y+16} M100 ${y+16} C114 ${y+12} 122 ${y} 120 ${y-14} C108 ${y-8} 100 ${y+2} 100 ${y+16} `; }
+    return [L_("Épi",d), F_("Grain","M100 14 C110 24 110 40 100 50 C90 40 90 24 100 14 Z")]; },
+  clehotel:()=>[L_("Clé",FI.circle(64,64,24)+" M81 81 L150 150 M128 128 L142 114 M140 140 L154 126"), F_("Gemme",FI.dot(64,64,7))],
+  lit:()=>[L_("Lit","M22 62 L22 164 M22 132 L178 132 L178 164 M22 118 L178 118"), L_("Oreiller","M36 104 C36 92 76 92 76 104 C76 112 36 112 36 104","second"), F_("Étoile",FI.sparkle(144,74,18))],
+  diamant:()=>[L_("Diamant","M60 50 L140 50 L174 88 L100 168 L26 88 L60 50 M26 88 L174 88 M60 50 L76 88 L100 168 L124 88 L140 50 M76 88 L100 50 L124 88")],
+  flacon:()=>[L_("Flacon","M58 94 L142 94 C150 94 156 100 156 108 L156 162 C156 170 150 176 142 176 L58 176 C50 176 44 170 44 162 L44 108 C44 100 50 94 58 94 M86 94 L86 78 L114 78 L114 94"), F_("Bouchon","M78 46 L122 46 L122 78 L78 78 Z"), L_("Reflet","M64 114 L64 154","second")],
+  rouge:()=>[L_("Étui","M68 116 L132 116 L132 182 L68 182 L68 116 M74 100 L126 100 L126 116"), F_("Rouge","M80 100 L80 52 C80 40 98 26 120 22 L120 100 Z")],
+  etincelle:()=>[F_("Étincelle",FI.sparkle(100,100,80),"main"), F_("Éclat",FI.sparkle(160,40,18))],
+  miroir:()=>[L_("Miroir","M100 18 C126 18 142 44 142 76 C142 108 126 134 100 134 C74 134 58 108 58 76 C58 44 74 18 100 18 M100 134 L100 184 M88 184 L112 184"), L_("Reflet","M80 60 C82 46 90 38 100 36","second"), F_("Éclat",FI.sparkle(118,104,10))],
+  ciseaux:()=>[L_("Lames","M84 120 L156 26 M116 120 L44 26"), L_("Anneaux",FI.circle(70,148,24)+" "+FI.circle(130,148,24)), F_("Vis",FI.dot(100,92,5))],
+  compas:()=>[L_("Compas","M100 54 L58 172 M100 54 L142 172 M74 128 L126 128 "+FI.circle(100,42,12)+" M100 30 L100 16")],
+  equerre:()=>[L_("Équerre","M30 30 L30 172 L172 172 L30 30 M52 94 L52 150 L108 150 L52 94"), L_("Graduations","M30 56 L42 56 M30 80 L42 80 M30 104 L42 104 M30 128 L42 128","second")],
+  colonne:()=>[L_("Colonne","M50 40 L150 40 M58 40 C58 54 66 56 76 56 L124 56 C134 56 142 54 142 40 M74 56 L74 154 M92 56 L92 154 M108 56 L108 154 M126 56 L126 154 M62 154 L138 154 M50 168 L150 168")],
+  maison:()=>[L_("Maison","M28 100 L100 38 L172 100 M50 82 L50 170 L150 170 L150 82 M86 170 L86 132 C86 116 114 116 114 132 L114 170"), F_("Fenêtre",FI.dot(100,88,7))],
+  immeuble:()=>[L_("Immeuble","M52 178 L52 30 L148 30 L148 178 M36 178 L164 178 M76 54 L76 66 M100 54 L100 66 M124 54 L124 66 M76 86 L76 98 M100 86 L100 98 M124 86 L124 98 M76 118 L76 130 M124 118 L124 130 M88 178 L88 150 L112 150 L112 178")],
+  casque:()=>[L_("Casque","M36 134 C36 90 64 60 100 60 C136 60 164 90 164 134 M20 144 L180 144 M86 62 L86 104 L114 104 L114 62")],
+  engrenage:()=>{ let d=""; for(let k=0;k<8;k++){ const a=k*Math.PI/4, c=Math.cos(a), s=Math.sin(a); d+=`M${r2(100+50*c)} ${r2(100+50*s)} L${r2(100+70*c)} ${r2(100+70*s)} `; } return [L_("Engrenage",FI.circle(100,100,50)+" "+d), F_("Axe",FI.dot(100,100,14))]; },
+  code:()=>[L_("Chevrons","M66 56 L24 100 L66 144 M134 56 L176 100 L134 144"), L_("Barre","M116 40 L84 160","second")],
+  ecran:()=>[L_("Écran","M24 40 C24 34 28 30 34 30 L166 30 C172 30 176 34 176 40 L176 126 C176 132 172 136 166 136 L34 136 C28 136 24 132 24 126 L24 40 M100 136 L100 166 M66 168 L134 168"), F_("Curseur","M86 66 L86 104 L96 94 L104 112 L112 108 L104 90 L118 90 Z")],
+  balance:()=>[L_("Balance","M100 34 L100 170 M64 172 L136 172 M30 56 L170 56 M44 56 L24 108 L64 108 L44 56 M156 56 L136 108 L176 108 L156 56"), F_("Pivot",FI.dot(100,34,8))],
+  graphique:()=>[L_("Axes","M28 28 L28 172 L176 172"), L_("Courbe","M44 140 C70 136 78 104 100 100 C122 96 128 64 160 48","second"), F_("Point",FI.dot(160,48,8))],
+  photo:()=>[L_("Appareil","M30 70 L70 70 L80 52 L120 52 L130 70 L170 70 C176 70 180 74 180 80 L180 160 C180 166 176 170 170 170 L30 170 C24 170 20 166 20 160 L20 80 C20 74 24 70 30 70 "+FI.circle(100,118,32)), F_("Lentille",FI.dot(100,118,12))],
+  feuille:()=>[L_("Feuille","M100 178 C56 140 50 84 100 24 C150 84 144 140 100 178 M100 178 L100 66 M100 118 L126 94 M100 142 L74 118")],
+  livre:()=>[L_("Livre","M100 58 C80 46 52 46 26 54 L26 156 C52 148 80 148 100 160 C120 148 148 148 174 156 L174 54 C148 46 120 46 100 58 L100 160")],
+  plume:()=>[L_("Plume","M58 176 C70 120 100 64 150 26 C154 70 130 120 74 150 M150 26 L70 160")],
+  vague:()=>[L_("Vagues","M20 84 C44 64 64 64 86 84 C108 104 128 104 150 84 C164 72 172 70 180 72 M20 120 C44 100 64 100 86 120 C108 140 128 140 150 120 C164 108 172 106 180 108"), L_("Écume","M20 156 C44 136 64 136 86 156 C108 176 128 176 150 156","second")],
+  montagne:()=>[L_("Montagnes","M18 166 L76 78 L104 118 L134 70 L182 166 L18 166"), F_("Soleil",FI.dot(150,42,12))],
+  coeur:()=>[L_("Cœur","M100 168 C66 140 26 114 26 76 C26 52 44 36 66 36 C82 36 94 46 100 58 C106 46 118 36 134 36 C156 36 174 52 174 76 C174 114 134 140 100 168")],
+  soleil:()=>{ let d=FI.circle(100,100,34)+" "; for(let k=0;k<12;k++){ const a=k*Math.PI/6, c=Math.cos(a), s=Math.sin(a); d+=`M${r2(100+50*c)} ${r2(100+50*s)} L${r2(100+(k%2?64:76)*c)} ${r2(100+(k%2?64:76)*s)} `; } return [L_("Soleil",d)]; },
+  lune:()=>[F_("Lune","M120 24 C82 34 58 66 58 104 C58 146 90 178 132 178 C150 178 166 172 178 160 C110 168 66 104 120 24 Z","main"), F_("Étoile",FI.sparkle(150,60,16))],
+  cle:()=>[L_("Clé",FI.circle(60,100,32)+" M92 100 L180 100 M150 100 L150 126 M170 100 L170 120"), F_("Gemme",FI.dot(60,100,9))],
+  couronne:()=>[L_("Couronne","M30 150 L22 64 L64 104 L100 46 L136 104 L178 64 L170 150 L30 150 M30 170 L170 170"), F_("Perle",FI.dot(100,46,8))],
+  fleur:()=>{ let d=""; for(let k=0;k<5;k++){ const a=-Math.PI/2+k*2*Math.PI/5, c=Math.cos(a), s=Math.sin(a), px=-s, py=c, t=(x,y)=>`${r2(100+x*c+y*px)} ${r2(100+x*s+y*py)}`; d+=`M${t(14,0)} C${t(30,-26)} ${t(70,-22)} ${t(74,0)} C${t(70,22)} ${t(30,26)} ${t(14,0)} `; } return [L_("Pétales",d), F_("Cœur",FI.dot(100,100,10))]; },
+};
+Object.assign(SUBJECTS,{ etincelle:"etincelle eclat brillance glamour lumineux cosmetique luxe beaute spa", lune:"lune nuit sommeil reve nocturne bien etre relaxation" });
+ICONS.etincelle={n:"étincelle", build(){ return [{name:"Étincelle",tone:"main",subs:parsePathD(FI.sparkle(100,100,86))}]; }};
+ICONS.lune={n:"lune", build(){ return [{name:"Lune",tone:"main",subs:parsePathD("M120 24 C82 34 58 66 58 104 C58 146 90 178 132 178 C150 178 166 172 178 160 C110 168 66 104 120 24 Z")}]; }};
+/* refined pictogram as layers: lines stroked (weight scaled), accents filled */
+function placeFine(id, cx, cy, size, tones){
+  const parts=FINE[id](), raw=parts.map(p=>({p, subs:parsePathD(p.d, {open:p.line})})), all=raw.flatMap(r=>r.subs);
+  const b=bounds([{subs:all}]), k=size/Math.max(b.x1-b.x0+FINE_W, b.y1-b.y0+FINE_W), mx=(b.x0+b.x1)/2, my=(b.y0+b.y1)/2;
+  const T=q=>q&&{x:r2(cx+(q.x-mx)*k), y:r2(cy+(q.y-my)*k)};
+  return raw.map((r,i)=>{ const L={visible:true,locked:false,id:"motif-"+id+"-"+(i+1),name:r.p.name,group:"mark",fill:tones[r.p.tone]||tones.main,subs:r.subs.map(s=>s.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i)||null,o:T(n.o)||null})))};
+    if(r.p.line){ L.open=true; L.sw=r2(FINE_W*k); } return L; });
+}
 const MATERIALS={ bois:"bois ebenisterie ebeniste menuiserie menuisier charpente artisanal artisanale massif chene noyer", or:"or dore luxe premium prestige bijou joaillerie", neon:"neon nuit club bar soiree", pierre:"pierre mineral beton marbre" };
 const STYLE_HINTS={ lowpoly:"tech moderne digital numerique 3d geometrique jeu", pixel:"retro jeu gaming arcade pixel 8bit", main:"artisanal fait main artisan atelier authentique",
   lineart:"minimal minimaliste epure simple elegant", gravure:"tradition traditionnel ancien vintage heritage", cartoon:"enfant fun ludique joyeux", arabesque:"oriental luxe ornement baroque classique raffine",
@@ -3730,7 +3791,9 @@ async function buildPremium(plan, info){
   const doc={layers:[], pals:[{id:"main",name:"Principale",colors:dark?[plan.ink,plan.paper,PREMIUM_GOLD]:[plan.ink,plan.accent,plan.paper]}], groups:[]};
   const L0=(id,name,fill,subs)=>({visible:true,locked:false,id,name,group:"mark",fill,subs});
   // the motif: library pictogram or monogram, as flat layers of one colour, centred on cx, cy within size
-  const motif=(cx,cy,size,fill,forceLetters)=>{
+  const fine=plan.subject&&FINE[plan.subject]&&!plan.illus;
+  const motif=(cx,cy,size,fill,forceLetters,tones)=>{
+    if(fine&&!forceLetters) return placeFine(plan.subject, cx, cy, size, tones||{main:ink, second:accent, detail:accent});
     if(plan.subject&&!forceLetters){ const ic=placeIcon(plan.subject,{x:0,y:0,s:1},{main:fill,second:fill,detail:fill}); const b=bounds(ic), k=size/Math.max(b.x1-b.x0,b.y1-b.y0);
       ic.forEach(L=>L.subs.forEach(s=>s.forEach(n=>{ for(const p of [n,n.i,n.o]) if(p){ p.x=r2(cx+(p.x-(b.x0+b.x1)/2)*k); p.y=r2(cy+(p.y-(b.y0+b.y1)/2)*k); } }))); return ic; }
     return monoLayers(plan.letters, fN, GN, {cx, cy, w:size*(plan.letters.length>1?1:0.8), h:size*0.68}, fill);
@@ -3743,6 +3806,9 @@ async function buildPremium(plan, info){
       return [...m, L0("accent","Trait d'accent",accent,roundRect(cx-S*0.16,b.y1+S*0.1,S*0.32,Math.max(2,S*0.025),Math.max(1,S*0.0125)))]; }
     if(box==="none") return motif(cx,cy,S,accent,forceLetters);
     if(box==="ring"){ return [L0("cadre","Cercle",ink,ring(cx,cy,S/2,Math.max(2,S/40))), ...motif(cx,cy,S*0.56,accent,forceLetters)]; }
+    if(fine&&!forceLetters){ // line drawing on a solid container: light lines, accent kept (lines cannot be cut out)
+      const inner={disc:0.54, square:0.56, shield:0.48, diamond:0.4, hexagon:0.5, arch:0.5}[box], dy=box==="shield"?-S*0.04:box==="arch"?S*0.05:0, light=dark?plan.ink:plan.paper;
+      return [L0("cadre",cap(PREMIUM_CONTAINERS[box].replace(/^un(e)? /,"")),box==="disc"?accent:ink,shapeIn(box,cx,cy,S)), ...placeFine(plan.subject,cx,cy+dy,S*inner,{main:light, second:box==="disc"?light:accent, detail:box==="disc"?light:accent})]; }
     const inner={disc:0.58, square:0.58, shield:0.5, diamond:0.42, hexagon:0.52, arch:0.52}[box], dy=box==="shield"?-S*0.04:box==="arch"?S*0.05:0;
     const m=motif(cx,cy+dy,S*inner,accent,forceLetters), fill=box==="disc"?accent:ink;
     return [L0("cadre",cap(PREMIUM_CONTAINERS[box].replace(/^un(e)? /,"")),fill,knockout(shapeIn(box,cx,cy,S), m))];
@@ -4717,17 +4783,17 @@ const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,
    copy-paste with claude.ai, the API key and the Claude Desktop extension all send claudePrompt() (context +
    reply format) and apply the JSON reply with applyClaudeReply(): curves as SVG paths, same undo banner and
    history entry ("Claude : note") as the artifact patch channel. */
-function parsePathD(d){
+function parsePathD(d, opts){ const keepEnds=!!(opts&&opts.open);   // open (stroked) paths: only Z closes a contour
   const t=String(d||"").match(/[a-df-z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi)||[]; const subs=[]; let cur=null, i=0, cmd="", x=0, y=0, sx=0, sy=0, lc=null, lq=null;
   const num=()=>parseFloat(t[i++]), isNum=()=>i<t.length && !/^[a-z]$/i.test(t[i]);
   const P=(px,py)=>({x:r2(px),y:r2(py)});
-  const close=()=>{ if(cur&&cur.length>1){ const a=cur[0], b=cur[cur.length-1]; if(Math.abs(a.x-b.x)<.01&&Math.abs(a.y-b.y)<.01){ a.i=b.i; cur.pop(); } } };
+  const close=(z)=>{ if(keepEnds&&!z) return; if(cur&&cur.length>1){ const a=cur[0], b=cur[cur.length-1]; if(Math.abs(a.x-b.x)<.01&&Math.abs(a.y-b.y)<.01){ a.i=b.i; cur.pop(); } } };
   const cubic=(ax,ay,bx,by,ex,ey)=>{ if(!cur){ cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); } cur[cur.length-1].o=P(ax,ay); cur.push({x:r2(ex),y:r2(ey),i:P(bx,by),o:null}); lc={x:bx,y:by}; x=ex; y=ey; };
   const line=(ex,ey)=>{ if(!cur){ cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); } cur.push({x:r2(ex),y:r2(ey),i:null,o:null}); x=ex; y=ey; };
   while(i<t.length){
     if(/^[a-z]$/i.test(t[i])) cmd=t[i++]; else if(!cmd) { i++; continue; }
     const rel=cmd===cmd.toLowerCase(), C=cmd.toUpperCase(), ox=rel?x:0, oy=rel?y:0; let keepC=false, keepQ=false;
-    if(C==="Z"){ close(); cur=null; x=sx; y=sy; lc=lq=null; continue; }
+    if(C==="Z"){ close(true); cur=null; x=sx; y=sy; lc=lq=null; continue; }
     if(!isNum()) continue;
     if(C==="M"){ const nx=num()+ox, ny=num()+oy; close(); x=sx=nx; y=sy=ny; cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); cmd=rel?"l":"L"; }
     else if(C==="L"){ line(num()+ox, num()+oy); }

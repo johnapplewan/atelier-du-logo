@@ -64,6 +64,12 @@ Ces règles guident le générateur de propositions de l'atelier (`premiumPlans`
 - **Contenants simples** : cercle, carré arrondi (rayon ≈ 22 % du côté), écusson. Filets fins et réguliers.
 - **Pas de détail plus petit que 1/48 du symbole.** Le symbole seul doit se lire à 16 px.
 
+### 5 bis. Pictogrammes raffinés
+- **Trait fin d'épaisseur constante** : 7 unités pour une boîte de 200, extrémités et angles arrondis, en vraies courbes de Bézier (pas de polygones).
+- **Un seul détail plein**, dans la couleur d'accent : une goutte, une gemme, un bouchon, une étincelle.
+- **Sur un contenant plein**, le trait passe dans la couleur claire. Un trait ne se découpe pas.
+- **Le pictogramme plein** reste réservé aux styles illustrés (low poly, gravure…).
+
 ### 6. Finition
 - **Centrage optique** : le symbole est placé 1 à 2 % au-dessus du centre géométrique. Les formes rondes dépassent légèrement.
 - **Espacement optique** : les lettres larges et les lettres rondes s'équilibrent, au lieu d'un espacement fixe et mécanique.

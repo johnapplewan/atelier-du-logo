@@ -163,6 +163,12 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   const trades = await p.evaluate(() => ["restaurant", "coiffure", "développeur", "avocat", "bâtiment", "parfum", "architecte", "hôtel"].map(k => readKeywords([k]).subjects[0]));
   check("trade keywords call up profession pictograms", () => assert.deepStrictEqual(trades, ["couverts", "ciseaux", "code", "balance", "casque", "flacon", "compas", "cloche"]));
 
+  // refined pictograms: monoline open paths (complete outlines), used by the premium layouts
+  const fine = await p.evaluate(async () => { const loop = "M0 0 L10 0 L10 10 L0 0"; const info = { name: "Hôtel Lumière", tagline: "Paris", keywords: ["hôtel", "luxe"], letters: "" };
+    const pl = conceptPlan(info, 0).plans[0], d = await buildConcept(pl, info);
+    return [parsePathD(loop, { open: true })[0].length, parsePathD(loop)[0].length, Object.keys(FINE).length, d.doc.layers.filter(l => l.open && l.sw > 0 && /^motif-/.test(l.id)).length > 0]; });
+  check("refined pictograms: open outlines kept whole, monoline motif in premium proposals", () => assert.deepStrictEqual(fine.slice(0, 2).concat([fine[2] >= 34, fine[3]]), [4, 3, true, true]));
+
   done(errors.concat(e2));
   await browser.close();
 })();
