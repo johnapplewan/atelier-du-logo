@@ -53,4 +53,7 @@ fs.mkdirSync(out, { recursive: true });
 const buf = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE", compressionOptions: { level: 9 } });
 fs.writeFileSync(path.join(out, "atelier-du-logo.mcpb"), buf);
 fs.writeFileSync(path.join(root, "tools/mcpb/manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+// the skill, as a zip ready to upload in claude.ai (Settings > Capabilities > Skills)
+const sk = new JSZip(); sk.file("atelier-du-logo/SKILL.md", fs.readFileSync(path.join(root, "skill/atelier-du-logo/SKILL.md")));
+fs.writeFileSync(path.join(out, "atelier-du-logo-skill.zip"), await sk.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 console.log("app/downloads/atelier-du-logo.mcpb written (" + Math.round(buf.length / 1024) + " Ko, extension " + VERSION + ")");

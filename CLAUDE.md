@@ -47,7 +47,7 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 4. **Brand book.** (done: questionnaire, pages, PDF, deposit pack) Generate the brand-book page (logo variants, backgrounds, colours, type, clear space, deposit files) from the user's logo, as was done for Simulimmo.
    - Before generating, once the logo is done: a series of questions with choices to pick (style, exact colours, type, mood), so the book matches what the user wants rather than Claude's defaults.
    - PDF export: A4 portrait for print, and landscape for slides.
-5. **Distribution.**
+5. **Distribution.** (done: `skill/atelier-du-logo/SKILL.md`, zipped into `app/downloads/atelier-du-logo-skill.zip` by `npm run mcpb`; `GUIDE.md`)
    - A skill (`SKILL.md`) that tells Claude how to open the workshop in a new conversation and how to work with it: read the bubbles, send patches.
    - A short user guide.
 6. **Pen and pencil.** (done) Bézier handles visible on demand (all handles toggle, Alt+drag pulls handles out of a node); a real pen tool that creates paths (click = corner, click-drag = curve, click the first point = close, Enter/Escape = open path); a freehand pencil (stylus pressure; "Trait" = editable stroke, "Pinceau" = filled brush shape), smoothed into editable curves. Open paths are stroked layers (`L.open`, `L.sw`).

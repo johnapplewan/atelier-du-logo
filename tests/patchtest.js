@@ -52,6 +52,12 @@ const dbMock = () => {
   const again = (await layer(p, "cadre")).subs[0].length;
   check("an applied patch is not replayed", () => assert.strictEqual(again, 8));
 
+  // same channel, shared reply format: SVG path, new layer, bubble reply
+  await p.evaluate(() => __remote("atelier/patch", { at: Date.now() + 5000, reply: JSON.stringify({ note: "triangle", calques: [{ id: "tri", nom: "Triangle", d: "M10 10 L60 10 L35 50 Z", couleur: "#123456" }], reponses: [] }) }));
+  await p.waitForTimeout(800);
+  const tri = await p.evaluate(() => { const L = __atelier.layers.find(l => l.id === "tri"); return L && [L.subs[0].length, !document.querySelector("#claudeBar").hidden]; });
+  check("atelier/patch also takes the shared reply format (SVG paths, new layers)", () => assert.deepStrictEqual(tri, [3, true]));
+
   done(errors);
   await browser.close();
 })();

@@ -48,6 +48,8 @@ Trois façons, dans « Connexions Claude » (sous les bulles) :
 - **Clé API Anthropic** (appli autonome, payé à l'usage) : « Demander (clé API) » envoie les bulles et une image du logo à Claude Opus 5.5 via le SDK officiel (`app/vendor/anthropic-sdk.js`, sortie JSON structurée, `fallbacks: "default"`). La clé reste dans le navigateur.
 - **Claude Desktop** : l'extension `app/downloads/atelier-du-logo.mcpb` sert l'atelier en local (hors ligne, http://127.0.0.1:4718) et donne à Claude les outils `atelier_ouvrir`, `atelier_etat`, `atelier_apercu`, `atelier_svg`, `atelier_appliquer`. La page lui répond par `/bridge/events` (SSE) et `/bridge/result`.
 
+Le skill `skill/atelier-du-logo/SKILL.md` (zip : `app/downloads/atelier-du-logo-skill.zip`) apprend à Claude à travailler avec l'atelier dans chacun de ces modes. Guide utilisateur : [GUIDE.md](GUIDE.md).
+
 Toutes les réponses passent par `applyClaudeReply` : bandeau « Annuler la modification de Claude », entrée « Claude : note » dans l'historique, calques verrouillés intouchés.
 
 Reconstruire l'extension après une modification de l'appli : `npm run build` puis `npm run mcpb`. Le SDK Anthropic se met à jour avec `npm run sdk`.

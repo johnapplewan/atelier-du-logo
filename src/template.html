@@ -669,6 +669,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <h3>Le projet</h3>
   <p>L'Atelier du Logo est un éditeur vectoriel pour dessiner son logo et sa charte graphique, seul ou avec Claude. On part de son nom, de ses mots-clés, d'une forme, d'une photo de croquis ou d'un concept proposé ; on dessine à la Plume et au Crayon, on choisit parmi 56 polices libres ou on crée la sienne, on applique des styles (low poly, gravure, line art…), on pose des bulles pour demander des retouches à Claude, et on repart avec ses fichiers et une charte en PDF.</p>
   <p>Tout se passe dans le navigateur : vos projets restent sur votre appareil.</p>
+  <p><a href="https://github.com/johnapplewan/atelier-du-logo/blob/main/GUIDE.md" target="_blank" rel="noopener">Guide d'utilisation</a> · <a href="https://github.com/johnapplewan/atelier-du-logo" target="_blank" rel="noopener">Code source</a></p>
   <h3>L'auteur</h3>
   <p id="abBio"></p>
   <div id="abSupport"></div>
@@ -4518,6 +4519,7 @@ function renderApiSec(){
    Claude tools (state, preview, svg, apply). The page answers them through /bridge/events (SSE) + /bridge/result. */
 const bridge={on:false, es:null, version:""};
 const MCPB_URL="https://johnapplewan.github.io/atelier-du-logo/downloads/atelier-du-logo.mcpb";
+const SKILL_URL="https://johnapplewan.github.io/atelier-du-logo/downloads/atelier-du-logo-skill.zip";
 async function bridgeCmd(cmd, args){
   if(cmd==="state") return Object.assign(claudeContext(notes.filter(n=>!n.done)), {projet:$("#projName")?$("#projName").textContent:"", bullesTraitees:notes.filter(n=>n.done).length});
   if(cmd==="svg") return {svg:exportSpec("full",false).svg};
@@ -4545,7 +4547,8 @@ function renderMcpSec(){
     :`<p class="muted">L'extension installe l'atelier sur votre ordinateur (utilisable hors ligne) et le relie à Claude Desktop : Claude lit vos bulles, regarde le logo et modifie les tracés, dans la conversation, avec votre abonnement.</p>
     <ol class="muted" style="margin:6px 0 8px;padding-left:20px"><li>Téléchargez l'extension, puis ouvrez le fichier : Claude Desktop propose de l'installer (ou Réglages › Extensions › Installer une extension).</li>
     <li>Dans une conversation, demandez « Ouvre l'atelier du logo » : il s'ouvre dans votre navigateur à l'adresse 127.0.0.1.</li><li>Posez vos bulles, puis demandez à Claude de les traiter.</li></ol>
-    <div class="row"><button id="cdMcpDl">Télécharger l'extension (.mcpb)</button><span class="muted" id="cdMcpMsg"></span></div>`);
+    <div class="row"><button id="cdMcpDl">Télécharger l'extension (.mcpb)</button><span class="muted" id="cdMcpMsg"></span></div>`)+
+    `<p class="muted" style="margin-top:10px">Skill « Atelier du Logo » : il apprend à Claude à travailler avec l'atelier (bulles, aperçu, modifications) dans toutes vos conversations. <a href="${esc(SKILL_URL)}" target="_blank" rel="noopener">Télécharger le skill</a>, puis claude.ai › Réglages › Capacités › Skills › Importer.</p>`;
   if($("#cdMcpDl")) $("#cdMcpDl").onclick=async()=>{ const m=$("#cdMcpMsg"); m.textContent="Téléchargement…";
     try{ const r=await fetch("downloads/atelier-du-logo.mcpb"); if(!r.ok) throw new Error(r.status); const blob=await r.blob(); await saveBlob("atelier-du-logo.mcpb", blob); m.textContent="Extension téléchargée ("+Math.round(blob.size/1024/1024*10)/10+" Mo) : ouvrez-la pour l'installer dans Claude Desktop."; }
     catch(e){ m.innerHTML="Téléchargez-la depuis le site de l'atelier : <strong>"+esc(MCPB_URL)+"</strong>"; } };
@@ -4557,6 +4560,11 @@ function applyPatch(d){
   if(!d || !Number.isFinite(d.at)) return;
   let seen=0; try{ seen=+localStorage.getItem("atelier-logo-patch")||0; }catch(_){}
   if(d.at<=seen || d.at<=lastAt.patch) return;
+  // shared reply format (SVG paths, new layers, bubble replies): {at, reply: JSON string of {note, calques, supprimer, reponses}}
+  if(typeof d.reply==="string"){ let o; try{ o=JSON.parse(d.reply); }catch(_){ return; }
+    if(drag||glyphMode){ setTimeout(()=>applyPatch(d),1500); return; }
+    lastAt.patch=d.at; try{ localStorage.setItem("atelier-logo-patch",String(d.at)); }catch(_){}
+    const r=applyClaudeReply(o); if(r.ok) toast("Claude : "+r.msg); return; }
   let v; try{ v=JSON.parse(d.layers); }catch(_){ return; }
   if(!Array.isArray(v) || !v.length || !v.every(l=>l && typeof l.id==="string" && validLayers([Object.assign({visible:true,locked:false,name:"x",group:"mark",fill:"#000000"},l)]))) return;
   if(drag||glyphMode){ setTimeout(()=>applyPatch(d),1500); return; }
