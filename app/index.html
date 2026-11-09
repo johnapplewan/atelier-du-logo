@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atelier du Logo par John Apple</title>
+<script>
+/* Content-Security-Policy for the standalone app (GitHub Pages, installed app, Claude Desktop extension): the page may only
+   load and talk to its own origin, plus Google Fonts for live text. Even if an injection slipped through, it could not
+   send data elsewhere. Not applied inside the claude.ai artifact frame, which has its own policy and runtime. */
+if(window.top===window && /^https?:$/.test(location.protocol)){ const m=document.createElement("meta"); m.httpEquiv="Content-Security-Policy";
+  m.content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'";
+  document.head.appendChild(m); }
+</script>
 <link rel="stylesheet" href="vendor/fonts/ui.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -1762,10 +1770,10 @@ function refreshFmt(){ const f=exFmt(); document.querySelectorAll(".exfmt .rast"
 document.querySelectorAll("input[name=exf]").forEach(r=>r.onchange=refreshFmt);
 function loadJSZip(){
   if(window.JSZip) return Promise.resolve(window.JSZip);
-  // bundled copy first (works offline), the CDN only if it is missing
+  // bundled copy only (works offline; no third-party script)
   const load=src=>new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src=src;
     sc.onload=()=>window.JSZip?ok(window.JSZip):ko(new Error("jszip")); sc.onerror=()=>ko(new Error("jszip")); document.head.appendChild(sc); });
-  return load("vendor/jszip.min.js").catch(()=>load("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"));
+  return load("vendor/jszip.min.js");
 }
 async function buildZip(crop){
   const JSZip=await loadJSZip(), zip=new JSZip();
@@ -4927,7 +4935,7 @@ function renderMcpSec(){
   el.innerHTML=`<h3>Claude Desktop <span class="muted">· avec votre abonnement, vos réglages et vos skills</span></h3>`+(bridge.on
     ?`<p><strong>Connecté à Claude Desktop.</strong> Dans une conversation, demandez par exemple « Regarde mes bulles dans l'atelier et traite-les ». Claude lit le projet, voit le logo et applique ses modifications ici, avec le bandeau pour annuler.</p>`
     :`<p class="muted">L'extension installe l'atelier sur votre ordinateur (utilisable hors ligne) et le relie à Claude Desktop : Claude lit vos bulles, regarde le logo et modifie les tracés, dans la conversation, avec votre abonnement.</p>
-    <ol class="muted" style="margin:6px 0 8px;padding-left:20px"><li>Téléchargez l'extension, puis ouvrez le fichier : Claude Desktop propose de l'installer (ou Réglages › Extensions › Installer une extension).</li>
+    <ol class="muted" style="margin:6px 0 8px;padding-left:20px"><li>Téléchargez l'extension, puis ouvrez le fichier : Claude Desktop propose de l'installer (ou Réglages › Extensions › Installer une extension). Claude Desktop signale qu'elle n'est pas signée : c'est attendu pour une extension indépendante. Installez-la seulement si vous l'avez téléchargée depuis l'atelier.</li>
     <li>Dans une conversation, demandez « Ouvre l'atelier du logo » : il s'ouvre dans votre navigateur à l'adresse 127.0.0.1.</li><li>Posez vos bulles, puis demandez à Claude de les traiter.</li></ol>
     <div class="row"><button id="cdMcpDl">Télécharger l'extension (.mcpb)</button><span class="muted" id="cdMcpMsg"></span></div>`)+
     `<p class="muted" style="margin-top:10px">Skill « Atelier du Logo » : il apprend à Claude à travailler avec l'atelier (bulles, aperçu, modifications) dans toutes vos conversations. <a href="${esc(SKILL_URL)}" target="_blank" rel="noopener">Télécharger le skill</a>, puis claude.ai › Réglages › Capacités › Skills › Importer.</p>`;

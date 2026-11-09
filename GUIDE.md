@@ -50,7 +50,7 @@ Le bouton **?** liste tous les raccourcis. **Annuler** défait la dernière acti
 2. Envoyez-la à Claude :
    - **dans Claude (artifact)** : « Envoyer à Claude » ;
    - **sur claude.ai, gratuit** : « Copier la demande », collez-la dans une conversation, puis copiez la réponse de Claude et faites « Coller la réponse » ;
-   - **avec Claude Desktop** : installez l'extension (Connexions Claude › Télécharger l'extension), puis demandez dans une conversation « Traite mes bulles dans l'atelier » ;
+   - **avec Claude Desktop** : installez l'extension (Connexions Claude › Télécharger l'extension), puis demandez dans une conversation « Traite mes bulles dans l'atelier ». À l'installation, Claude Desktop prévient que l'extension n'est pas signée : c'est normal pour une extension indépendante. Installez-la seulement si elle vient du site de l'atelier ;
 3. Les changements de Claude arrivent avec un bandeau **« Annuler la modification de Claude »**. Claude répond aussi dans chaque bulle.
 
 Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des calques).
