@@ -86,7 +86,7 @@ function listApp(dir, base = "") {
   });
 }
 const appDir = path.join(root, "app");
-const files = listApp(appDir).filter(f => !["sw.js", "files.json"].includes(f)).sort();
+const files = listApp(appDir).filter(f => !["sw.js", "files.json"].includes(f) && !f.startsWith("downloads/")).sort();
 const hash = crypto.createHash("sha1");
 for (const f of files) hash.update(f).update(fs.readFileSync(path.join(appDir, f)));
 const version = hash.digest("hex").slice(0, 12);

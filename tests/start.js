@@ -60,8 +60,14 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   await p.click('[data-start="proposal"]');
   await p.waitForSelector("#stProps [data-prop] svg", { timeout: 20000 });
   const props = await p.evaluate(() => ({ titles: [...document.querySelectorAll("#stProps [data-prop] b")].map(b => b.textContent), found: document.querySelector("#stProps p").textContent }));
-  check("six concepts from the keywords", () => { assert.strictEqual(props.titles.length, 6); assert.match(props.found, /cerf/); assert.match(props.found, /matière : bois/);
-    assert.ok(props.titles.includes("Planche gravée") && props.titles.includes("AN entrelacés") && props.titles.some(t => /^Demi-cerf/.test(t)), props.titles.join(" | ")); });
+  check("nine concepts: five premium layouts, then illustrated ones", () => { assert.strictEqual(props.titles.length, 9); assert.match(props.found, /cerf/); assert.match(props.found, /matière : bois/);
+    assert.deepStrictEqual(props.titles.slice(0, 5), ["Signature empilée", "Monogramme encadré", "Emblème à double filet", "Logotype à détail", "Version sombre"]);
+    assert.ok(props.titles.some(t => /^Cerf .*nom en dessous/.test(t)) && props.titles.some(t => /^Écusson/.test(t)), props.titles.join(" | ")); });
+  // the whole catalogue for this brief: 36 premium layouts + illustrated ones (styles, seals, emblems, plank…)
+  const all = await p.evaluate(async () => { const info = startInfo(), C = conceptPlan.counts, titles = new Set(); const n = Math.ceil(Math.max(C.premium / 5, C.illus / 4));
+    for (let r = 0; r < n; r++) for (const pl of conceptPlan(info, r).plans) titles.add(pl.title); return { C, titles: [...titles], series: document.querySelector("#stSeries").textContent }; });
+  check("more than 60 proposals for this brief, all different", () => { assert.ok(all.C.premium + all.C.illus >= 60, JSON.stringify(all.C)); assert.ok(all.titles.length >= 55, String(all.titles.length));
+    assert.ok(all.titles.includes("Planche gravée") && all.titles.includes("Sceau, nom en cercle") && all.titles.some(t => /^Demi-cerf/.test(t)), all.titles.join(" | ")); assert.match(all.series, /propositions · série 1 sur/); });
   await p.locator("#startDlg").screenshot({ path: __dirname + "/s10.png" });
   const esc = props.titles.findIndex(t => /^Écusson/.test(t));
   await p.click(`#stProps [data-prop="${esc}"]`); await p.click("#stGo"); await p.waitForTimeout(600);
@@ -77,9 +83,10 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   check("key letters saved with the brand", () => assert.strictEqual(letKept, "an"));
   // a subject outside the pictogram library: placeholder + bubble brief for Claude
   await p.fill("#stKw", "loutre, rivière"); await p.waitForTimeout(400); await p.waitForFunction(() => /loutre/.test(document.querySelector("#stProps").textContent), null, { timeout: 15000 });
-  await p.click('#stProps [data-prop="0"]'); await p.click("#stGo"); await p.waitForTimeout(500);
+  const ph = await p.evaluate(() => [...document.querySelectorAll("#stProps [data-prop] b")].findIndex(b => /^Signature empilée$|^Loutre /.test(b.textContent)));
+  await p.click(`#stProps [data-prop="${Math.max(0, ph)}"]`); await p.click("#stGo"); await p.waitForTimeout(500);
   const brief = await p.evaluate(() => ({ ph: __atelier.layers.some(l => l.id === "motif-provisoire"), note: (__atelier.notes.find(n => /loutre/.test(n.text)) || {}).text || "" }));
-  check("unknown subject: placeholder and a bubble brief for Claude", () => { assert.ok(brief.ph); assert.match(brief.note, /dessine le motif « loutre »/); });
+  check("unknown subject: placeholder and a bubble brief for Claude (premium rules)", () => { assert.ok(brief.ph); assert.match(brief.note, /dessine le motif « loutre »/); });
 
   // blank page: a plain link next to "Plus tard"
   await p.click("#startBtn");
@@ -151,6 +158,16 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   await q.click("#stLater"); await q.reload(); await q.waitForTimeout(500);
   const later = await q.evaluate(() => document.querySelector("#startDlg").open);
   check("'Plus tard' postpones the welcome", () => assert.strictEqual(later, false));
+
+  // trades: keywords call up profession pictograms
+  const trades = await p.evaluate(() => ["restaurant", "coiffure", "développeur", "avocat", "bâtiment", "parfum", "architecte", "hôtel"].map(k => readKeywords([k]).subjects[0]));
+  check("trade keywords call up profession pictograms", () => assert.deepStrictEqual(trades, ["couverts", "ciseaux", "code", "balance", "casque", "flacon", "compas", "cloche"]));
+
+  // refined pictograms: monoline open paths (complete outlines), used by the premium layouts
+  const fine = await p.evaluate(async () => { const loop = "M0 0 L10 0 L10 10 L0 0"; const info = { name: "Hôtel Lumière", tagline: "Paris", keywords: ["hôtel", "luxe"], letters: "" };
+    const pl = conceptPlan(info, 0).plans[0], d = await buildConcept(pl, info);
+    return [parsePathD(loop, { open: true })[0].length, parsePathD(loop)[0].length, Object.keys(FINE).length, d.doc.layers.filter(l => l.open && l.sw > 0 && /^motif-/.test(l.id)).length > 0]; });
+  check("refined pictograms: open outlines kept whole, monoline motif in premium proposals", () => assert.deepStrictEqual(fine.slice(0, 2).concat([fine[2] >= 34, fine[3]]), [4, 3, true, true]));
 
   done(errors.concat(e2));
   await browser.close();

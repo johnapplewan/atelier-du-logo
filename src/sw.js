@@ -14,6 +14,8 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request, url = new URL(req.url);
   if (req.method !== "GET" || url.origin !== self.location.origin) return;
+  // live bridge to Claude Desktop and on-demand downloads: never cached
+  if (url.pathname.includes("/bridge/") || url.pathname.includes("/downloads/")) return;
   e.respondWith(fetch(req).then(res => {
     if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
     return res;

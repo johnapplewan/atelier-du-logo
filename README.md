@@ -28,6 +28,27 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 - **Bulles d'annotation** (texte et voix), envoyées à Claude. Les retouches de Claude arrivent avec un bandeau pour les annuler.
 - **Export** : SVG, PNG et JPG, par groupe ou par calque, en ZIP.
 
+## Propositions de logo
+
+« Proposition de logo » (au premier lancement ou dans « Marque et départ ») tire ses propositions du nom, du slogan, des mots-clés et des lettres clés. Elle les présente par séries de 9 : 5 premium et 4 illustrées. « Autres concepts » passe à la série suivante.
+
+- **36 compositions premium**, construites selon [DESIGN-RULES.md](DESIGN-RULES.md) :
+  - signature empilée ou en ligne, symbole seul ou dans un contenant (disque, cercle fin, carré arrondi, écusson, losange, hexagone, arche) ;
+  - monogrammes découpés dans leur cadre ;
+  - emblèmes à double filet ;
+  - sceaux au nom écrit en cercle ;
+  - six logotypes à détail ;
+  - versions sombres sur plaque.
+- **36 pictogrammes raffinés** pour les propositions premium. Ils sont dessinés au trait fin d'épaisseur constante, en vraies courbes de Bézier, avec un seul détail en couleur d'accent : cloche, couverts, toque, verre de vin, tasse, épi de blé, clé d'hôtel, lit, diamant, flacon, rouge à lèvres, étincelle, miroir, ciseaux, compas, équerre, colonne, maison, immeuble, casque, engrenage, code, écran, balance, graphique, appareil photo, feuille, livre, plume, vagues, montagne, cœur, soleil, lune, clé, couronne, fleur. Sur un contenant plein, le trait passe en clair.
+- **62 pictogrammes pleins** (pour les styles des propositions illustrées), dont 36 métiers : bâtiment (casque, grue, truelle), immobilier (immeuble), industrie (engrenage, usine, clé à molette, éclair), beauté (flacon, rouge à lèvres, ciseaux, miroir), informatique (écran, code, puce, nuage), architecture (compas, équerre, colonne), food et restauration (toque, couverts, cloche, croissant, verre de vin), hôtellerie (lit, clé d'hôtel), et santé, droit, finance, joaillerie, photo, musique, sport, auto, formation, animaux, mode, peinture. Les mots-clés les appellent : « restaurant », « coiffure », « avocat », « développeur »…
+- **Jusqu'à 26 propositions illustrées** quand un sujet est reconnu : chaque composition dans plusieurs styles (low poly, gravure, line art, pixel…), des sceaux, emblèmes et signatures illustrés, et la planche gravée pour le bois.
+- **Sans sujet reconnu**, les compositions premium utilisent les initiales.
+- **Si le sujet n'est pas dans la bibliothèque**, la proposition garde une place vide et une bulle demande à Claude de le dessiner.
+
+## Tablette et téléphone
+
+Sous 900 px de large (téléphone, tablette en portrait), le dessin occupe tout l'écran. Une barre d'onglets en bas (Outils, Calques, Sélection, Palette, Bulles) ouvre chaque panneau en volet, et un toucher sur le dessin le referme. Les actions secondaires passent dans le menu ☰. Le dessin se fait au doigt ou au stylet (pression), avec zoom à deux doigts. En paysage, une tablette garde les trois colonnes.
+
 ## Appli autonome
 
 L'atelier fonctionne aussi hors de Claude, comme une application installable utilisable sans connexion :
@@ -36,8 +57,23 @@ L'atelier fonctionne aussi hors de Claude, comme une application installable uti
 - **En zip** : À propos > « Télécharger l'appli (zip) » récupère tous les fichiers (avec un `LISEZMOI.txt`). Pour l'ouvrir : `python3 -m http.server 8080` dans le dossier, puis http://localhost:8080.
 - **Installer** : depuis la page servie en http(s), « Installer l'appli » (ou le menu du navigateur). Le service worker (`sw.js`, généré par `npm run build` avec `files.json`) met en cache tous les fichiers ; il ne s'active jamais dans l'artifact.
 - **Fenêtres** (en-tête) : Outils, Calques, Sélection, Palette et Bulles se détachent chacun dans leur fenêtre, à placer sur un autre écran. Le panneau est déplacé, pas copié : un seul dessin, un seul historique, raccourcis clavier actifs dans chaque fenêtre. Fermer la fenêtre ou « Rattacher » le remet en place. Indisponible dans l'artifact (fenêtres bloquées).
+- **Sécurité** : hors artifact, une politique CSP limite la page à sa propre origine, plus Google Fonts pour les textes « live ». Le passage à un sous-domaine dédié est décrit dans `docs/DOMAINE.md`. Rapport d'audit : `docs/securite/`.
 - Hors artifact, les exports sont enregistrés directement par le navigateur ; les polices de l'interface et JSZip sont servis localement (`app/vendor/`).
 - **Liens de soutien** (À propos) : le lien PayPal est dans le code ; le numéro Wero n'y est jamais. Dans l'artifact, il se lit dans le doc `atelier/about` de la base (`{"wero": "…"}`, écriture réservée au propriétaire). Sur GitHub Pages, il vient du secret `ATELIER_WERO` (Settings > Secrets and variables > Actions), lu par le workflow au moment du build. En local, il vient de `about.local.json` (ignoré par git) ou de la variable `ATELIER_WERO` au moment de `npm run build`. Il est encodé dans la page et ne s'affiche qu'au clic sur « Afficher le numéro ».
+
+## Travailler avec Claude
+
+Dans « Connexions Claude » (sous les bulles) :
+
+- **Dans l'artifact** : « Envoyer à Claude » transmet les bulles à la conversation, Claude modifie le dessin par le canal `atelier/patch`.
+- **Copier-coller avec claude.ai** (gratuit) : « Copier la demande » copie le contexte (marque, calques en tracés SVG, bulles) et le format de réponse ; on colle la réponse de Claude avec « Coller la réponse ».
+- **Claude Desktop** : l'extension `app/downloads/atelier-du-logo.mcpb` sert l'atelier en local (hors ligne, http://127.0.0.1:4718) et donne à Claude les outils `atelier_ouvrir`, `atelier_etat`, `atelier_apercu`, `atelier_svg`, `atelier_appliquer`. La page lui répond par `/bridge/events` (SSE) et `/bridge/result`.
+
+Le skill `skill/atelier-du-logo/SKILL.md` (zip : `app/downloads/atelier-du-logo-skill.zip`) apprend à Claude à travailler avec l'atelier dans chacun de ces modes. Guide utilisateur : [GUIDE.md](GUIDE.md).
+
+Toutes les réponses passent par `applyClaudeReply` : bandeau « Annuler la modification de Claude », entrée « Claude : note » dans l'historique, calques verrouillés intouchés.
+
+Reconstruire l'extension après une modification de l'appli : `npm run build` puis `npm run mcpb`.
 
 ## Arborescence
 
@@ -49,6 +85,7 @@ L'atelier fonctionne aussi hors de Claude, comme une application installable uti
 | `tools/fonts/` | Chaîne des polices (harfbuzzjs + opentype.js) : `gen.mjs` puis `trim.cjs` → `fonts.js` (métadonnées seules), `glyphs.cjs` → `app/glyphs/`, `dicts.cjs` → `app/dict-*.js` |
 | `app/vendor/` | opentype.js et JSZip (MIT), polices de l'interface Instrument Serif et Inter (OFL) |
 | `src/sw.js` | Source du service worker (hors ligne) |
+| `tools/mcpb/` | Extension Claude Desktop : `server.js` (serveur MCP + pont vers la page), `build.mjs` → `app/downloads/atelier-du-logo.mcpb` |
 | `tests/` | Tests Playwright (Chromium) sur `app/` servi en local : `npm test` |
 
 ## Licences

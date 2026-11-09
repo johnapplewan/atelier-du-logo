@@ -2,8 +2,16 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atelier du Logo par John Apple</title>
+<script>
+/* Content-Security-Policy for the standalone app (GitHub Pages, installed app, Claude Desktop extension): the page may only
+   load and talk to its own origin, plus Google Fonts for live text. Even if an injection slipped through, it could not
+   send data elsewhere. Not applied inside the claude.ai artifact frame, which has its own policy and runtime. */
+if(window.top===window && /^https?:$/.test(location.protocol)){ const m=document.createElement("meta"); m.httpEquiv="Content-Security-Policy";
+  m.content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'";
+  document.head.appendChild(m); }
+</script>
 <link rel="stylesheet" href="vendor/fonts/ui.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -42,6 +50,12 @@ header .group{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .winmenu p{margin:6px 4px 2px;font-size:12px}
 .detached{border:1px dashed var(--line);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .detached[hidden]{display:none}
+.claudedlg{width:min(640px,94vw)}
+.claudedlg .cdsec{border-top:1px solid var(--line);padding-top:12px;margin:12px 0 0}
+.claudedlg h3{margin:0 0 6px;font-size:15px}
+.claudedlg textarea{width:100%;margin:8px 0;font:12px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical}
+.claudedlg input[type=password],.claudedlg input[type=text]{flex:1;min-width:200px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.linkbtn{border:0;background:none;padding:0;color:var(--brass);text-decoration:underline;cursor:pointer;font-size:12px}
 aside.left>.collapse+.detached{margin-right:30px}
 aside.right>.collapse+.detached{margin-left:30px}
 .detached button{font-size:12px;padding:3px 8px}
@@ -310,7 +324,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .pcard{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;display:flex;flex-direction:column;gap:6px}
 .pcard.cur{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
 .pthumb{height:110px;padding:8px;background:var(--cream);border:0;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.pthumb svg{width:100%;height:100%}
+.pthumb svg,.pthumb img{width:100%;height:100%;object-fit:contain}
 .pname{font:600 14px Inter,system-ui,sans-serif;border:1px solid transparent;border-radius:6px;padding:3px 5px;background:none}
 .pname:hover,.pname:focus{border-color:var(--line);background:#fff}
 .pmeta{font-size:12px;color:var(--muted);padding:0 5px}
@@ -398,7 +412,43 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
 #stage.rulers .claudebar,#stage.rulers .glyphbar{top:30px}#stage.rulers .mini{top:30px;left:30px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--night);color:var(--ivory);padding:9px 14px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
 .toast.show{opacity:1}
-@media (max-width:980px){main{grid-template-columns:1fr;grid-template-rows:auto 60vh auto}aside.left{border-right:0;border-bottom:1px solid var(--line)}aside.right{border-left:0;border-top:1px solid var(--line)}.hint{display:none}}
+.menubtn,.mbar{display:none}
+/* ---------- Phone and tablet (portrait): full canvas, bottom tab bar, panels as sheets ---------- */
+@media (max-width:900px){
+  header{padding:8px 10px;gap:8px;flex-wrap:nowrap;padding-top:max(8px,env(safe-area-inset-top))}
+  header .brand h1{font-size:20px} header .sub,#projName,#status span{display:none}
+  .menubtn{display:inline-flex;align-items:center;gap:4px;order:5}
+  header .group{flex-wrap:nowrap;gap:5px}
+  header .group [data-sec],header .group .sec{display:none}
+  header.menuopen{flex-wrap:wrap}
+  header.menuopen .group{flex-wrap:wrap;width:100%;order:6}
+  header.menuopen .group [data-sec],header.menuopen .group .sec{display:inline-flex}
+  main,main.noleft,main.noright,main.noleft.noright{display:block;position:relative;grid-template-columns:none}
+  #stage{position:absolute;inset:0}
+  .mini,.mini-open,.mini-open.right,.collapse,.hint{display:none!important}
+  aside,main.noleft aside.left,main.noright aside.right{display:none;visibility:visible;position:absolute;left:0;right:0;bottom:0;z-index:20;max-height:58%;overflow:auto;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));border:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;box-shadow:0 -8px 30px rgba(20,20,25,.14);-webkit-overflow-scrolling:touch}
+  aside::before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--line);margin:-4px auto 10px}
+  aside>section,aside>.detached{display:none;margin-bottom:14px}
+  body.sheet-tools aside.left,body.sheet-layers aside.left,body.sheet-palette aside.left,body.sheet-selection aside.right,body.sheet-notes aside.right{display:block}
+  body.sheet-tools #toolsSec,body.sheet-tools #gridSec,body.sheet-layers #layersSec,body.sheet-palette #palSec,body.sheet-selection #inspector,body.sheet-selection #fontSec,body.sheet-notes #notesSec,body.sheet-notes #noteEditor{display:block}
+  aside.right>section:first-of-type{padding-left:0}
+  .mbar{display:flex;justify-content:space-around;background:var(--paper);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));flex:none}
+  .mbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;font-size:11px;padding:6px 2px;border-radius:10px;color:var(--muted);position:relative;min-height:48px}
+  .mbar button svg,.mbar .mbi svg{width:22px;height:22px}
+  .mbar .mbi{display:flex;height:22px}
+  .mbar button.on{color:var(--ink);background:var(--cream)}
+  .mbcount{position:absolute;top:2px;right:calc(50% - 22px);background:var(--brass);color:#fff;font-size:10px;border-radius:9px;padding:0 5px;line-height:16px}
+  .tools button{min-height:52px}
+  aside .ib{min-width:34px;min-height:34px}
+  input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px}
+  header .group .winwrap,header.menuopen .group .winwrap{display:none}
+  /* detached panel windows are narrow too: they keep the plain panel layout */
+  body.panelwin aside,body.panelwin aside>section,body.panelwin aside>div{display:block!important;position:static;max-height:none;box-shadow:none;border-radius:0;padding:14px}
+  body.panelwin aside::before{display:none}
+  button,select,input[type=checkbox],input[type=radio]{touch-action:manipulation}
+  dialog{padding:16px;max-height:calc(100vh - 24px);overflow:auto}
+}
+@media (max-width:420px){ header .brand h1{display:none} .menubtn span{display:none} #redo{display:none} }
 </style>
 </head>
 <body>
@@ -410,15 +460,16 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <div class="spacer"></div>
   <span id="projName" class="projname"></span>
   <div id="status" role="status"><i></i><span>Chargement…</span></div>
-  <div class="group">
+  <button id="menuBtn" class="menubtn" aria-expanded="false" aria-controls="hdrGroup" title="Menu">☰<span> Menu</span></button>
+  <div class="group" id="hdrGroup">
     <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
     <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
-    <span class="winwrap"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
-    <button id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
-    <button id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
-    <button id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
-    <button id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
-    <button id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
+    <span class="winwrap sec"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
+    <button data-sec="1" id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
+    <button data-sec="1" id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
+    <button data-sec="1" id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
+    <button data-sec="1" id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
+    <button data-sec="1" id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
 </header>
@@ -441,7 +492,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
       <div id="drawOpts" class="shapeopts" hidden></div>
       <button id="importBtn" class="wide" title="Fichier ou photo d'un dessin, d'une signature, d'une texture : transformé en courbes">Importer une image…</button>
     </section>
-    <section>
+    <section id="gridSec">
       <h2>Grille</h2>
       <div class="row">
         <label class="chk"><input type="checkbox" id="gridOn"> Afficher</label>
@@ -516,6 +567,13 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     <section id="noteEditor"></section>
   </aside>
 </main>
+<nav class="mbar" id="mbar" aria-label="Panneaux">
+  <button data-sheet="tools" id="mbTools"><span class="mbi" id="mbToolIcon"></span><span>Outils</span></button>
+  <button data-sheet="layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>Calques</span></button>
+  <button data-sheet="selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="3 2"/><path d="M9 12h6M12 9v6"/></svg><span>Sélection</span></button>
+  <button data-sheet="palette"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1.4" fill="currentColor"/><circle cx="12" cy="7.5" r="1.4" fill="currentColor"/><circle cx="15.5" cy="10" r="1.4" fill="currentColor"/></svg><span>Palette</span></button>
+  <button data-sheet="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H10l-4 4v-4H4z"/></svg><span>Bulles</span><b class="mbcount" id="mbNotes" hidden></b></button>
+</nav>
 
 <dialog id="exportDlg">
   <h2>Exporter le logo</h2>
@@ -663,6 +721,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <h3>Le projet</h3>
   <p>L'Atelier du Logo est un éditeur vectoriel pour dessiner son logo et sa charte graphique, seul ou avec Claude. On part de son nom, de ses mots-clés, d'une forme, d'une photo de croquis ou d'un concept proposé ; on dessine à la Plume et au Crayon, on choisit parmi 56 polices libres ou on crée la sienne, on applique des styles (low poly, gravure, line art…), on pose des bulles pour demander des retouches à Claude, et on repart avec ses fichiers et une charte en PDF.</p>
   <p>Tout se passe dans le navigateur : vos projets restent sur votre appareil.</p>
+  <p><a href="https://github.com/johnapplewan/atelier-du-logo/blob/main/GUIDE.md" target="_blank" rel="noopener">Guide d'utilisation</a> · <a href="https://github.com/johnapplewan/atelier-du-logo" target="_blank" rel="noopener">Code source</a></p>
   <h3>L'auteur</h3>
   <p id="abBio"></p>
   <div id="abSupport"></div>
@@ -672,6 +731,17 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <h3>Crédits</h3>
   <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js et JSZip (licence MIT). Icônes et interface en Instrument Serif et Inter (OFL). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
   <div class="row" style="justify-content:flex-end"><button id="abClose">Fermer</button></div>
+</dialog>
+<dialog id="claudeDlg" class="claudedlg" aria-labelledby="cdTitle">
+  <div class="row"><h2 id="cdTitle">Travailler avec Claude</h2><span class="sp"></span><button id="cdClose">Fermer</button></div>
+  <section class="cdsec">
+    <h3>Copier-coller avec claude.ai <span class="muted">· gratuit, avec votre compte</span></h3>
+    <p class="muted">1. Posez des bulles sur le dessin, puis « Copier la demande ». 2. Collez-la dans une conversation sur claude.ai (ou l'appli Claude). 3. Copiez toute la réponse de Claude et collez-la ici.</p>
+    <div class="row"><button id="cdCopy">Copier la demande</button><span class="muted" id="cdCopyMsg"></span></div>
+    <textarea id="cdPaste" rows="6" placeholder="Collez ici la réponse de Claude (le bloc json suffit)" spellcheck="false"></textarea>
+    <div class="row"><button id="cdApply" class="primary">Appliquer la réponse</button><span class="muted" id="cdMsg" role="status"></span></div>
+  </section>
+  <section class="cdsec" id="cdMcpSec"></section>
 </dialog>
 <dialog id="scDlg" class="scdlg" aria-labelledby="scTitle">
   <div class="row"><h2 id="scTitle">Raccourcis</h2><span class="sp"></span><label class="chk"><input type="checkbox" id="scHelp"> Afficher les aides à l'écran</label></div>
@@ -739,6 +809,8 @@ let tool = "move";
 let view = {k:1, tx:0, ty:0};
 let grid = {on:false, snap:false, size:4};
 
+/* untrusted text that ends up in SVG attributes: letters, digits, spaces and a little punctuation only (no quotes, <, >, =) */
+const LIVE_FAMILY=/^[\p{L}\p{N} .,&()_+-]{1,60}$/u;
 function validLayers(v){
   if(!Array.isArray(v)) return false;   // an empty page is a valid document
   const pt = p => p===null || (p && Number.isFinite(p.x) && Number.isFinite(p.y));
@@ -747,7 +819,9 @@ function validLayers(v){
     && (l.opacity===undefined || (Number.isFinite(l.opacity) && l.opacity>=0 && l.opacity<=1))
     && (l.blend===undefined || (typeof l.blend==="string" && /^[a-z-]{3,20}$/.test(l.blend)))
     && (l.name.length<=80)
-    && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && l.live.family.length<=60
+    && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && LIVE_FAMILY.test(l.live.family)
+         && (l.live.lang===undefined || l.live.lang==="" || (typeof l.live.lang==="string" && /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}$/.test(l.live.lang)))
+         && (l.live.dir===undefined || ["auto","ltr","rtl"].includes(l.live.dir)) && (l.live.weight===undefined || (Number.isInteger(l.live.weight) && l.live.weight>=100 && l.live.weight<=900))
          && Number.isFinite(l.live.w0) && Number.isFinite(l.live.h0) && Number.isFinite(l.live.bx) && Number.isFinite(l.live.by) && l.subs.length===1 && l.subs[0].length===4))
     && validFx(l.fx)
     && (l.open===undefined || typeof l.open==="boolean") && (l.sw===undefined || (Number.isFinite(l.sw) && l.sw>0 && l.sw<=400))
@@ -884,7 +958,7 @@ function reportKept(kept){ if(kept.length) toast("Gardé tel quel car modifié e
 function undo(){ const e=[...hist].reverse().find(x=>x.on); if(!e) return; const kept=toggleEntry(e,false); redoIds.push(e.id); changed(); renderHistory(); reportKept(kept); }
 function redo(){ let e=null; while(redoIds.length&&!e){ const id=redoIds.pop(); e=hist.find(x=>x.id===id&&!x.on)||null; } if(!e) return; const kept=toggleEntry(e,true); changed(); renderHistory(); reportKept(kept); }
 const canUndo=()=>hist.some(x=>x.on), canRedo=()=>redoIds.some(id=>hist.some(x=>x.id===id&&!x.on));
-function validHist(v){ return Array.isArray(v)&&v.length<=300&&v.every(e=>e&&typeof e.id==="string"&&typeof e.label==="string"&&typeof e.on==="boolean"&&e.d&&e.d.ents&&typeof e.d.ents==="object"&&e.d.pos&&e.d.doc); }
+function validHist(v){ return Array.isArray(v)&&v.length<=300&&v.every(e=>e&&typeof e.id==="string"&&/^[\w-]{1,40}$/.test(e.id)&&typeof e.label==="string"&&e.label.length<=200&&(e.at===undefined||Number.isFinite(e.at))&&typeof e.on==="boolean"&&e.d&&e.d.ents&&typeof e.d.ents==="object"&&e.d.pos&&e.d.doc); }
 /* --- the history panel (long press or right click on "Annuler") --- */
 let histHover=null;
 function relTime(t){ const s=Math.round((Date.now()-t)/1000); return s<60?"à l'instant":s<3600?Math.floor(s/60)+" min":s<86400?Math.floor(s/3600)+" h":new Date(t).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); }
@@ -892,7 +966,7 @@ function openHistory(){ const p=$("#histPanel"); p.hidden=false; renderHistory()
 function closeHistory(){ $("#histPanel").hidden=true; histHover=null; renderHistHi(); }
 function renderHistory(){
   updateButtons(); const p=$("#histPanel"); if(!p||p.hidden) return;
-  $("#histList").innerHTML=hist.length?hist.slice().reverse().map(e=>`<li class="${e.on?"":"off"}" data-h="${e.id}"><label><input type="checkbox" ${e.on?"checked":""} data-hc="${e.id}" aria-label="${e.on?"Décocher":"Recocher"} : ${esc(e.label)}"><span class="hl">${esc(e.label)}</span></label><span class="ht">${relTime(e.at)}</span></li>`).join("")
+  $("#histList").innerHTML=hist.length?hist.slice().reverse().map(e=>`<li class="${e.on?"":"off"}" data-h="${esc(e.id)}"><label><input type="checkbox" ${e.on?"checked":""} data-hc="${esc(e.id)}" aria-label="${e.on?"Décocher":"Recocher"} : ${esc(e.label)}"><span class="hl">${esc(e.label)}</span></label><span class="ht">${relTime(e.at)}</span></li>`).join("")
     :`<li class="muted" style="padding:10px">Aucune modification pour l'instant.</li>`;
   $("#histCount").textContent=hist.length?hist.filter(e=>e.on).length+" / "+hist.length+" actives":"";
 }
@@ -1026,7 +1100,7 @@ function renderPins(){
       <text x="0" y="-19" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" fill="#fff" pointer-events="none">${n.n}</text></g>`;
   }).join("");
 }
-function renderAll(){ renderPalette(); renderFontSec(); renderTextRow(); renderDirRow(); if(!$("#fontMenu").hidden) renderFontMenu(); renderArt(); renderOverlay(); renderPins(); renderLayers(); renderInspector(); renderNotes(); renderNoteEditor(); updateButtons(); }
+function renderAll(){ try{ renderMbar(); }catch(_){} renderPalette(); renderFontSec(); renderTextRow(); renderDirRow(); if(!$("#fontMenu").hidden) renderFontMenu(); renderArt(); renderOverlay(); renderPins(); renderLayers(); renderInspector(); renderNotes(); renderNoteEditor(); updateButtons(); }
 function updateButtons(){ $("#undo").disabled=!canUndo(); $("#histBtn").disabled=!hist.length; $("#redo").disabled=!canRedo(); }
 
 const ICON = {
@@ -1260,7 +1334,7 @@ const HINTS = {
 };
 function setTool(t){
   if(tool==="pen" && t!=="pen" && penPath) finishPen(false);
-  tool=t; cv.setAttribute("class","t-"+t);
+  tool=t; cv.setAttribute("class","t-"+t); try{ renderMbar(); }catch(_){}
   document.querySelectorAll("[data-tool]").forEach(b=>{ b.classList.toggle("on",b.dataset.tool===t); b.setAttribute("aria-pressed",b.dataset.tool===t); });
   $("#hint").textContent=HINTS[t]; if(window.flashHint) flashHint(); if(window.renderGuides) renderGuides(); if(t!=="points"&&t!=="pen") sel.node=null; renderOverlay(); renderInspector(); if(window.renderMini) renderMini(); renderShapeOpts(); renderDrawOpts();
 }
@@ -1287,6 +1361,26 @@ $("#showRight").onclick=()=>setPanels(panelsOpen().left,true);
 $("#miniTool").onclick=()=>{ const f=$("#flyout"); f.hidden=!f.hidden; $("#miniTool").setAttribute("aria-expanded",String(!f.hidden)); };
 $("#flyout").addEventListener("click",e=>{ const b=e.target.closest("[data-ft]"); if(!b) return; setTool(b.dataset.ft); $("#flyout").hidden=true; });
 try{ const pp=JSON.parse(localStorage.getItem("atelier-logo-panels")||"null"); if(pp) setPanels(pp.left!==false, pp.right!==false); }catch(_){}
+
+/* ---------- Phone / tablet: the bottom tab bar opens one panel at a time as a sheet over the canvas ---------- */
+const mobileMQ=window.matchMedia("(max-width:900px)");
+let sheet=null;
+function openSheet(k){
+  sheet=k; for(const n of ["tools","layers","selection","palette","notes"]) document.body.classList.toggle("sheet-"+n, n===k);
+  document.querySelectorAll("#mbar [data-sheet]").forEach(b=>b.classList.toggle("on", b.dataset.sheet===k));
+}
+function renderMbar(){
+  const ic=$("#mbToolIcon"); if(ic) ic.innerHTML=toolIcon(tool);
+  const c=$("#mbNotes"), n=notes.filter(x=>!x.done).length; if(c){ c.hidden=!n; c.textContent=n; }
+}
+$("#mbar").addEventListener("click",e=>{ const b=e.target.closest("[data-sheet]"); if(!b) return; openSheet(sheet===b.dataset.sheet?null:b.dataset.sheet); renderMbar(); });
+// a tap on the drawing closes the sheet, so the whole canvas is free to work on
+$("#cv").addEventListener("pointerdown",()=>{ if(mobileMQ.matches && sheet) openSheet(null); });
+$("#menuBtn").onclick=()=>{ const h=document.querySelector("header"), o=!h.classList.contains("menuopen"); h.classList.toggle("menuopen",o); $("#menuBtn").setAttribute("aria-expanded",String(o)); };
+$("#hdrGroup").addEventListener("click",e=>{ if(e.target.closest("[data-sec]")){ document.querySelector("header").classList.remove("menuopen"); $("#menuBtn").setAttribute("aria-expanded","false"); } });
+mobileMQ.addEventListener("change",()=>{ if(!mobileMQ.matches) openSheet(null); });
+// choosing a tool closes the Tools sheet: the canvas is free to draw on
+$("#toolsSec").addEventListener("click",e=>{ if(mobileMQ.matches && e.target.closest(".tools [data-tool]")) openSheet(null); });
 
 /* ---------- Panel windows ----------
    « Fenêtres » moves a panel's own DOM into a separate window (window.open, same origin), e.g. on a second
@@ -1676,10 +1770,10 @@ function refreshFmt(){ const f=exFmt(); document.querySelectorAll(".exfmt .rast"
 document.querySelectorAll("input[name=exf]").forEach(r=>r.onchange=refreshFmt);
 function loadJSZip(){
   if(window.JSZip) return Promise.resolve(window.JSZip);
-  // bundled copy first (works offline), the CDN only if it is missing
+  // bundled copy only (works offline; no third-party script)
   const load=src=>new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src=src;
     sc.onload=()=>window.JSZip?ok(window.JSZip):ko(new Error("jszip")); sc.onerror=()=>ko(new Error("jszip")); document.head.appendChild(sc); });
-  return load("vendor/jszip.min.js").catch(()=>load("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"));
+  return load("vendor/jszip.min.js");
 }
 async function buildZip(crop){
   const JSZip=await loadJSZip(), zip=new JSZip();
@@ -1701,9 +1795,10 @@ window.__buildZip=buildZip;
 function addNote(w){
   const n={id:"n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6), n:(notes.reduce((m,x)=>Math.max(m,x.n),0)+1), x:r2(w.x), y:r2(w.y), text:"", audio:null, at:new Date().toISOString()};
   notes.push(n); selNote=n.id; renderPins(); renderNotes(); renderNoteEditor(); scheduleSave("notes");
+  if(mobileMQ.matches) setTimeout(()=>openSheet("notes"),0);
   setTimeout(()=>{ const ta=$("#noteText"); if(ta) ta.focus(); },30);
 }
-function renderNotes(){
+function renderNotes(){ try{ renderMbar(); }catch(_){}
   renderSendBox();
   const ul=$("#notes");
   if(!notes.length){ ul.innerHTML=`<li class="empty">Aucune annotation. Choisissez l'outil Bulle puis cliquez sur le dessin.</li>`; return; }
@@ -1814,12 +1909,14 @@ function renderSendBox(){
     no_session:"Aucune session Claude n'écoute cette page pour l'instant : copiez la demande et collez-la dans la conversation.",
     writers_only:"Seul un éditeur de la page peut envoyer à Claude : copiez la demande.", checking:"Vérification…"}[sendState];
   const html=`<div class="row"><button id="sendAll" class="primary" ${!open.length||sendState!=="available"?"disabled":""}>Envoyer à Claude${open.length?" ("+open.length+")":""}</button>
-    <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button></div>
-    <p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
+    <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button><button id="pasteReply" title="Coller la réponse de Claude (claude.ai)">Coller la réponse</button></div>
+    <p class="muted"><button class="linkbtn" id="cdOpen">Connexions Claude : copier-coller, Claude Desktop</button></p><p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
   // same content: keep the buttons (replacing them under a click would swallow it)
   if(el.__html===html) return; el.__html=html; el.innerHTML=html;
   $("#sendAll").onclick=()=>sendToClaude(open);
-  $("#copyReq").onclick=async()=>{ try{ await navigator.clipboard.writeText(requestText(open)); $("#sendMsg").textContent="Demande copiée : collez-la dans la conversation avec Claude."; }catch(_){ $("#sendMsg").textContent="Copie refusée par le navigateur."; } };
+  $("#copyReq").onclick=async()=>{ $("#sendMsg").textContent=await copyRequest(open); };
+  $("#pasteReply").onclick=()=>openClaudeDlg(true);
+  $("#cdOpen").onclick=()=>openClaudeDlg(false);
 }
 async function sendToClaude(list){
   list=list.filter(n=>n.text.trim()||n.audio);
@@ -2303,7 +2400,11 @@ function registerCustom(cf){ window.__G=window.__G||{}; window.__G[cf.gkey]=cf.G
 function mergeCustomFonts(){ customFonts.forEach(registerCustom); }
 async function saveCustomFonts(){ try{ await P.setMeta("fonts", customFonts); }catch(_){ toast("Espace de l'appareil plein : la police n'a pas pu être enregistrée."); } }
 async function initCustomFonts(){ try{ const v=await P.meta("fonts"); if(Array.isArray(v)) customFonts=v.filter(validCustom); mergeCustomFonts(); }catch(_){} }
-function validCustom(cf){ return cf&&typeof cf.id==="string"&&/^custom-[\w-]{1,60}$/.test(cf.id)&&typeof cf.name==="string"&&cf.name.length<=80&&cf.G&&Number.isFinite(cf.G.upem)&&cf.G.adv&&cf.G.gl&&Number.isFinite(cf.k); }
+const GLYPH_D=/^[MLQCZ0-9eE.\s+-]*$/i, finiteMap=o=>o&&typeof o==="object"&&Object.values(o).every(Number.isFinite);
+function validCustom(cf){ return cf&&typeof cf.id==="string"&&/^custom-[\w-]{1,60}$/.test(cf.id)&&typeof cf.name==="string"&&cf.name.length<=80
+  &&(cf.gkey===undefined||(typeof cf.gkey==="string"&&/^custom-[\w-]{1,80}$/.test(cf.gkey)))&&cf.G&&Number.isFinite(cf.G.upem)&&cf.G.upem>0&&Number.isFinite(cf.k)
+  &&finiteMap(cf.G.adv)&&(cf.G.kern===undefined||finiteMap(cf.G.kern))&&(cf.G.m===undefined||finiteMap(cf.G.m))
+  &&cf.G.gl&&typeof cf.G.gl==="object"&&Object.values(cf.G.gl).every(d=>typeof d==="string"&&d.length<20000&&GLYPH_D.test(d)); }
 const newFontId=name=>"custom-"+slug(name,"police")+"-"+Date.now().toString(36);
 /* metrics read from the outlines when the file gives none */
 function glyphBox(G,ch){ if(!G.gl[ch]) return null; const subs=parseGlyph(G.gl[ch],0); if(!subs.length) return null; return bounds([{subs}]); }
@@ -2693,7 +2794,7 @@ const measureSvg=document.createElementNS("http://www.w3.org/2000/svg","svg");
 measureSvg.setAttribute("style","position:absolute;left:-9999px;top:0;width:10px;height:10px;visibility:hidden"); document.body.appendChild(measureSvg);
 function liveAttrs(lv){
   const vert=!!lv.vert, dir=lv.dir==="auto"?(isRTL(lv.str)?"rtl":"ltr"):lv.dir;
-  return `font-family="'${lv.family.replace(/'/g,"")}', sans-serif" font-weight="${lv.weight||400}"${lv.italic?` font-style="italic"`:""} font-size="100" direction="${dir}" xml:lang="${lv.lang||""}"`+
+  return `font-family="'${esc(lv.family.replace(/'/g,""))}', sans-serif" font-weight="${esc(lv.weight||400)}"${lv.italic?` font-style="italic"`:""} font-size="100" direction="${esc(dir)}" xml:lang="${esc(lv.lang||"")}"`+
     (vert?` writing-mode="vertical-rl" style="writing-mode:vertical-rl;text-orientation:${lv.script==="latn"?"mixed":"upright"}"`:"")+(dir==="rtl"?` unicode-bidi="plaintext"`:"");
 }
 async function measureLive(lv){
@@ -3390,6 +3491,173 @@ const SUBJECTS={
   rondin:"rondin ebenisterie ebeniste charpente charpentier buche tronc",
   livre:"livre librairie ecole formation bibliotheque",
 };
+/* trades: pictograms for professions (200 x 200 box), simple and geometric so they suit the premium layouts */
+IC.rrect=(x0,y0,x1,y1,r)=>{ const P=[], c=[[x1-r,y0+r,-Math.PI/2],[x1-r,y1-r,0],[x0+r,y1-r,Math.PI/2],[x0+r,y0+r,Math.PI]];
+  for(const [cx,cy,a0] of c) for(let k=0;k<=6;k++){ const a=a0+k*Math.PI/12; P.push({x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)}); } return P; };
+IC.arc=(cx,cy,r,a0,a1,n=24)=>{ const P=[]; for(let k=0;k<=n;k++){ const a=a0+(a1-a0)*k/n; P.push({x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)}); } return P; };
+IC.ell=(cx,cy,rx,ry,n=40)=>IC.curve(t=>({x:cx+rx*Math.cos(2*Math.PI*t), y:cy+ry*Math.sin(2*Math.PI*t)}),n);
+Object.assign(ICONS,{
+  casque:{n:"casque de chantier", build(){ return [{name:"Casque",tone:"main",subs:[IC.solid(IC.arc(100,128,72,Math.PI,2*Math.PI,36).concat([{x:172,y:128}])), IC.solid(IC.rrect(14,128,186,148,8))]},
+    {name:"Arête",tone:"second",subs:[IC.solid(IC.rrect(90,52,110,128,6))]}]; }},
+  grue:{n:"grue", build(){ return [{name:"Grue",tone:"main",subs:[IC.solid(IC.rect(62,40,78,180)), IC.solid([{x:24,y:40},{x:186,y:40},{x:186,y:54},{x:24,y:54}]), IC.thick([{x:70,y:14},{x:30,y:40}],5,5), IC.thick([{x:70,y:14},{x:176,y:40}],5,5), IC.solid(IC.rect(40,180,100,192))]},
+    {name:"Crochet",tone:"second",subs:[IC.thick([{x:156,y:54},{x:156,y:118}],4,4), IC.solid(IC.rrect(140,118,172,140,5))]}]; }},
+  truelle:{n:"truelle", build(){ return [{name:"Lame",tone:"main",subs:[IC.solid([{x:100,y:20},{x:160,y:110},{x:100,y:140},{x:40,y:110}])]},{name:"Manche",tone:"second",subs:[IC.solid(IC.rect(94,140,106,152)), IC.solid(IC.rrect(88,152,112,196,10))]}]; }},
+  immeuble:{n:"immeuble", build(){ const w=[]; for(let r=0;r<5;r++) for(let c=0;c<3;c++) w.push(IC.hole(IC.rect(60+c*30,34+r*28,76+c*30,48+r*28)));
+    return [{name:"Immeuble",tone:"main",subs:[IC.solid(IC.rect(46,18,154,190)), ...w, IC.hole(IC.rect(88,170,112,190))]}]; }},
+  engrenage:{n:"engrenage", build(){ const p=[]; for(let k=0;k<10;k++){ const a=k*Math.PI/5; for(const [r,d] of [[66,-0.13],[84,-0.09],[84,0.09],[66,0.13]]) p.push({x:100+r*Math.cos(a+d+(r===66?0:0)),y:100+r*Math.sin(a+d)}); }
+    return [{name:"Engrenage",tone:"main",subs:[IC.solid(p), IC.hole(IC.circ(100,100,28,32))]}]; }},
+  usine:{n:"usine", build(){ return [{name:"Usine",tone:"main",subs:[IC.solid([{x:16,y:184},{x:16,y:100},{x:64,y:72},{x:64,y:100},{x:112,y:72},{x:112,y:100},{x:150,y:76},{x:150,y:24},{x:176,y:24},{x:176,y:184}])]},
+    {name:"Fenêtres",tone:"detail",subs:[0,1,2].map(i=>IC.solid(IC.rect(32+i*44,128,56+i*44,150)))}]; }},
+  molette:{n:"clé à molette", build(){ const head=IC.circ(62,62,44,40); return [{name:"Clé",tone:"main",subs:[IC.solid(IC.rot([{x:52,y:84},{x:72,y:84},{x:72,y:186},{x:52,y:186}],62,62,-Math.PI/4)), IC.solid(head), IC.hole(IC.rot([{x:52,y:14},{x:72,y:14},{x:72,y:62},{x:52,y:62}],62,62,-Math.PI/4))]}]; }},
+  eclair:{n:"éclair", build(){ return [{name:"Éclair",tone:"main",subs:[IC.solid([{x:118,y:10},{x:44,y:112},{x:94,y:112},{x:80,y:190},{x:156,y:84},{x:106,y:84}])]}]; }},
+  flacon:{n:"flacon de parfum", build(){ return [{name:"Flacon",tone:"main",subs:[IC.solid(IC.rrect(40,82,160,186,22))]},{name:"Col et bouchon",tone:"second",subs:[IC.solid(IC.rect(86,62,114,82)), IC.solid(IC.rrect(74,22,126,62,8))]},
+    {name:"Reflet",tone:"detail",subs:[IC.solid(IC.rrect(58,100,70,160,6))]}]; }},
+  rouge:{n:"rouge à lèvres", build(){ return [{name:"Étui",tone:"main",subs:[IC.solid(IC.rrect(66,118,134,192,6))]},{name:"Bague",tone:"detail",subs:[IC.solid(IC.rect(72,100,128,118))]},
+    {name:"Rouge",tone:"second",subs:[IC.solid([{x:80,y:100},{x:80,y:46},{x:120,y:18},{x:120,y:100}])]}]; }},
+  ciseaux:{n:"ciseaux", build(){ return [{name:"Lames",tone:"main",subs:[IC.solid([{x:76,y:128},{x:160,y:12},{x:172,y:18},{x:94,y:138}]), IC.solid([{x:124,y:128},{x:40,y:12},{x:28,y:18},{x:106,y:138}])]},
+    {name:"Anneaux",tone:"second",subs:[IC.solid(IC.circ(64,152,32,32)), IC.hole(IC.circ(64,152,18,28)), IC.solid(IC.circ(136,152,32,32)), IC.hole(IC.circ(136,152,18,28))]}]; }},
+  miroir:{n:"miroir", build(){ return [{name:"Miroir",tone:"main",subs:[IC.solid(IC.ell(100,74,58,64)), IC.hole(IC.ell(100,74,44,50)), IC.solid(IC.rrect(90,136,110,194,8))]},{name:"Reflet",tone:"detail",subs:[IC.solid(IC.ell(100,74,44,50))]}]; }},
+  ecran:{n:"écran", build(){ return [{name:"Écran",tone:"main",subs:[IC.solid(IC.rrect(14,30,186,146,10)), IC.hole(IC.rect(28,44,172,128)), IC.solid([{x:84,y:146},{x:116,y:146},{x:124,y:174},{x:76,y:174}]), IC.solid(IC.rrect(56,174,144,186,5))]},
+    {name:"Code",tone:"second",subs:[IC.thick([{x:84,y:66},{x:64,y:86},{x:84,y:106}],8,8), IC.thick([{x:116,y:66},{x:136,y:86},{x:116,y:106}],8,8)]}]; }},
+  code:{n:"code", build(){ return [{name:"Chevrons",tone:"main",subs:[IC.thick([{x:64,y:46},{x:18,y:100},{x:64,y:154}],18,18), IC.thick([{x:136,y:46},{x:182,y:100},{x:136,y:154}],18,18)]},{name:"Barre",tone:"second",subs:[IC.thick([{x:116,y:30},{x:84,y:170}],16,16)]}]; }},
+  puce:{n:"puce", build(){ const pins=[]; for(let k=0;k<4;k++){ const o=58+k*28; pins.push(IC.solid(IC.rect(o-5,14,o+5,40)), IC.solid(IC.rect(o-5,160,o+5,186)), IC.solid(IC.rect(14,o-5,40,o+5)), IC.solid(IC.rect(160,o-5,186,o+5))); }
+    return [{name:"Puce",tone:"main",subs:[IC.solid(IC.rrect(40,40,160,160,12)), IC.hole(IC.rrect(70,70,130,130,6))]},{name:"Broches",tone:"second",subs:pins}]; }},
+  nuage:{n:"nuage", build(){ const pts=[...IC.arc(62,118,40,Math.PI/2,Math.PI*1.5,14), ...IC.arc(100,84,48,Math.PI*1.08,Math.PI*1.95,16), ...IC.arc(146,112,38,Math.PI*1.4,Math.PI*2.5,16)];
+    return [{name:"Nuage",tone:"main",subs:[IC.solid(pts)]}]; }},
+  compas:{n:"compas", build(){ return [{name:"Branches",tone:"main",subs:[IC.thick([{x:100,y:44},{x:50,y:186}],16,8), IC.thick([{x:100,y:44},{x:150,y:186}],16,8), IC.thick([{x:66,y:132},{x:134,y:132}],8,8)]},
+    {name:"Charnière",tone:"second",subs:[IC.solid(IC.circ(100,40,18,28)), IC.solid(IC.rect(94,10,106,24))]}]; }},
+  equerre:{n:"équerre", build(){ return [{name:"Équerre",tone:"main",subs:[IC.solid([{x:24,y:24},{x:24,y:180},{x:180,y:180}]), IC.hole([{x:48,y:84},{x:48,y:156},{x:120,y:156}])]},{name:"Graduations",tone:"detail",subs:[0,1,2,3,4].map(i=>IC.solid(IC.rect(24,44+i*24,36,48+i*24)))}]; }},
+  colonne:{n:"colonne", build(){ const fl=[]; for(let i=0;i<4;i++) fl.push(IC.hole(IC.rect(72+i*16,56,78+i*16,154)));
+    return [{name:"Colonne",tone:"main",subs:[IC.solid(IC.rect(40,20,160,38)), IC.solid([{x:52,y:38},{x:148,y:38},{x:136,y:52},{x:64,y:52}]), IC.solid(IC.rect(64,52,136,160)), ...fl, IC.solid(IC.rect(52,160,148,172)), IC.solid(IC.rect(40,172,160,188))]}]; }},
+  toque:{n:"toque de chef", build(){ const top=[...IC.arc(62,82,32,Math.PI*0.6,Math.PI*1.6,12), ...IC.arc(100,58,38,Math.PI*1.15,Math.PI*1.85,12), ...IC.arc(138,82,32,Math.PI*1.4,Math.PI*2.4,12), {x:140,y:124},{x:60,y:124}];
+    return [{name:"Toque",tone:"main",subs:[IC.solid(top), IC.solid(IC.rrect(60,132,140,168,6))]}]; }},
+  couverts:{n:"fourchette et couteau", build(){ return [{name:"Fourchette",tone:"main",subs:[IC.solid(IC.rect(46,20,54,74)), IC.solid(IC.rect(62,20,70,74)), IC.solid(IC.rect(78,20,86,74)), IC.solid(IC.rrect(44,70,88,92,10)), IC.solid(IC.rrect(58,88,74,186,7))]},
+    {name:"Couteau",tone:"second",subs:[IC.solid([{x:124,y:20},{x:148,y:30},{x:150,y:110},{x:124,y:110}]), IC.solid(IC.rrect(122,104,146,186,8))]}]; }},
+  cloche:{n:"cloche de service", build(){ return [{name:"Cloche",tone:"main",subs:[IC.solid(IC.arc(100,148,78,Math.PI,2*Math.PI,36).concat([{x:178,y:148}])), IC.solid(IC.rrect(10,152,190,168,6))]},{name:"Bouton",tone:"second",subs:[IC.solid(IC.circ(100,62,11,20)), IC.solid(IC.rect(96,66,104,74))]}]; }},
+  croissant:{n:"croissant", build(){ const P=IC.arc(100,150,88,Math.PI*1.08,Math.PI*1.92,24).concat(IC.arc(100,182,64,Math.PI*1.86,Math.PI*1.14,20));
+    return [{name:"Croissant",tone:"main",subs:[IC.solid(P)]},{name:"Rainures",tone:"detail",subs:[IC.thick([{x:70,y:76},{x:80,y:118}],5,5), IC.thick([{x:100,y:66},{x:100,y:116}],5,5), IC.thick([{x:130,y:76},{x:120,y:118}],5,5)]}]; }},
+  vin:{n:"verre de vin", build(){ const bowl=IC.arc(100,62,52,0,Math.PI,24).concat([{x:48,y:30},{x:152,y:30}]);
+    return [{name:"Verre",tone:"main",subs:[IC.solid(bowl), IC.solid(IC.rect(95,112,105,176)), IC.solid(IC.rrect(62,176,138,188,6))]},{name:"Vin",tone:"second",subs:[IC.solid(IC.arc(100,66,42,0.15,Math.PI-0.15,20))]}]; }},
+  lit:{n:"lit", build(){ return [{name:"Lit",tone:"main",subs:[IC.solid(IC.rect(16,56,30,170)), IC.solid(IC.rect(30,120,184,150)), IC.solid(IC.rect(170,150,184,170))]},{name:"Oreiller",tone:"second",subs:[IC.solid(IC.rrect(38,94,90,118,10)), IC.solid(IC.rrect(94,100,184,118,8))]}]; }},
+  clehotel:{n:"clé d'hôtel", build(){ return [{name:"Porte-clé",tone:"main",subs:[IC.solid([{x:120,y:72},{x:170,y:110},{x:150,y:190},{x:96,y:190},{x:84,y:110}]), IC.hole(IC.circ(124,104,9,20))]},
+    {name:"Clé",tone:"second",subs:[IC.solid(IC.circ(64,52,30,32)), IC.hole(IC.circ(64,52,14,24)), IC.thick([{x:80,y:76},{x:118,y:100}],10,10)]}]; }},
+  balance:{n:"balance", build(){ return [{name:"Balance",tone:"main",subs:[IC.solid(IC.rect(95,30,105,176)), IC.solid(IC.rrect(56,176,144,188,6)), IC.solid(IC.rect(28,46,172,56)), IC.solid(IC.circ(100,30,10,20))]},
+    {name:"Plateaux",tone:"second",subs:[IC.solid(IC.arc(48,112,30,0,Math.PI,16)), IC.solid(IC.arc(152,112,30,0,Math.PI,16)), IC.thick([{x:40,y:56},{x:22,y:112}],3,3), IC.thick([{x:40,y:56},{x:74,y:112}],3,3), IC.thick([{x:160,y:56},{x:126,y:112}],3,3), IC.thick([{x:160,y:56},{x:178,y:112}],3,3)]}]; }},
+  diamant:{n:"diamant", build(){ return [{name:"Diamant",tone:"main",subs:[IC.solid([{x:52,y:36},{x:148,y:36},{x:186,y:80},{x:100,y:180},{x:14,y:80}])]},{name:"Facettes",tone:"detail",subs:[IC.thick([{x:14,y:80},{x:186,y:80}],4,4), IC.thick([{x:76,y:80},{x:100,y:176}],4,4), IC.thick([{x:124,y:80},{x:100,y:176}],4,4), IC.thick([{x:76,y:80},{x:100,y:38}],4,4), IC.thick([{x:124,y:80},{x:100,y:38}],4,4)]}]; }},
+  photo:{n:"appareil photo", build(){ return [{name:"Boîtier",tone:"main",subs:[IC.solid(IC.rrect(14,58,186,170,14)), IC.solid(IC.rrect(64,38,120,64,6)), IC.hole(IC.circ(100,114,40,36))]},{name:"Objectif",tone:"second",subs:[IC.solid(IC.circ(100,114,26,32))]}]; }},
+  musique:{n:"note de musique", build(){ return [{name:"Note",tone:"main",subs:[IC.solid(IC.rot(IC.ell(70,156,30,22),70,156,-0.4)), IC.solid(IC.rect(92,30,104,150)), IC.solid([{x:92,y:30},{x:160,y:12},{x:160,y:52},{x:104,y:66}])]}]; }},
+  haltere:{n:"haltère", build(){ return [{name:"Haltère",tone:"main",subs:[IC.solid(IC.rect(40,92,160,108)), IC.solid(IC.rrect(24,56,48,144,6)), IC.solid(IC.rrect(152,56,176,144,6)), IC.solid(IC.rrect(8,72,26,128,5)), IC.solid(IC.rrect(174,72,192,128,5))]}]; }},
+  voiture:{n:"voiture", build(){ return [{name:"Carrosserie",tone:"main",subs:[IC.solid([{x:10,y:136},{x:14,y:102},{x:46,y:96},{x:70,y:62},{x:138,y:62},{x:164,y:96},{x:188,y:104},{x:190,y:136}]), IC.hole([{x:80,y:74},{x:98,y:74},{x:98,y:96},{x:62,y:96}]), IC.hole([{x:108,y:74},{x:132,y:74},{x:150,y:96},{x:108,y:96}])]},
+    {name:"Roues",tone:"second",subs:[IC.solid(IC.circ(54,140,22,28)), IC.solid(IC.circ(148,140,22,28))]}]; }},
+  sante:{n:"croix de santé", build(){ return [{name:"Croix",tone:"main",subs:[IC.solid([{x:72,y:20},{x:128,y:20},{x:128,y:72},{x:180,y:72},{x:180,y:128},{x:128,y:128},{x:128,y:180},{x:72,y:180},{x:72,y:128},{x:20,y:128},{x:20,y:72},{x:72,y:72}])]}]; }},
+  diplome:{n:"mortier de diplômé", build(){ return [{name:"Mortier",tone:"main",subs:[IC.solid([{x:100,y:30},{x:192,y:72},{x:100,y:114},{x:8,y:72}]), IC.solid([{x:48,y:96},{x:100,y:120},{x:152,y:96},{x:152,y:150},{x:100,y:170},{x:48,y:150}])]},{name:"Gland",tone:"second",subs:[IC.thick([{x:170,y:82},{x:170,y:140}],4,4), IC.solid(IC.rrect(162,136,178,164,4))]}]; }},
+  patte:{n:"patte", build(){ return [{name:"Coussinet",tone:"main",subs:[IC.solid(IC.ell(100,136,46,40))]},{name:"Doigts",tone:"second",subs:[IC.solid(IC.ell(46,92,16,22)), IC.solid(IC.ell(80,58,17,24)), IC.solid(IC.ell(120,58,17,24)), IC.solid(IC.ell(154,92,16,22))]}]; }},
+  cintre:{n:"cintre", build(){ return [{name:"Cintre",tone:"main",subs:[IC.thick([{x:100,y:66},{x:14,y:150},{x:186,y:150},{x:100,y:66}],10,10), IC.thick([{x:100,y:66},{x:100,y:52}],9,9), IC.thick(IC.arc(116,46,16,Math.PI,Math.PI*2.2,10),9,9)]}]; }},
+  pinceau:{n:"pinceau", build(){ return [{name:"Manche",tone:"main",subs:[IC.solid(IC.rot(IC.rrect(92,10,108,108,8),100,100,Math.PI/4))]},{name:"Virole",tone:"detail",subs:[IC.solid(IC.rot(IC.rect(88,108,112,128),100,100,Math.PI/4))]},
+    {name:"Poils",tone:"second",subs:[IC.solid(IC.rot([{x:88,y:128},{x:112,y:128},{x:112,y:160},{x:100,y:190},{x:88,y:160}],100,100,Math.PI/4))]}]; }},
+  graphique:{n:"graphique", build(){ return [{name:"Barres",tone:"main",subs:[IC.solid(IC.rrect(24,120,58,186,4)), IC.solid(IC.rrect(76,84,110,186,4)), IC.solid(IC.rrect(128,44,162,186,4))]},{name:"Courbe",tone:"second",subs:[IC.thick([{x:20,y:100},{x:70,y:62},{x:110,y:72},{x:178,y:18}],7,7)]}]; }},
+});
+Object.assign(SUBJECTS,{
+  casque:"batiment btp chantier construction maconnerie macon gros oeuvre renovation travaux entreprise generale",
+  grue:"grue promoteur promotion immobiliere chantier genie civil",
+  truelle:"truelle macon maconnerie platrier platrerie carrelage carreleur facade",
+  immeuble:"immeuble immobilier residence appartement syndic copropriete gestion locative promotion",
+  engrenage:"industrie industriel mecanique usinage engrenage maintenance ingenierie automatisme",
+  usine:"usine fabrication production manufacture atelier industriel logistique",
+  molette:"plomberie plombier garage mecanicien depannage reparation outillage",
+  eclair:"electricite electricien energie electrique courant borne",
+  flacon:"parfum parfumerie cosmetique cosmetiques beaute soin spa estheticienne institut",
+  rouge:"maquillage makeup maquilleuse rouge levre beaute onglerie",
+  ciseaux:"coiffure coiffeur coiffeuse salon barbier barber couture couturiere",
+  miroir:"miroir beaute esthetique institut relooking",
+  ecran:"informatique ordinateur web developpement site agence numerique digital",
+  code:"code developpeur programmation logiciel saas devops",
+  puce:"electronique puce hardware robotique intelligence ia",
+  nuage:"cloud nuage hebergement serveur stockage",
+  compas:"architecte architecture plan conception design dessinateur",
+  equerre:"bureau etude equerre geometre metreur",
+  colonne:"colonne classique patrimoine musee institution antique",
+  toque:"chef cuisine cuisinier traiteur gastronomie gastronomique",
+  couverts:"restaurant restauration brasserie bistrot table repas bouchon",
+  cloche:"hotel hotellerie reception conciergerie service gastronomie",
+  croissant:"croissant viennoiserie patisserie patissier petit dejeuner",
+  vin:"vin cave caviste vigneron vignoble domaine sommelier bar oenologie",
+  lit:"chambre hote gite auberge hebergement literie sommeil",
+  clehotel:"hotel hotellerie chambre location saisonniere airbnb",
+  balance:"avocat justice juridique droit notaire cabinet",
+  diamant:"diamant joaillerie joaillier bijouterie bijoutier",
+  photo:"photographe photographie studio photo shooting",
+  musique:"musique musicien concert label chant ecole",
+  haltere:"sport fitness salle musculation coach coaching gym",
+  voiture:"automobile voiture garage taxi vtc auto ecole carrosserie",
+  sante:"sante medecin medical clinique pharmacie infirmier infirmiere kine",
+  diplome:"formation diplome universite etudiant enseignement cours",
+  patte:"animaux animal veterinaire toilettage chien chat animalerie",
+  cintre:"mode vetement boutique pret porter dressing friperie",
+  pinceau:"peinture peintre decoration decorateur deco art",
+  graphique:"finance comptable comptabilite expert conseil gestion investissement banque",
+});
+/* ---------- Refined pictograms (premium) ----------
+   Monoline drawings with real Bézier curves (200 x 200 box): parts {name, tone, d, line}. line = stroked open path of
+   constant weight FINE_W with round caps; without line, a filled accent. Used first by the premium layouts. */
+const FINE_W=7;
+const FI={ k:0.5523,
+  circle:(cx,cy,r)=>{ const k=0.5523*r; return `M${cx} ${cy-r} C${cx+k} ${cy-r} ${cx+r} ${cy-k} ${cx+r} ${cy} C${cx+r} ${cy+k} ${cx+k} ${cy+r} ${cx} ${cy+r} C${cx-k} ${cy+r} ${cx-r} ${cy+k} ${cx-r} ${cy} C${cx-r} ${cy-k} ${cx-k} ${cy-r} ${cx} ${cy-r}`; },
+  dot:(cx,cy,r)=>FI.circle(cx,cy,r)+" Z",
+  sparkle:(cx,cy,r)=>{ const q=r*0.14; return `M${cx} ${cy-r} C${cx+q} ${cy-q} ${cx+q} ${cy-q} ${cx+r} ${cy} C${cx+q} ${cy+q} ${cx+q} ${cy+q} ${cx} ${cy+r} C${cx-q} ${cy+q} ${cx-q} ${cy+q} ${cx-r} ${cy} C${cx-q} ${cy-q} ${cx-q} ${cy-q} ${cx} ${cy-r} Z`; },
+};
+const L_=(name,d,tone="main")=>({name,tone,d,line:true}), F_=(name,d,tone="second")=>({name,tone,d});
+const FINE={
+  cloche:()=>[L_("Cloche","M36 140 C36 96 64 66 100 66 C136 66 164 96 164 140"), L_("Plateau","M22 152 L178 152"), L_("Tige","M100 66 L100 56"), F_("Bouton",FI.dot(100,48,8))],
+  couverts:()=>[L_("Fourchette","M66 36 L66 76 M80 36 L80 76 M94 36 L94 76 M66 76 C66 96 94 96 94 76 M80 92 L80 168"), L_("Couteau","M126 168 L126 36 C144 48 148 84 142 108 L126 108")],
+  toque:()=>[L_("Toque","M66 128 C40 126 38 88 64 86 C62 58 96 48 106 72 C118 50 156 60 150 90 C172 92 166 128 134 128"), L_("Bandeau","M66 128 L66 156 L134 156 L134 128"), L_("Plis","M88 128 L88 108 M112 128 L112 108")],
+  vin:()=>[L_("Verre","M66 36 C62 78 76 106 100 108 C124 106 138 78 134 36 L66 36 M100 108 L100 164 M74 166 L126 166"), F_("Vin","M70 64 L130 64 C128 88 116 100 100 100 C84 100 72 88 70 64 Z")],
+  tasse:()=>[L_("Tasse","M52 86 L140 86 L140 112 C140 144 120 164 96 164 C72 164 52 144 52 112 L52 86 M140 96 C166 96 166 134 140 134 M36 178 L156 178"), L_("Vapeur","M82 66 C72 54 92 46 82 30 M108 66 C98 54 118 46 108 30","second")],
+  ble:()=>{ let d="M100 186 L100 40 "; for(let i=0;i<4;i++){ const y=64+i*28; d+=`M100 ${y+16} C86 ${y+12} 78 ${y} 80 ${y-14} C92 ${y-8} 100 ${y+2} 100 ${y+16} M100 ${y+16} C114 ${y+12} 122 ${y} 120 ${y-14} C108 ${y-8} 100 ${y+2} 100 ${y+16} `; }
+    return [L_("Épi",d), F_("Grain","M100 14 C110 24 110 40 100 50 C90 40 90 24 100 14 Z")]; },
+  clehotel:()=>[L_("Clé",FI.circle(64,64,24)+" M81 81 L150 150 M128 128 L142 114 M140 140 L154 126"), F_("Gemme",FI.dot(64,64,7))],
+  lit:()=>[L_("Lit","M22 62 L22 164 M22 132 L178 132 L178 164 M22 118 L178 118"), L_("Oreiller","M36 104 C36 92 76 92 76 104 C76 112 36 112 36 104","second"), F_("Étoile",FI.sparkle(144,74,18))],
+  diamant:()=>[L_("Diamant","M60 50 L140 50 L174 88 L100 168 L26 88 L60 50 M26 88 L174 88 M60 50 L76 88 L100 168 L124 88 L140 50 M76 88 L100 50 L124 88")],
+  flacon:()=>[L_("Flacon","M58 94 L142 94 C150 94 156 100 156 108 L156 162 C156 170 150 176 142 176 L58 176 C50 176 44 170 44 162 L44 108 C44 100 50 94 58 94 M86 94 L86 78 L114 78 L114 94"), F_("Bouchon","M78 46 L122 46 L122 78 L78 78 Z"), L_("Reflet","M64 114 L64 154","second")],
+  rouge:()=>[L_("Étui","M68 116 L132 116 L132 182 L68 182 L68 116 M74 100 L126 100 L126 116"), F_("Rouge","M80 100 L80 52 C80 40 98 26 120 22 L120 100 Z")],
+  etincelle:()=>[F_("Étincelle",FI.sparkle(100,100,80),"main"), F_("Éclat",FI.sparkle(160,40,18))],
+  miroir:()=>[L_("Miroir","M100 18 C126 18 142 44 142 76 C142 108 126 134 100 134 C74 134 58 108 58 76 C58 44 74 18 100 18 M100 134 L100 184 M88 184 L112 184"), L_("Reflet","M80 60 C82 46 90 38 100 36","second"), F_("Éclat",FI.sparkle(118,104,10))],
+  ciseaux:()=>[L_("Lames","M84 120 L156 26 M116 120 L44 26"), L_("Anneaux",FI.circle(70,148,24)+" "+FI.circle(130,148,24)), F_("Vis",FI.dot(100,92,5))],
+  compas:()=>[L_("Compas","M100 54 L58 172 M100 54 L142 172 M74 128 L126 128 "+FI.circle(100,42,12)+" M100 30 L100 16")],
+  equerre:()=>[L_("Équerre","M30 30 L30 172 L172 172 L30 30 M52 94 L52 150 L108 150 L52 94"), L_("Graduations","M30 56 L42 56 M30 80 L42 80 M30 104 L42 104 M30 128 L42 128","second")],
+  colonne:()=>[L_("Colonne","M50 40 L150 40 M58 40 C58 54 66 56 76 56 L124 56 C134 56 142 54 142 40 M74 56 L74 154 M92 56 L92 154 M108 56 L108 154 M126 56 L126 154 M62 154 L138 154 M50 168 L150 168")],
+  maison:()=>[L_("Maison","M28 100 L100 38 L172 100 M50 82 L50 170 L150 170 L150 82 M86 170 L86 132 C86 116 114 116 114 132 L114 170"), F_("Fenêtre",FI.dot(100,88,7))],
+  immeuble:()=>[L_("Immeuble","M52 178 L52 30 L148 30 L148 178 M36 178 L164 178 M76 54 L76 66 M100 54 L100 66 M124 54 L124 66 M76 86 L76 98 M100 86 L100 98 M124 86 L124 98 M76 118 L76 130 M124 118 L124 130 M88 178 L88 150 L112 150 L112 178")],
+  casque:()=>[L_("Casque","M36 134 C36 90 64 60 100 60 C136 60 164 90 164 134 M20 144 L180 144 M86 62 L86 104 L114 104 L114 62")],
+  engrenage:()=>{ let d=""; for(let k=0;k<8;k++){ const a=k*Math.PI/4, c=Math.cos(a), s=Math.sin(a); d+=`M${r2(100+50*c)} ${r2(100+50*s)} L${r2(100+70*c)} ${r2(100+70*s)} `; } return [L_("Engrenage",FI.circle(100,100,50)+" "+d), F_("Axe",FI.dot(100,100,14))]; },
+  code:()=>[L_("Chevrons","M66 56 L24 100 L66 144 M134 56 L176 100 L134 144"), L_("Barre","M116 40 L84 160","second")],
+  ecran:()=>[L_("Écran","M24 40 C24 34 28 30 34 30 L166 30 C172 30 176 34 176 40 L176 126 C176 132 172 136 166 136 L34 136 C28 136 24 132 24 126 L24 40 M100 136 L100 166 M66 168 L134 168"), F_("Curseur","M86 66 L86 104 L96 94 L104 112 L112 108 L104 90 L118 90 Z")],
+  balance:()=>[L_("Balance","M100 34 L100 170 M64 172 L136 172 M30 56 L170 56 M44 56 L24 108 L64 108 L44 56 M156 56 L136 108 L176 108 L156 56"), F_("Pivot",FI.dot(100,34,8))],
+  graphique:()=>[L_("Axes","M28 28 L28 172 L176 172"), L_("Courbe","M44 140 C70 136 78 104 100 100 C122 96 128 64 160 48","second"), F_("Point",FI.dot(160,48,8))],
+  photo:()=>[L_("Appareil","M30 70 L70 70 L80 52 L120 52 L130 70 L170 70 C176 70 180 74 180 80 L180 160 C180 166 176 170 170 170 L30 170 C24 170 20 166 20 160 L20 80 C20 74 24 70 30 70 "+FI.circle(100,118,32)), F_("Lentille",FI.dot(100,118,12))],
+  feuille:()=>[L_("Feuille","M100 178 C56 140 50 84 100 24 C150 84 144 140 100 178 M100 178 L100 66 M100 118 L126 94 M100 142 L74 118")],
+  livre:()=>[L_("Livre","M100 58 C80 46 52 46 26 54 L26 156 C52 148 80 148 100 160 C120 148 148 148 174 156 L174 54 C148 46 120 46 100 58 L100 160")],
+  plume:()=>[L_("Plume","M58 176 C70 120 100 64 150 26 C154 70 130 120 74 150 M150 26 L70 160")],
+  vague:()=>[L_("Vagues","M20 84 C44 64 64 64 86 84 C108 104 128 104 150 84 C164 72 172 70 180 72 M20 120 C44 100 64 100 86 120 C108 140 128 140 150 120 C164 108 172 106 180 108"), L_("Écume","M20 156 C44 136 64 136 86 156 C108 176 128 176 150 156","second")],
+  montagne:()=>[L_("Montagnes","M18 166 L76 78 L104 118 L134 70 L182 166 L18 166"), F_("Soleil",FI.dot(150,42,12))],
+  coeur:()=>[L_("Cœur","M100 168 C66 140 26 114 26 76 C26 52 44 36 66 36 C82 36 94 46 100 58 C106 46 118 36 134 36 C156 36 174 52 174 76 C174 114 134 140 100 168")],
+  soleil:()=>{ let d=FI.circle(100,100,34)+" "; for(let k=0;k<12;k++){ const a=k*Math.PI/6, c=Math.cos(a), s=Math.sin(a); d+=`M${r2(100+50*c)} ${r2(100+50*s)} L${r2(100+(k%2?64:76)*c)} ${r2(100+(k%2?64:76)*s)} `; } return [L_("Soleil",d)]; },
+  lune:()=>[F_("Lune","M120 24 C82 34 58 66 58 104 C58 146 90 178 132 178 C150 178 166 172 178 160 C110 168 66 104 120 24 Z","main"), F_("Étoile",FI.sparkle(150,60,16))],
+  cle:()=>[L_("Clé",FI.circle(60,100,32)+" M92 100 L180 100 M150 100 L150 126 M170 100 L170 120"), F_("Gemme",FI.dot(60,100,9))],
+  couronne:()=>[L_("Couronne","M30 150 L22 64 L64 104 L100 46 L136 104 L178 64 L170 150 L30 150 M30 170 L170 170"), F_("Perle",FI.dot(100,46,8))],
+  fleur:()=>{ let d=""; for(let k=0;k<5;k++){ const a=-Math.PI/2+k*2*Math.PI/5, c=Math.cos(a), s=Math.sin(a), px=-s, py=c, t=(x,y)=>`${r2(100+x*c+y*px)} ${r2(100+x*s+y*py)}`; d+=`M${t(14,0)} C${t(30,-26)} ${t(70,-22)} ${t(74,0)} C${t(70,22)} ${t(30,26)} ${t(14,0)} `; } return [L_("Pétales",d), F_("Cœur",FI.dot(100,100,10))]; },
+};
+Object.assign(SUBJECTS,{ etincelle:"etincelle eclat brillance glamour lumineux cosmetique luxe beaute spa", lune:"lune nuit sommeil reve nocturne bien etre relaxation" });
+ICONS.etincelle={n:"étincelle", build(){ return [{name:"Étincelle",tone:"main",subs:parsePathD(FI.sparkle(100,100,86))}]; }};
+ICONS.lune={n:"lune", build(){ return [{name:"Lune",tone:"main",subs:parsePathD("M120 24 C82 34 58 66 58 104 C58 146 90 178 132 178 C150 178 166 172 178 160 C110 168 66 104 120 24 Z")}]; }};
+/* refined pictogram as layers: lines stroked (weight scaled), accents filled */
+function placeFine(id, cx, cy, size, tones){
+  const parts=FINE[id](), raw=parts.map(p=>({p, subs:parsePathD(p.d, {open:p.line})})), all=raw.flatMap(r=>r.subs);
+  const b=bounds([{subs:all}]), k=size/Math.max(b.x1-b.x0+FINE_W, b.y1-b.y0+FINE_W), mx=(b.x0+b.x1)/2, my=(b.y0+b.y1)/2;
+  const T=q=>q&&{x:r2(cx+(q.x-mx)*k), y:r2(cy+(q.y-my)*k)};
+  return raw.map((r,i)=>{ const L={visible:true,locked:false,id:"motif-"+id+"-"+(i+1),name:r.p.name,group:"mark",fill:tones[r.p.tone]||tones.main,subs:r.subs.map(s=>s.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i)||null,o:T(n.o)||null})))};
+    if(r.p.line){ L.open=true; L.sw=r2(FINE_W*k); } return L; });
+}
 const MATERIALS={ bois:"bois ebenisterie ebeniste menuiserie menuisier charpente artisanal artisanale massif chene noyer", or:"or dore luxe premium prestige bijou joaillerie", neon:"neon nuit club bar soiree", pierre:"pierre mineral beton marbre" };
 const STYLE_HINTS={ lowpoly:"tech moderne digital numerique 3d geometrique jeu", pixel:"retro jeu gaming arcade pixel 8bit", main:"artisanal fait main artisan atelier authentique",
   lineart:"minimal minimaliste epure simple elegant", gravure:"tradition traditionnel ancien vintage heritage", cartoon:"enfant fun ludique joyeux", arabesque:"oriental luxe ornement baroque classique raffine",
@@ -3449,33 +3717,222 @@ function monoLayers(str, f, G, box, fill){ const {letters}=layoutText(str, f, G,
   const b=bounds(letters.map(l=>({subs:l.subs}))), s=Math.min(box.w/(b.x1-b.x0||1), box.h/(b.y1-b.y0||1)), ox=box.cx-(b.x0+b.x1)/2*s, oy=box.cy-(b.y0+b.y1)/2*s, T=p=>p&&{x:r2(ox+p.x*s),y:r2(oy+p.y*s)};
   return letters.map((g,i)=>({visible:true,locked:false,id:"mono-"+(i+1),name:"Monogramme "+g.ch,group:"mark",fill,font:f.id,ch:g.ch,subs:g.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)})))})); }
 const STYLE_LABEL=k=>(STYLES[k]||{n:k}).n.toLowerCase();
+/* ---------- Premium concepts (DESIGN-RULES.md) ----------
+   Five layouts built on the rules: stacked & centred, framed monogram (letters cut out of the frame), emblem with a
+   double ring, wordmark with one ownable detail, and the dark version on a deep plate. Two colours (ink + accent),
+   two type families at most, name in tracked capitals, tagline smaller and wider, flat symbol without effects. */
+const PREMIUM_TYPE={ // mood -> [name font, tagline font, tracking of the name (em)]
+  luxe:["cinzel","raleway",0.16], nature:["ebgaramond","josefin",0.16], tech:["spacegrotesk","inter",0.08], artisan:["ebgaramond","josefin",0.16],
+  chaleur:["youngserif","raleway",0.08], fun:["poppins","poppins",0.06], minimal:["josefin","inter",0.14], mer:["josefin","raleway",0.14],
+  solide:["montserrat-caps","montserrat",0.08], creatif:["dmserif","josefin",0.1] };
+const PREMIUM_ALT=[["cinzel","raleway",0.16],["montserrat-caps","montserrat",0.08],["playfair","josefin",0.14],["josefin","inter",0.16],["baskerville","raleway",0.14]];
+const PREMIUM_GOLD="#C2A15F";
+function capUnits(G){ try{ const s=parseGlyph(G.gl.H||G.gl.E||"",0); let m=0; s.forEach(c=>c.forEach(n=>{ m=Math.min(m,n.y); })); return -m||G.upem*0.7; }catch(_){ return (G.upem||1000)*0.7; } }
+function shiftLs(ls, dx, dy){ ls.forEach(L=>{ L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,dy))); if(L.bl!==undefined) L.bl=r2(L.bl+dy); if(L.gy) L.gy=L.gy.map(v=>r2(v+dy)); }); return ls; }
+/* a text line: capitals (optional), tracking in em, cap height in drawing units; returned at x0=0, baseline 0 */
+function textLine(str, f, G, o){
+  const s=(o.caps?String(str).toUpperCase():String(str)).trim(); if(!s) return [];
+  const scale=o.cap/(capUnits(G)*f.k), {letters}=layoutText(s, f, G, 0, 0, f.k*scale), tr=(o.track||0)*G.upem*f.k*scale;
+  return letters.map((g,i)=>{ const L={visible:true,locked:false,id:(o.idp||"lettre")+"-"+(i+1),name:(o.label||"Lettre")+" "+g.ch+" · "+(i+1),group:o.group||"word",fill:o.fill,font:f.id,ch:g.ch,subs:g.subs};
+    if(tr) L.subs.forEach(sub=>sub.forEach(n=>moveNode(n,i*tr,0))); if(o.group!=="mark") stamp(L,0); return L; });
+}
+const lineW=ls=>{ if(!ls.length) return 0; const b=bounds(ls); return b.x1-b.x0; };
+function circleSub(cx,cy,r){ const k=0.5523*r; return [{x:cx,y:cy-r,i:{x:cx-k,y:cy-r},o:{x:cx+k,y:cy-r}},{x:cx+r,y:cy,i:{x:cx+r,y:cy-k},o:{x:cx+r,y:cy+k}},{x:cx,y:cy+r,i:{x:cx+k,y:cy+r},o:{x:cx-k,y:cy+r}},{x:cx-r,y:cy,i:{x:cx-r,y:cy+k},o:{x:cx-r,y:cy-k}}].map(n=>({x:r2(n.x),y:r2(n.y),i:{x:r2(n.i.x),y:r2(n.i.y)},o:{x:r2(n.o.x),y:r2(n.o.y)}})); }
+const revSub=s=>s.slice().reverse().map(n=>({x:n.x,y:n.y,i:n.o?{...n.o}:null,o:n.i?{...n.i}:null}));
+const subArea=s=>area3(s.flatMap(n=>[n]));
+function ring(cx,cy,r,w){ const o=circleSub(cx,cy,r), i=circleSub(cx,cy,r-w); return [o, subArea(o)*subArea(i)>0?revSub(i):i]; }
+/* letters cut out of a filled frame: one layer, nonzero fill (letters wound against the frame, their counters with it) */
+function knockout(frameSubs, letterLayers){
+  const fs=frameSubs, dir=Math.sign(subArea(fs[0]));
+  const holes=letterLayers.flatMap(L=>{ const outer=L.subs.reduce((a,s)=>Math.abs(subArea(s))>Math.abs(subArea(a))?s:a, L.subs[0]);
+    return Math.sign(subArea(outer))===dir?L.subs.map(revSub):L.subs.map(s=>s.map(n=>({...n}))); });
+  return fs.concat(holes);
+}
+/* catalogue of premium proposals: layout × container × variant (see DESIGN-RULES.md). The order mixes families so
+   each round of five shows different layouts. */
+const PREMIUM_CONTAINERS={none:"", disc:"un disque", ring:"un cercle fin", square:"un carré arrondi", shield:"un écusson", diamond:"un losange", hexagon:"un hexagone", arch:"une arche"};
+const PREMIUM_CATALOG=(()=>{ const C=["disc","ring","square","shield","diamond","hexagon","arch"], out=[];
+  const add=o=>out.push(o);
+  add({layout:"stack", box:"none", title:"Signature empilée"}); add({layout:"mono", box:"square", title:"Monogramme encadré"}); add({layout:"emblem", title:"Emblème à double filet"});
+  add({layout:"word", variant:"bar", title:"Logotype à détail"}); add({layout:"stack", box:"none", dark:true, title:"Version sombre"});
+  add({layout:"seal", title:"Sceau, nom en cercle"}); add({layout:"horiz", box:"disc", title:"Symbole dans un disque, nom à côté"}); add({layout:"word", variant:"dot", title:"Logotype au point d'accent"});
+  add({layout:"mono", box:"disc", title:"Monogramme dans un disque"}); add({layout:"stack", box:"ring", title:"Symbole cerclé, nom dessous"});
+  add({layout:"word", variant:"twolines", title:"Nom sur deux lignes, deux graisses"}); add({layout:"horiz", box:"square", title:"Symbole découpé, nom à côté"}); add({layout:"seal", dark:true, title:"Sceau sombre"});
+  add({layout:"mono", box:"hexagon", title:"Monogramme hexagonal"}); add({layout:"stack", box:"shield", title:"Écusson découpé, nom dessous"});
+  add({layout:"word", variant:"frame", title:"Nom encadré, signature dans le filet"}); add({layout:"horiz", box:"ring", title:"Symbole cerclé, nom à côté"}); add({layout:"mono", box:"diamond", title:"Monogramme en losange"});
+  add({layout:"stack", box:"arch", title:"Arche, nom dessous"}); add({layout:"word", variant:"overline", title:"Signature au-dessus, filet, nom"});
+  add({layout:"horiz", box:"shield", title:"Écusson et nom en ligne"}); add({layout:"mono", box:"shield", title:"Monogramme en écusson"}); add({layout:"stack", box:"diamond", title:"Losange, nom dessous"});
+  add({layout:"word", variant:"initial", title:"Initiale d'accent"}); add({layout:"horiz", box:"hexagon", title:"Hexagone et nom en ligne"});
+  add({layout:"stack", box:"disc", dark:true, title:"Disque or sur plaque sombre"}); add({layout:"mono", box:"ring", title:"Initiales cerclées"}); add({layout:"stack", box:"hexagon", title:"Hexagone, nom dessous"});
+  add({layout:"horiz", box:"arch", title:"Arche et nom en ligne"}); add({layout:"word", variant:"bar", dark:true, title:"Logotype sombre"});
+  add({layout:"horiz", box:"diamond", title:"Losange et nom en ligne"}); add({layout:"stack", box:"square", title:"Carré découpé, nom dessous"}); add({layout:"mono", box:"square", dark:true, title:"Monogramme sur plaque sombre"});
+  add({layout:"emblem", dark:true, title:"Emblème sombre"}); add({layout:"stack", box:"disc", title:"Disque découpé, nom dessous"}); add({layout:"horiz", box:"none", title:"Symbole et nom en ligne"});
+  return out; })();
+function shapeIn(key, cx, cy, size){ // START_SHAPES (box 28..228) scaled into a square of side size centred on cx, cy
+  const k=size/200, T=p=>p&&{x:r2(cx+(p.x-128)*k), y:r2(cy+(p.y-128)*k)};
+  const subs=key==="disc"||key==="ring"?[circleSub(128,128,100)]:START_SHAPES[{square:"carre",shield:"ecusson",diamond:"losange",hexagon:"hexagone",arch:"arche"}[key]][1]();
+  return subs.map(s=>s.map(n=>({x:T(n).x, y:T(n).y, i:T(n.i)||null, o:T(n.o)||null})));
+}
+function premiumPlans(info, round){ const N=PREMIUM_CATALOG.length; return [0,1,2,3,4].map(j=>{ const idx=(round*5+j)%N; return premiumPlanFor(info, PREMIUM_CATALOG[idx], idx); }); }
+function premiumPlanFor(info, c, idx){
+  const kw=readKeywords(info.keywords), moods=rankMoods(info.keywords), subject=kw.subjects.filter(s=>ICONS[s])[0]||null;
+  const letters=keyLetters(info.name, info.letters).toUpperCase().slice(0,2), lex=subject?ICONS[subject].n:null;
+  {
+    const mood=moods[(idx>>1)%Math.min(2,moods.length)]||moods[0], M=MOODS[mood], pal=M.c[idx%M.c.length];
+    const type=idx%3!==2&&PREMIUM_TYPE[mood]?PREMIUM_TYPE[mood]:PREMIUM_ALT[idx%PREMIUM_ALT.length];
+    const what=lex?"le "+lex:"les initiales "+letters;
+    const desc={stack:`${cap(what)}${c.box!=="none"?" dans "+PREMIUM_CONTAINERS[c.box]:""} au-dessus du nom en capitales espacées.`, horiz:`${cap(what)}${c.box!=="none"?" dans "+PREMIUM_CONTAINERS[c.box]:""}, le nom à côté.`,
+      mono:`${letters.split("").join(" et ")} découpés dans ${PREMIUM_CONTAINERS[c.box]||"un cadre"}, le nom à côté.`, emblem:`Un double filet autour de ${what}, le nom dessous.`,
+      seal:`Le nom écrit en cercle autour de ${what}, la signature en bas.`, word:{bar:"Le nom seul, un trait d'accent dessous.", dot:"Le nom seul, ponctué d'un point d'accent.", twolines:"Le nom en deux lignes : une grasse, une fine et espacée.", frame:"Le nom dans un cadre fin, la signature qui coupe le filet.", overline:"La signature au-dessus d'un filet, le nom dessous.", initial:"Le nom avec son initiale dans la couleur d'accent."}[c.variant]}[c.layout];
+    return {premium:true, cat:idx, style:"flat", font:type[0], layout:c.layout, box:c.box||"none", variant:c.variant, dark:!!c.dark, kind:"p-"+c.layout,
+      subject, letters, ink:pal[0], paper:pal[1], accent:pal[2], nameFont:type[0], tagFont:type[1], track:type[2], unknown:subject?null:(kw.unknown[0]||null),
+      title:c.title, desc:desc+(c.dark?" Version sombre, accent or.":"")};
+  }
+}
+/* text along a circle: top arc reads left to right with letters outside the radius; bottom arc reads left to right too */
+function arcText(ls, cx, cy, r, bottom, cap){
+  if(!ls.length) return ls; const b=bounds(ls), W=b.x1-b.x0;
+  ls.forEach(L=>{ const lb=bounds([L]), xc=(lb.x0+lb.x1)/2-b.x0;
+    const th=bottom? Math.PI/2-(xc-W/2)/r : -Math.PI/2+(xc-W/2)/r, rot=bottom? th-Math.PI/2 : th+Math.PI/2;
+    const ax=(lb.x0+lb.x1)/2, ay=bottom? -cap : 0, px=cx+r*Math.cos(th), py=cy+r*Math.sin(th), c=Math.cos(rot), s=Math.sin(rot);
+    const T=p=>{ const dx=p.x-ax, dy=p.y-ay; return {x:r2(px+dx*c-dy*s), y:r2(py+dx*s+dy*c)}; };
+    L.subs=L.subs.map(sub=>sub.map(n=>({x:T(n).x, y:T(n).y, i:n.i?T(n.i):null, o:n.o?T(n.o):null}))); delete L.bl; delete L.gy; });
+  return ls;
+}
+async function buildPremium(plan, info){
+  const fN=fontById(plan.nameFont)||fontById("cinzel"), fT=fontById(plan.tagFont)||fN, GN=await loadGlyphs(fN.gkey), GT=fT===fN?GN:await loadGlyphs(fT.gkey);
+  const dark=plan.dark, ink=dark?plan.paper:plan.ink, accent=dark?PREMIUM_GOLD:plan.accent, tagline=info.tagline||"";
+  const doc={layers:[], pals:[{id:"main",name:"Principale",colors:dark?[plan.ink,plan.paper,PREMIUM_GOLD]:[plan.ink,plan.accent,plan.paper]}], groups:[]};
+  const L0=(id,name,fill,subs)=>({visible:true,locked:false,id,name,group:"mark",fill,subs});
+  // the motif: library pictogram or monogram, as flat layers of one colour, centred on cx, cy within size
+  const fine=plan.subject&&FINE[plan.subject]&&!plan.illus;
+  const motif=(cx,cy,size,fill,forceLetters,tones)=>{
+    if(fine&&!forceLetters) return placeFine(plan.subject, cx, cy, size, tones||{main:ink, second:accent, detail:accent});
+    if(plan.subject&&!forceLetters){ const ic=placeIcon(plan.subject,{x:0,y:0,s:1},{main:fill,second:fill,detail:fill}); const b=bounds(ic), k=size/Math.max(b.x1-b.x0,b.y1-b.y0);
+      ic.forEach(L=>L.subs.forEach(s=>s.forEach(n=>{ for(const p of [n,n.i,n.o]) if(p){ p.x=r2(cx+(p.x-(b.x0+b.x1)/2)*k); p.y=r2(cy+(p.y-(b.y0+b.y1)/2)*k); } }))); return ic; }
+    return monoLayers(plan.letters, fN, GN, {cx, cy, w:size*(plan.letters.length>1?1:0.8), h:size*0.68}, fill);
+  };
+  // a symbol: motif alone, or inside a container (filled containers cut the motif out; "ring" draws a thin circle)
+  const symbol=(box,cx,cy,S,forceLetters)=>{
+    cy-=S*0.015;   // optical centring
+    if(plan.unknown && !plan.subject && !forceLetters && plan.layout==="stack" && box==="none"){ return [L0("motif-provisoire","À dessiner : "+plan.unknown,accent,[circleSub(cx,cy,S*0.42), revSub(circleSub(cx,cy,S*0.42-3))])]; }
+    if(box==="none"&&!plan.subject&&plan.layout==="stack"){ const m=motif(cx,cy-S*0.06,S*0.78,accent,true); const b=bounds(m);
+      return [...m, L0("accent","Trait d'accent",accent,roundRect(cx-S*0.16,b.y1+S*0.1,S*0.32,Math.max(2,S*0.025),Math.max(1,S*0.0125)))]; }
+    if(box==="none") return motif(cx,cy,S,accent,forceLetters);
+    if(box==="ring"){ return [L0("cadre","Cercle",ink,ring(cx,cy,S/2,Math.max(2,S/40))), ...motif(cx,cy,S*0.56,accent,forceLetters)]; }
+    if(fine&&!forceLetters){ // line drawing on a solid container: light lines, accent kept (lines cannot be cut out)
+      const inner={disc:0.54, square:0.56, shield:0.48, diamond:0.4, hexagon:0.5, arch:0.5}[box], dy=box==="shield"?-S*0.04:box==="arch"?S*0.05:0, light=dark?plan.ink:plan.paper;
+      return [L0("cadre",cap(PREMIUM_CONTAINERS[box].replace(/^un(e)? /,"")),box==="disc"?accent:ink,shapeIn(box,cx,cy,S)), ...placeFine(plan.subject,cx,cy+dy,S*inner,{main:light, second:box==="disc"?light:accent, detail:box==="disc"?light:accent})]; }
+    const inner={disc:0.58, square:0.58, shield:0.5, diamond:0.42, hexagon:0.52, arch:0.52}[box], dy=box==="shield"?-S*0.04:box==="arch"?S*0.05:0;
+    const m=motif(cx,cy+dy,S*inner,accent,forceLetters), fill=box==="disc"?accent:ink;
+    return [L0("cadre",cap(PREMIUM_CONTAINERS[box].replace(/^un(e)? /,"")),fill,knockout(shapeIn(box,cx,cy,S), m))];
+  };
+  const name=(cap,fill,o={})=>textLine(o.str||info.name, o.font||fN, o.G||GN, {caps:o.caps!==false, track:o.track!==undefined?o.track:plan.track, cap, fill, idp:o.idp, label:o.label});
+  const tag=(cap,fill)=>tagline?textLine(tagline, fT, GT, {caps:true, track:0.28, cap, fill, group:"mark", idp:"signature", label:"Signature"}):[];
+  const centerX=(ls,cx)=>{ if(ls.length){ const b=bounds(ls); shiftLs(ls, cx-(b.x0+b.x1)/2, 0); } return ls; };
+  const fitName=(cap,maxW,fill)=>{ let nm=name(cap,fill), w=lineW(nm); if(w>maxW){ cap=cap*maxW/w; nm=name(cap,fill); } return {nm,cap}; };
+  let out=[];
+  if(plan.layout==="stack"){
+    const S=34*3.5, sym=symbol(plan.box,128,20+S/2,S); const {nm,cap:cN}=fitName(34,S*2.6,ink);
+    shiftLs(nm,0,20+S+cN*0.9+cN); centerX(nm,128); const tg=tag(cN*0.4, dark?PREMIUM_GOLD:shade(ink,0.25)); if(tg.length){ shiftLs(tg,0,bounds(nm).y1+cN*0.6+cN*0.4); centerX(tg,128); }
+    out=[...sym,...nm,...tg];
+  }
+  else if(plan.layout==="horiz"||plan.layout==="mono"){
+    const S=150, sym=symbol(plan.layout==="mono"?plan.box:plan.box, 128,128,S, plan.layout==="mono");
+    const cN=42, nm=name(cN,ink), tg=tag(cN*0.4,accent), hB=cN+(tg.length?cN*0.6+cN*0.4:0), x=128+S/2+S*0.24;
+    shiftLs(nm,x,128-hB/2+cN); if(tg.length) shiftLs(tg,x+cN*0.04,bounds(nm).y1+cN*0.6+cN*0.4);
+    out=[...sym,...nm,...tg];
+    if(plan.layout==="mono"&&plan.box==="square") out.push(L0("accent","Trait d'accent",accent,roundRect(128-S*0.2,128+S*0.3,S*0.4,S*0.035,S*0.0175)));
+  }
+  else if(plan.layout==="emblem"){
+    const R=110; out=[L0("filets","Double filet",ink,[...ring(128,128,R,R/12), ...ring(128,128,R*0.86,R/32)]), ...motif(128,128-R*0.02,R*1.04,accent)];
+    const {nm,cap:cN}=fitName(40,R*2*1.6,ink); shiftLs(nm,0,128+R+cN*1.1+cN); centerX(nm,128); const tg=tag(cN*0.4,accent); if(tg.length){ shiftLs(tg,0,bounds(nm).y1+cN*0.6+cN*0.4); centerX(tg,128); }
+    out.push(...nm,...tg);
+  }
+  else if(plan.layout==="seal"){
+    const R=118, band=R*0.2, rT=R*0.74, capS=band*0.6, avail=Math.PI*rT*0.82;
+    out=[L0("filets","Filets du sceau",ink,[...ring(128,128,R,R/30), ...ring(128,128,rT-capS*0.35,R/60)])];
+    let nm=textLine(info.name,fN,GN,{caps:true,track:Math.max(plan.track,0.14),cap:capS,fill:ink}); const w=lineW(nm); if(w>avail){ nm=textLine(info.name,fN,GN,{caps:true,track:Math.max(plan.track,0.14),cap:capS*avail/w,fill:ink}); }
+    out.push(...arcText(nm,128,128,rT+capS*0.25,false,capS));
+    const tg=tagline?textLine(tagline,fT,GT,{caps:true,track:0.3,cap:capS*0.7,fill:ink,group:"mark",idp:"signature",label:"Signature"}):[];
+    if(tg.length){ const wt=lineW(tg), k=Math.min(1,avail*0.7/wt), t2=k<1?textLine(tagline,fT,GT,{caps:true,track:0.3,cap:capS*0.7*k,fill:ink,group:"mark",idp:"signature",label:"Signature"}):tg; out.push(...arcText(t2,128,128,rT+capS*0.3,true,capS*0.7*k)); }
+    out.push(L0("points","Points",accent,[circleSub(128-(rT+capS*0.65),128,R*0.025), circleSub(128+(rT+capS*0.65),128,R*0.025)]));
+    out.push(...motif(128,128,R*0.82,accent));
+  }
+  else if(plan.layout==="word"){
+    const capW=56, v=plan.variant;
+    if(v==="twolines"&&String(info.name).trim().split(/\s+/).length>1){
+      const ws=String(info.name).trim().split(/\s+/), a=ws[0], b=ws.slice(1).join(" ");
+      const l1=name(capW,ink,{str:a,track:plan.track*0.6,idp:"lettre"}), l2=name(capW*0.42,accent,{str:b,track:0.42,font:fT,G:GT,idp:"lettre-b"});
+      shiftLs(l1,0,120); centerX(l1,128); shiftLs(l2,0,bounds(l1).y1+capW*0.5+capW*0.42); centerX(l2,128); l2.forEach((L,i)=>{ L.id="lettre-"+(l1.length+i+1); }); out=[...l1,...l2];
+      const tg=tag(capW*0.22,ink); if(tg.length){ shiftLs(tg,0,bounds(out).y1+capW*0.5+capW*0.22); centerX(tg,128); out.push(...tg); }
+    } else {
+      const {nm,cap:cW}=fitName(v==="twolines"?capW:capW,700,ink); shiftLs(nm,0,120); centerX(nm,128); const b=bounds(nm); out=[...nm];
+      const tg=tag(cW*0.26,v==="frame"||v==="overline"?accent:ink);
+      if(v==="bar"){ out.push(L0("accent","Trait d'accent",accent,roundRect(128-cW*0.45,b.y1+cW*0.3,cW*0.9,cW*0.09,cW*0.045))); if(tg.length){ shiftLs(tg,0,b.y1+cW*0.3+cW*0.09+cW*0.55+cW*0.26); centerX(tg,128); const tb=bounds(tg), gap=cW*0.35, rw=Math.max(12,((b.x1-b.x0)-(tb.x1-tb.x0))/2-gap), mid=(tb.y0+tb.y1)/2, h=Math.max(1.2,cW*0.03);
+          out.push(...tg, L0("filets","Filets",ink,[...roundRect(tb.x0-gap-rw,mid-h/2,rw,h,0), ...roundRect(tb.x1+gap,mid-h/2,rw,h,0)])); } }
+      else if(v==="dot"){ const d=cW*0.13; out.push(L0("accent","Point d'accent",accent,[circleSub(b.x1+d*1.6,b.y1-d,d)])); if(tg.length){ shiftLs(tg,0,b.y1+cW*0.7+cW*0.26); centerX(tg,128); out.push(...tg); } }
+      else if(v==="initial"){ nm[0].fill=accent; if(tg.length){ shiftLs(tg,0,b.y1+cW*0.7+cW*0.26); centerX(tg,128); out.push(...tg); } }
+      else if(v==="frame"){ const p=cW*0.6, x0=b.x0-p*1.4, y0=b.y0-p, x1=b.x1+p*1.4, y1=b.y1+p, t=Math.max(1.5,cW*0.035); let tb=null;
+        if(tg.length){ shiftLs(tg,0,y1+cW*0.13); centerX(tg,128); tb=bounds(tg); out.push(...tg); }
+        const gapL=tb?tb.x0-cW*0.25:(x0+x1)/2, gapR=tb?tb.x1+cW*0.25:(x0+x1)/2;
+        out.push(L0("cadre","Cadre fin",ink,[...roundRect(x0,y0,x1-x0,t,0), ...roundRect(x0,y0,t,y1-y0,0), ...roundRect(x1-t,y0,t,y1-y0,0), ...roundRect(x0,y1-t,gapL-x0,t,0), ...roundRect(gapR,y1-t,x1-gapR,t,0)])); }
+      else if(v==="overline"){ if(tg.length){ shiftLs(tg,0,b.y0-cW*0.9); centerX(tg,128); out.push(...tg); } out.push(L0("filets","Filet",ink,roundRect(128-cW*0.8,b.y0-cW*0.5,cW*1.6,Math.max(1.2,cW*0.03),0))); }
+      else { if(tg.length){ shiftLs(tg,0,b.y1+cW*0.7+cW*0.26); centerX(tg,128); out.push(...tg); } }
+    }
+  }
+  if(dark){ const b=bounds(out), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*0.16; out.unshift(L0("fond","Fond (plaque)",plan.ink,roundRect(b.x0-pad,b.y0-pad,b.x1-b.x0+2*pad,b.y1-b.y0+2*pad,Math.min(28,pad)))); }
+  // ids unique (several helpers number their own layers)
+  const seen=new Set(); out.forEach(L=>{ let id=L.id, n=1; while(seen.has(id)) id=L.id+"-"+(++n); L.id=id; seen.add(id); });
+  const sig=out.filter(L=>/^signature-/.test(L.id)); if(sig.length){ doc.groups.push({id:"grp-signature",name:"Signature",pal:null,open:false}); sig.forEach(L=>{ L.grp="grp-signature"; }); }
+  return withDoc(doc, ()=>{ layers=out;
+    if(plan.illus){ const ic=layers.filter(l=>/^motif-/.test(l.id)).map(l=>l.id), text=new Set(layers.filter(l=>l.group==="word"||/^signature-/.test(l.id)).map(l=>l.id));
+      if(ic.length) styleLayers(ic,"st:"+plan.illus,55);
+      // a style can make the motif bigger (ornaments, outlines): keep the name clear of it in the stacked layout
+      if(plan.layout==="stack"){ const tx=layers.filter(l=>text.has(l.id)), mo=layers.filter(l=>!text.has(l.id)); if(tx.length&&mo.length){ const over=bounds(mo).y1+14-bounds(tx).y0; if(over>0) shiftLs(tx,0,over); } } }
+    ensureZones();
+    return {doc:{layers:clone(layers), pals:clone(pals), groups:clone(groups)}, missing:!!layers.find(l=>l.id==="motif-provisoire"), bg:dark?null:plan.paper, word:info.name}; });
+}
 function conceptPlan(info, round){
   const kw=readKeywords(info.keywords), moods=rankMoods(info.keywords), mood=MOODS[moods[0]];
   const tones=kw.material?MATERIAL_COLORS[kw.material]:{main:mood.c[0][0],second:mood.c[0][2],detail:mood.c[0][1],text:mood.c[0][0],light:mood.c[0][1]};
   const subj=kw.subjects.filter(s=>ICONS[s]), main=subj[0]||null, unknown=kw.unknown[0]||null;
   const styles=[...new Set(kw.styles.concat(kw.material==="bois"?["gravebois","lowpoly","main"]:kw.material==="or"?["dore","arabesque"]:[]).concat(STYLE_DEFAULTS))];
-  const st=i=>styles[(i+round*2)%styles.length];
-  const font=(s,i)=>{ const l=STYLE_FONTS[s]||["playfair","montserrat"]; return l[(i+round)%l.length]; };
+  const font=(s,i)=>{ const l=STYLE_FONTS[s]||["playfair","montserrat"]; return l[i%l.length]; };
   const sub2=subj[1]||null, letters=keyLetters(info.name, info.letters).toUpperCase();
   const lex=main?ICONS[main].n:unknown||"symbole";
-  const plans=[];
-  const push=(p)=>plans.push(Object.assign({tones, subject:main, unknown:main?null:unknown, letters},p));
-  const s0=st(0), s1=st(1), s2=st(2), s3=st(3);
-  push({kind:"buste", style:s0, font:font(s0,0), lines:2, title:`${cap(lex)} ${STYLE_LABEL(s0)}, nom en dessous`, desc:`Le ${lex} en ${STYLE_LABEL(s0)}, le nom centré dessous sur deux lignes.`});
-  push({kind:"planche", style:kw.material==="bois"||!kw.material?"gravebois":"dore", font:font("gravebois",1), title:`Planche gravée`, desc:`Une planche ${kw.material==="bois"||!kw.material?"de bois massif":"en "+kw.material} avec le ${lex} et le nom gravés.`});
-  push({kind:"ecusson", style:s1, font:font(s1,1), title:`Écusson et ${lex}`, desc:`Un écusson portant le ${lex} (${STYLE_LABEL(s1)}), le nom à côté.`});
-  push({kind:"demi", style:s2, font:font(s2,2), lines:2, title:`Demi-${lex} ${STYLE_LABEL(s2)}`, desc:`Une moitié de ${lex} stylisée en ${STYLE_LABEL(s2)}, le nom sur deux lignes.`});
-  push({kind:"entrelacs", style:s3, font:["cinzel","playfair","dmserif","baskerville"][round%4], second:main==="cerf"?"bois":(sub2||main), title:`${letters} entrelacés`, desc:`${letters.split("").join(" et ")} entrelacés dans un écusson${main?", d'où sortent "+(main==="cerf"?"des bois de cerf":"des éléments du "+lex):""}.`});
-  push({kind:"mono3d", style:kw.material==="or"?"dore":"gravebois", font:["bebas","oswald","cinzel","dmserif"][round%4], title:`${letters} en 3D`, desc:`${letters} ${kw.material==="or"?"dorés":"gravés dans du bois massif"}, vus de trois quarts avec profondeur.`});
-  return {plans, kw};
+  // illustrated catalogue: each composition in several styles, plus illustrated seals / emblems / stacked signatures
+  const cat=[], S=i=>styles[i%styles.length];
+  const bust=s=>({kind:"buste", style:s, lines:2, title:`${cap(lex)} ${STYLE_LABEL(s)}, nom en dessous`, desc:`Le ${lex} en ${STYLE_LABEL(s)}, le nom centré dessous sur deux lignes.`});
+  const shield=s=>({kind:"ecusson", style:s, title:`Écusson et ${lex} ${STYLE_LABEL(s)}`, desc:`Un écusson portant le ${lex} (${STYLE_LABEL(s)}), le nom à côté.`});
+  const half=s=>({kind:"demi", style:s, lines:2, title:`Demi-${lex} ${STYLE_LABEL(s)}`, desc:`Une moitié de ${lex} stylisée en ${STYLE_LABEL(s)}, le nom sur deux lignes.`});
+  const inter=(s,i)=>({kind:"entrelacs", style:s, font:["cinzel","playfair","dmserif","baskerville"][i%4], second:main==="cerf"?"bois":(sub2||main), title:`${letters} entrelacés`+(i?" ("+STYLE_LABEL(s)+")":""), desc:`${letters.split("").join(" et ")} entrelacés dans un écusson${main?", d'où sortent "+(main==="cerf"?"des bois de cerf":"le "+ICONS[sub2||main].n):""}.`});
+  const illusPremium=(layout,s,i)=>Object.assign(premiumPlanFor(info, {layout, box:"none", title:""}, 40+i), {illus:s, title:{seal:"Sceau",emblem:"Emblème",stack:"Signature"}[layout]+` et ${lex} ${STYLE_LABEL(s)}`, desc:`Le ${lex} en ${STYLE_LABEL(s)} ${layout==="seal"?"au centre d'un sceau, le nom en cercle":layout==="emblem"?"dans un double filet, le nom dessous":"au-dessus du nom en capitales espacées"}.`});
+  // without a pictogram, styles have nothing to illustrate: keep the monograms and two drawing briefs for Claude
+  for(let i=0;i<(main?8:2);i++){
+    if(!main){ cat.push(bust(S(i))); if(i<2) cat.push(inter(S(i+3),i)); continue; }
+    cat.push(bust(S(i)));
+    if(i<4) cat.push(shield(S(i+1)));
+    if(main && i<2) cat.push(illusPremium("seal",S(i+2),i), illusPremium("emblem",S(i+3),i+2));
+    if(i<4) cat.push(half(S(i+2)));
+    if(main && i<2) cat.push(illusPremium("stack",S(i+4),i+4));
+    if(i<2) cat.push(inter(S(i+3),i));
+    if(i===0 && kw.material==="bois") cat.push({kind:"planche", style:"gravebois", title:"Planche gravée", desc:`Une planche de bois massif avec le ${lex} et le nom gravés.`});
+    if(i===1 && kw.material) cat.push({kind:"mono3d", style:kw.material==="or"?"dore":"gravebois", font:["bebas","oswald","cinzel","dmserif"][round%4], title:`${letters} en 3D`, desc:`${letters} ${kw.material==="or"?"dorés":"gravés dans du bois massif"}, vus de trois quarts avec profondeur.`});
+  }
+  cat.forEach((p,i)=>{ if(!p.premium){ p.font=p.font||font(p.style,i); Object.assign(p,{tones, subject:main, unknown:main?null:unknown, letters}); } });
+  const k=(round*4)%cat.length, illus=[0,1,2,3].map(i=>cat[(k+i)%cat.length]).filter((p,i,a)=>a.indexOf(p)===i);
+  conceptPlan.counts={premium:PREMIUM_CATALOG.length, illus:cat.length};
+  return {plans:premiumPlans(info, round).concat(illus), kw};
 }
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 async function buildConcept(plan, info){
+  if(plan.premium) return buildPremium(plan, info);
   const f=fontById(plan.font)||fontById("instrument"), G=await loadGlyphs(f.gkey), t=plan.tones, doc={layers:[], pals:[{id:"main",name:"Principale",colors:[t.main,t.text,t.light]}], groups:[]};
   const missing=!plan.subject;
   const icon=(box,tones)=>plan.subject?placeIcon(plan.subject, box, tones):[{visible:true,locked:false,id:"motif-provisoire",name:"À dessiner : "+(plan.unknown||"symbole"),group:"mark",fill:tones.main,subs:START_SHAPES.cercle[1]().map(s=>s.map(n=>({x:r2(box.x+(n.x-28)*box.s),y:r2(box.y+(n.y-28)*box.s),i:n.i&&{x:r2(box.x+(n.i.x-28)*box.s),y:r2(box.y+(n.i.y-28)*box.s)},o:n.o&&{x:r2(box.x+(n.o.x-28)*box.s),y:r2(box.y+(n.o.y-28)*box.s)}})))}];
   return withDoc(doc, ()=>{
-    const ids=()=>layers.map(l=>l.id), styleIt=(ls,s,a)=>{ const keep=new Set(ls.map(l=>l.id)); styleLayers([...keep], "st:"+s, a); };
+    const ids=()=>layers.map(l=>l.id), styleIt=(ls,s,a)=>{ const keep=new Set(ls.filter(l=>l.id!=="motif-provisoire").map(l=>l.id)); if(keep.size) styleLayers([...keep], "st:"+s, a); };
     if(plan.kind==="buste"){ const ic=icon({x:28,y:8,s:1},t); layers.push(...ic); styleIt(ic, plan.style, 55);
       layers.push(...nameLayers(info.name, f, G, {x:128, baseline:282, top:bounds(layers).y1+22, align:"center", lines:plan.lines, fill:t.text, scale:0.62})); }
     else if(plan.kind==="planche"){ const nm=nameLayers(info.name, f, G, {x:230, baseline:150, middle:116, align:"left", lines:1, fill:shade(t.main,-0.45), scale:0.62}), nb=bounds(nm), W=Math.max(560,nb.x1+60);
@@ -3502,11 +3959,12 @@ async function buildConcept(plan, info){
     return {doc:{layers:clone(layers), pals:clone(pals), groups:clone(groups)}, missing};
   });
 }
-function conceptSVG(doc, k){
+function conceptSVG(doc, k, bg){
   const ls=doc.layers.filter(l=>l.visible!==false); if(!ls.length) return "";
-  return withDoc({layers:clone(doc.layers), pals:clone(doc.pals), groups:clone(doc.groups)}, ()=>{ const b=bounds(layers), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*0.08; let defs="", body="";
+  return withDoc({layers:clone(doc.layers), pals:clone(doc.pals), groups:clone(doc.groups)}, ()=>{ const b=bounds(layers), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*(bg!==undefined?0.16:0.08); let defs="", body="";
     layers.forEach(l=>{ const r=layerSVG(l,{pfx:"c"+k}); defs+=r.defs; body+=r.body; });
-    return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${body}</svg>`; });
+    const vb=[b.x0-pad,b.y0-pad,b.x1-b.x0+2*pad,b.y1-b.y0+2*pad].map(r2);
+    return `<svg viewBox="${vb.join(" ")}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${bg?`<rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" fill="${esc(bg)}"/>`:""}${body}</svg>`; });
 }
 
 /* ---------- Brand book ----------
@@ -3857,8 +4315,8 @@ async function renderProposals(){
     prop.list=plans; prop.docs=docs; if(prop.pick>=plans.length||!docs[prop.pick]) prop.pick=docs.findIndex(Boolean);
     const found=kw.subjects.map(s=>ICONS[s]&&ICONS[s].n).filter(Boolean);
     el.innerHTML=`<p class="muted" style="margin:0 0 8px">${found.length?"Sujets repérés : "+esc(found.join(", ")):"Aucun sujet illustré repéré dans les mots-clés"}${kw.material?" · matière : "+esc(kw.material):""}${kw.unknown.length&&!found.length?" · « "+esc(kw.unknown[0])+" » sera à dessiner par Claude":""}.</p>
-      <div class="props">${docs.map((d,i)=>d?`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}">${conceptSVG(d.doc,i)}<b>${esc(plans[i].title)}</b><span>${esc(plans[i].desc)} · ${esc((fontById(plans[i].font)||{name:""}).name)}${d.missing?" · à dessiner par Claude":""}</span></button>`:"").join("")}</div>
-      <div class="row"><button type="button" id="stMore">Autres concepts</button><span class="muted">Tout reste modifiable : formes, styles, couleurs, police.</span></div>`;
+      <div class="props">${docs.map((d,i)=>d?`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}">${conceptSVG(d.doc,i,d.bg)}<b>${esc(plans[i].title)}</b><span>${esc(plans[i].desc)} · ${esc((fontById(plans[i].font)||{name:""}).name)}${d.missing?" · à dessiner par Claude":""}</span></button>`:"").join("")}</div>
+      <div class="row"><button type="button" id="stMore">Autres concepts</button><span class="muted" id="stSeries">${(()=>{ const c=conceptPlan.counts||{premium:0,illus:0}, t=c.premium+c.illus, n=Math.max(1,Math.ceil(Math.max(c.premium/5,c.illus/4))); return t+" propositions · série "+(prop.round%n+1)+" sur "+n; })()}</span><span class="muted">Tout reste modifiable : formes, styles, couleurs, police.</span></div>`;
   } finally { if(n===prop.busy) el.removeAttribute("aria-busy"); }
 }
 let propT=null;
@@ -3898,8 +4356,9 @@ async function applyStart(choice, info, shape){
     groups=[]; curPal="main"; pals=[{id:"main",name:"Principale",colors:[]}]; sel={layer:null,node:null};
     layers = choice==="example" ? clone(ORIGIN) : [];
     if(choice==="proposal"){ const c=prop.docs[prop.pick], plan=prop.list[prop.pick]; layers=clone(c.doc.layers); pals=clone(c.doc.pals); groups=clone(c.doc.groups);
-      if(c.missing){ const b=bounds(layers.filter(l=>l.id==="motif-provisoire")); notes.push({id:"n"+Date.now().toString(36), n:notes.reduce((m,x)=>Math.max(m,x.n),0)+1, x:r2((b.x0+b.x1)/2), y:r2((b.y0+b.y1)/2), audio:null, at:new Date().toISOString(),
-        text:`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
+      if(c.missing){ const ph=layers.filter(l=>l.id==="motif-provisoire"), b=bounds(ph.length?ph:layers.filter(l=>l.group==="mark").concat(layers).slice(0,Math.max(1,layers.length))); notes.push({id:"n"+Date.now().toString(36), n:notes.reduce((m,x)=>Math.max(m,x.n),0)+1, x:r2((b.x0+b.x1)/2), y:r2((b.y0+b.y1)/2), audio:null, at:new Date().toISOString(),
+        text:plan.premium?`Concept « ${plan.title} » : dessine le motif « ${plan.unknown} » à la place du cercle provisoire, en aplat d'une seule couleur (${plan.accent}), simple et lisible à 16 px, sans effet (règles premium : DESIGN-RULES.md). Mots-clés : ${brand.keywords.join(", ")}.`
+          :`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
     if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
     ensureZones(); wordText=brand.name;
     if(choice==="word"||choice==="shape"||choice==="example"){
@@ -4108,6 +4567,10 @@ async function exportProjects(ids, label){
   const cols=collections.filter(c=>ps.some(p=>p.collection===c.id)), used=new Set(ps.flatMap(p=>((p.doc&&p.doc.layers)||[]).map(l=>l.font)));
   await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps, fonts:customFonts.filter(c=>used.has(c.id))}));
 }
+/* imported projects: the thumbnail is redrawn from the validated drawing, never taken from the file */
+function importThumb(doc){ try{ const pal=Array.isArray(doc.pals)&&doc.pals.length?doc.pals:[{id:"main",name:"Principale",colors:[]}];
+  return withDoc({layers:clone(doc.layers), pals:clone(pal), groups:clone(doc.groups||[])}, ()=>thumbSVG(layers)); }catch(_){ return ""; } }
+const thumbImg=t=>/^<svg[\s>]/.test(t||"")?`<img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(t)}">`:"";
 async function importFile(file){
   let v; try{ v=JSON.parse(await file.text()); }catch(_){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
   if(!v||v.format!=="atelier-logo"||!Array.isArray(v.projects)){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
@@ -4119,7 +4582,8 @@ async function importFile(file){
   if(nf) await saveCustomFonts();
   const existing=new Set((await P.all()).map(p=>p.id)); let n=0;
   for(const p of v.projects){ if(!p||typeof p.name!=="string"||!validDoc(p.doc)) continue;
-    const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:typeof p.thumb==="string"?p.thumb:""};
+    if(p.doc.hist!==undefined && !validHist(p.doc.hist)) delete p.doc.hist;   // an unsafe history is dropped, the drawing is kept
+    const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:importThumb(p.doc)};
     if(!/^[\w-]+$/.test(q.id)) q.id=newPid(); await P.put(q); n++; }
   renderProjects(); toast(n?n+" projet"+(n>1?"s importés":" importé")+".":"Aucun projet lisible dans ce fichier.");
 }
@@ -4137,7 +4601,7 @@ async function renderProjects(){
   const fmt=t=>new Date(t).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
   $("#projGrid").innerHTML=list.length?list.map(p=>{ const cur=curProject&&p.id===curProject.id;
     return `<article class="pcard${cur?" cur":""}" data-pid="${esc(p.id)}">
-      <button class="pthumb" data-open="${esc(p.id)}" title="${cur?"Projet ouvert":"Ouvrir"}">${p.thumb||'<span class="muted">Page vierge</span>'}</button>
+      <button class="pthumb" data-open="${esc(p.id)}" title="${cur?"Projet ouvert":"Ouvrir"}">${thumbImg(p.thumb)||'<span class="muted">Page vierge</span>'}</button>
       <input class="pname" data-pname="${esc(p.id)}" value="${esc(p.name)}" maxlength="80" aria-label="Nom du projet">
       <div class="pmeta">${cur?'<b>Ouvert</b> · ':""}${fmt(p.updated)} · ${(p.doc&&p.doc.layers||[]).length} calques</div>
       <select data-pcoll="${esc(p.id)}" aria-label="Collection du projet"><option value="">Sans collection</option>${collections.map(c=>`<option value="${esc(c.id)}" ${p.collection===c.id?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
@@ -4334,11 +4798,163 @@ function loadPalDoc(v){ if(Array.isArray(v)){ if(validPalette(v)){ pals=[{id:"ma
 function localSave(){ projectTouch(); try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
 function localLoad(){ try{ const v=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return v; }catch(_){ return null; } }
 const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,palette:0};
+/* ---------- Claude exchange: one request / reply format for every connection ----------
+   copy-paste with claude.ai, the API key and the Claude Desktop extension all send claudePrompt() (context +
+   reply format) and apply the JSON reply with applyClaudeReply(): curves as SVG paths, same undo banner and
+   history entry ("Claude : note") as the artifact patch channel. */
+function parsePathD(d, opts){ const keepEnds=!!(opts&&opts.open);   // open (stroked) paths: only Z closes a contour
+  const t=String(d||"").match(/[a-df-z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi)||[]; const subs=[]; let cur=null, i=0, cmd="", x=0, y=0, sx=0, sy=0, lc=null, lq=null;
+  const num=()=>parseFloat(t[i++]), isNum=()=>i<t.length && !/^[a-z]$/i.test(t[i]);
+  const P=(px,py)=>({x:r2(px),y:r2(py)});
+  const close=(z)=>{ if(keepEnds&&!z) return; if(cur&&cur.length>1){ const a=cur[0], b=cur[cur.length-1]; if(Math.abs(a.x-b.x)<.01&&Math.abs(a.y-b.y)<.01){ a.i=b.i; cur.pop(); } } };
+  const cubic=(ax,ay,bx,by,ex,ey)=>{ if(!cur){ cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); } cur[cur.length-1].o=P(ax,ay); cur.push({x:r2(ex),y:r2(ey),i:P(bx,by),o:null}); lc={x:bx,y:by}; x=ex; y=ey; };
+  const line=(ex,ey)=>{ if(!cur){ cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); } cur.push({x:r2(ex),y:r2(ey),i:null,o:null}); x=ex; y=ey; };
+  while(i<t.length){
+    if(/^[a-z]$/i.test(t[i])) cmd=t[i++]; else if(!cmd) { i++; continue; }
+    const rel=cmd===cmd.toLowerCase(), C=cmd.toUpperCase(), ox=rel?x:0, oy=rel?y:0; let keepC=false, keepQ=false;
+    if(C==="Z"){ close(true); cur=null; x=sx; y=sy; lc=lq=null; continue; }
+    if(!isNum()) continue;
+    if(C==="M"){ const nx=num()+ox, ny=num()+oy; close(); x=sx=nx; y=sy=ny; cur=[{x:r2(x),y:r2(y),i:null,o:null}]; subs.push(cur); cmd=rel?"l":"L"; }
+    else if(C==="L"){ line(num()+ox, num()+oy); }
+    else if(C==="H"){ line(num()+ox, y); }
+    else if(C==="V"){ line(x, num()+oy); }
+    else if(C==="C"){ const a=num()+ox, b=num()+oy, c=num()+ox, e=num()+oy, f=num()+ox, g=num()+oy; cubic(a,b,c,e,f,g); keepC=true; }
+    else if(C==="S"){ const ax=lc?2*x-lc.x:x, ay=lc?2*y-lc.y:y, c=num()+ox, e=num()+oy, f=num()+ox, g=num()+oy; cubic(ax,ay,c,e,f,g); keepC=true; }
+    else if(C==="Q"||C==="T"){ let qx, qy; if(C==="Q"){ qx=num()+ox; qy=num()+oy; } else { qx=lq?2*x-lq.x:x; qy=lq?2*y-lq.y:y; }
+      const ex=num()+ox, ey=num()+oy, x0=x, y0=y; cubic(x0+2/3*(qx-x0), y0+2/3*(qy-y0), ex+2/3*(qx-ex), ey+2/3*(qy-ey), ex, ey); lq={x:qx,y:qy}; keepQ=true; }
+    else if(C==="A"){ num(); num(); num(); num(); num(); line(num()+ox, num()+oy); }
+    else { i++; }
+    if(!keepC && C!=="S" && C!=="C") lc=null; if(!keepQ) lq=null;
+  }
+  close();
+  return subs.filter(s=>s.length>=2);
+}
+const effFill=L=>Number.isInteger(L.zone)?primary(palOf(L).colors[L.zone]||L.fill):L.fill;
+function claudeContext(list){
+  return { atelier:"Atelier du Logo", marque:{nom:brand.name||"", slogan:brand.tagline||"", motsCles:brand.keywords||"", mot:wordText},
+    repere:"Coordonnées en unités du dessin, y vers le bas. Le symbole occupe le carré 0..256 à gauche ; le mot commence vers x=300.",
+    palette:(curPalObj()||{colors:[]}).colors.map(primary),
+    calques:layers.map(L=>{ const o={id:L.id, nom:L.name, groupe:L.group==="word"?"mot":"symbole", couleur:effFill(L), d:pathD(L.subs, L.open)};
+      if(L.open) o.trait=L.sw||2; if(L.locked) o.verrouille=true; if(!L.visible) o.masque=true; if(L.fx&&L.fx.length) o.effets=L.fx.map(f=>f.t); return o; }),
+    bulles:list.map(n=>{ const L=layerAt(n.x,n.y); return {n:n.n, x:Math.round(n.x), y:Math.round(n.y), calque:L?L.id:null, demande:n.text.trim()||(n.audio?"(note vocale, non transmise)":"")}; }) };
+}
+const REPLY_FORMAT=`Réponds avec ton explication, puis UN SEUL bloc \`\`\`json au format suivant :
+{
+  "note": "résumé court de ce que tu as changé",
+  "calques": [ { "id": "id existant ou nouveau", "d": "tracé SVG (M, L, C, Q, Z en coordonnées absolues)", "couleur": "#RRGGBB", "nom": "nom lisible" } ],
+  "supprimer": [ "id" ],
+  "reponses": [ { "n": 1, "texte": "réponse affichée dans la bulle 1", "fait": true } ]
+}
+Règles : ne mets dans "calques" que ce que tu modifies ou ajoutes (un id inconnu crée un nouveau calque ; "groupe": "symbole" ou "mot" pour un nouveau calque). "d", "couleur" et "nom" sont facultatifs : un champ absent reste tel quel. Formes fermées par Z ; pas d'arcs (A), utilise des courbes C. Ne touche pas aux calques verrouillés. Réponds à chaque bulle dans "reponses".`;
+function claudePrompt(list){
+  return `Bonjour Claude. Je dessine mon logo dans l'Atelier du Logo (éditeur vectoriel). Traite ${list.length>1?"les "+list.length+" bulles":"la bulle"} ci-dessous en modifiant les tracés.\n\n`+
+    "```json\n"+JSON.stringify(claudeContext(list))+"\n```\n\n"+REPLY_FORMAT;
+}
+function extractReply(text){
+  const s=String(text||""), blocks=[...s.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)].map(m=>m[1]);
+  const tryParse=v=>{ try{ const o=JSON.parse(v); return o&&typeof o==="object"&&!Array.isArray(o)?o:null; }catch(_){ return null; } };
+  for(const b of blocks.reverse()){ const o=tryParse(b.trim()); if(o) return o; }
+  const a=s.indexOf("{"), b=s.lastIndexOf("}"); return a>=0&&b>a?tryParse(s.slice(a,b+1)):null;
+}
+function applyClaudeReply(o){
+  if(!o||typeof o!=="object") return {ok:false, msg:"Réponse illisible : il faut le bloc json de Claude."};
+  if(glyphMode) return {ok:false, msg:"Quittez l'édition de glyphe avant d'appliquer la réponse."};
+  const note=String(o.note||"").slice(0,140), before=snapshot(), skipped=[]; let added=0, edited=0, removed=0;
+  const hex=v=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v.trim())?v.trim().toUpperCase():null;
+  for(const c of Array.isArray(o.calques)?o.calques:[]){
+    if(!c||typeof c!=="object") continue;
+    const id=String(c.id||"").trim().slice(0,60), L=id&&layerById(id), subs=c.d!==undefined?parsePathD(c.d):null, col=hex(c.couleur||c.fill);
+    if(L){ if(L.locked){ skipped.push(L.name); continue; }
+      if(subs&&subs.length){ L.subs=subs; delete L.kind; delete L.live; }
+      if(col){ L.fill=col; delete L.zone; }
+      if(c.nom) L.name=String(c.nom).slice(0,60);
+      edited++; }
+    else if(subs&&subs.length){
+      const ref=layerById(sel.layer), nid=id&&/^[\w-]+$/.test(id)?id:newLayerId("claude");
+      const N={visible:true, locked:false, id:nid, name:String(c.nom||"Forme de Claude").slice(0,60), group:/^(mot|word)$/.test(c.groupe)?"word":"mark", fill:col||(ref?effFill(ref):"#1D1D1F"), subs};
+      layers.push(N); added++; }
+  }
+  for(const id of Array.isArray(o.supprimer)?o.supprimer:[]){ const L=layerById(String(id)); if(!L) continue; if(L.locked){ skipped.push(L.name); continue; } layers=layers.filter(l=>l!==L); removed++; }
+  if(!validLayers(layers)){ restoreSnap(before); return {ok:false, msg:"Réponse refusée : elle aurait abîmé le dessin."}; }
+  groups=groups.filter(g=>layers.some(l=>l.grp===g.id));
+  ensureZones(); fixSel();
+  const changed=snapshot()!==before;
+  if(changed){ record(before, "Claude"+(note?" : "+note.slice(0,70):"")); setClaudeUndo({before, note, at:Date.now()}); scheduleSave("shape"); }
+  let answered=0;
+  for(const r of Array.isArray(o.reponses)?o.reponses:[]){ const n=notes.find(x=>x.n===+r.n); if(!n) continue; n.reply=String(r.texte||r.text||"").slice(0,2000); n.done=r.fait!==false; answered++; }
+  if(answered) scheduleSave("notes");
+  renderAll();
+  const parts=[]; if(edited) parts.push(edited+" calque"+(edited>1?"s":"")+" modifié"+(edited>1?"s":"")); if(added) parts.push(added+" ajouté"+(added>1?"s":"")); if(removed) parts.push(removed+" supprimé"+(removed>1?"s":"")); if(answered) parts.push(answered+" bulle"+(answered>1?"s":"")+" répondue"+(answered>1?"s":""));
+  if(skipped.length) parts.push("verrouillé, laissé tel quel : "+skipped.join(", "));
+  return {ok:changed||answered>0, msg:parts.length?parts.join(" · ")+".":"Rien à changer dans cette réponse."};
+}
+async function copyRequest(list){
+  list=list.filter(n=>n.text.trim()||n.audio); if(!list.length) return "Écrivez d'abord une demande dans une bulle.";
+  try{ await navigator.clipboard.writeText(claudePrompt(list)); return "Demande copiée : collez-la dans une conversation sur claude.ai, puis « Coller la réponse »."; }
+  catch(_){ openClaudeDlg(false); $("#cdPaste").value=claudePrompt(list); $("#cdPaste").select(); return "Copie refusée par le navigateur : la demande est sélectionnée dans la fenêtre Claude, copiez-la (Ctrl+C)."; }
+}
+function openClaudeDlg(focusPaste){
+  $("#cdMsg").textContent=""; $("#cdCopyMsg").textContent=""; renderMcpSec();
+  if(!$("#claudeDlg").open) $("#claudeDlg").showModal(); if(focusPaste){ $("#cdPaste").value=""; $("#cdPaste").focus(); }
+}
+$("#cdClose").onclick=()=>$("#claudeDlg").close();
+$("#cdCopy").onclick=async()=>{ $("#cdCopyMsg").textContent=await copyRequest(notes.filter(n=>!n.done)); };
+$("#cdApply").onclick=()=>{ const o=extractReply($("#cdPaste").value), r=applyClaudeReply(o); $("#cdMsg").textContent=r.msg; if(r.ok){ $("#cdPaste").value=""; toast("Réponse de Claude appliquée. "+r.msg); } };
+/* placeholders, filled by the API and Claude Desktop sections below */
+/* No API key option: the workshop never stores or sends an Anthropic key. Any key left by an earlier version is erased. */
+try{ localStorage.removeItem("atelier-logo-api-key"); }catch(_){}
+/* Claude Desktop extension (downloads/atelier-du-logo.mcpb): a local server serves this page on 127.0.0.1 and gives
+   Claude tools (state, preview, svg, apply). The page answers them through /bridge/events (SSE) + /bridge/result. */
+const bridge={on:false, es:null, version:""};
+const MCPB_URL="https://johnapplewan.github.io/atelier-du-logo/downloads/atelier-du-logo.mcpb";
+const SKILL_URL="https://johnapplewan.github.io/atelier-du-logo/downloads/atelier-du-logo-skill.zip";
+async function bridgeCmd(cmd, args){
+  if(cmd==="state") return Object.assign(claudeContext(notes.filter(n=>!n.done)), {projet:$("#projName")?$("#projName").textContent:"", bullesTraitees:notes.filter(n=>n.done).length});
+  if(cmd==="svg") return {svg:exportSpec("full",false).svg};
+  if(cmd==="preview"){ const blob=await rasterize(exportSpec("full",false).svg, Math.min(2048,Math.max(128,+args.width||1024)), "#FFFFFF", "png");
+    return {png:await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); })}; }
+  if(cmd==="apply"){ const r=applyClaudeReply(args); if(r.ok) toast("Claude a modifié le dessin : "+r.msg); return {msg:(r.ok?"Appliqué dans l'atelier : ":"Non appliqué : ")+r.msg}; }
+  return {error:"Commande inconnue : "+cmd};
+}
+async function connectBridge(){
+  // the extension's server flips this marker when it serves the page: no blind probing elsewhere
+  // the extension's server replaces this marker with its per-launch token when it serves the page: no blind probing elsewhere
+  const token=/*__ATELIER_BRIDGE__*/false;
+  if(typeof token!=="string" || !/^[0-9a-f]{48}$/.test(token) || window.top!==window) return;
+  const q="?t="+token;
+  try{ const r=await fetch("bridge/ping"+q,{cache:"no-store"}); if(!r.ok) return; bridge.version=(await r.json()).version||""; }catch(_){ return; }
+  const es=new EventSource("bridge/events"+q); bridge.es=es;
+  es.onopen=()=>{ bridge.on=true; renderMcpSec(); };
+  es.onerror=()=>{ bridge.on=false; renderMcpSec(); };
+  es.onmessage=async e=>{ let m; try{ m=JSON.parse(e.data); }catch(_){ return; }
+    let result; try{ result=await bridgeCmd(m.cmd, m.args||{}); }catch(err){ result={error:String(err&&err.message||err)}; }
+    try{ await fetch("bridge/result"+q,{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:m.id, result})}); }catch(_){} };
+}
+function renderMcpSec(){
+  const el=$("#cdMcpSec"); if(!el) return; el.hidden=false;
+  el.innerHTML=`<h3>Claude Desktop <span class="muted">· avec votre abonnement, vos réglages et vos skills</span></h3>`+(bridge.on
+    ?`<p><strong>Connecté à Claude Desktop.</strong> Dans une conversation, demandez par exemple « Regarde mes bulles dans l'atelier et traite-les ». Claude lit le projet, voit le logo et applique ses modifications ici, avec le bandeau pour annuler.</p>`
+    :`<p class="muted">L'extension installe l'atelier sur votre ordinateur (utilisable hors ligne) et le relie à Claude Desktop : Claude lit vos bulles, regarde le logo et modifie les tracés, dans la conversation, avec votre abonnement.</p>
+    <ol class="muted" style="margin:6px 0 8px;padding-left:20px"><li>Téléchargez l'extension, puis ouvrez le fichier : Claude Desktop propose de l'installer (ou Réglages › Extensions › Installer une extension). Claude Desktop signale qu'elle n'est pas signée : c'est attendu pour une extension indépendante. Installez-la seulement si vous l'avez téléchargée depuis l'atelier.</li>
+    <li>Dans une conversation, demandez « Ouvre l'atelier du logo » : il s'ouvre dans votre navigateur à l'adresse 127.0.0.1.</li><li>Posez vos bulles, puis demandez à Claude de les traiter.</li></ol>
+    <div class="row"><button id="cdMcpDl">Télécharger l'extension (.mcpb)</button><span class="muted" id="cdMcpMsg"></span></div>`)+
+    `<p class="muted" style="margin-top:10px">Skill « Atelier du Logo » : il apprend à Claude à travailler avec l'atelier (bulles, aperçu, modifications) dans toutes vos conversations. <a href="${esc(SKILL_URL)}" target="_blank" rel="noopener">Télécharger le skill</a>, puis claude.ai › Réglages › Capacités › Skills › Importer.</p>`;
+  if($("#cdMcpDl")) $("#cdMcpDl").onclick=async()=>{ const m=$("#cdMcpMsg"); m.textContent="Téléchargement…";
+    try{ const r=await fetch("downloads/atelier-du-logo.mcpb"); if(!r.ok) throw new Error(r.status); const blob=await r.blob(); await saveBlob("atelier-du-logo.mcpb", blob); m.textContent="Extension téléchargée ("+Math.round(blob.size/1024/1024*10)/10+" Mo) : ouvrez-la pour l'installer dans Claude Desktop."; }
+    catch(e){ m.innerHTML="Téléchargez-la depuis le site de l'atelier : <strong>"+esc(MCPB_URL)+"</strong>"; } };
+}
+connectBridge();
+
 /* Claude's edits: atelier/patch holds only the changed layers, merged by id */
 function applyPatch(d){
   if(!d || !Number.isFinite(d.at)) return;
   let seen=0; try{ seen=+localStorage.getItem("atelier-logo-patch")||0; }catch(_){}
   if(d.at<=seen || d.at<=lastAt.patch) return;
+  // shared reply format (SVG paths, new layers, bubble replies): {at, reply: JSON string of {note, calques, supprimer, reponses}}
+  if(typeof d.reply==="string"){ let o; try{ o=JSON.parse(d.reply); }catch(_){ return; }
+    if(drag||glyphMode){ setTimeout(()=>applyPatch(d),1500); return; }
+    lastAt.patch=d.at; try{ localStorage.setItem("atelier-logo-patch",String(d.at)); }catch(_){}
+    const r=applyClaudeReply(o); if(r.ok) toast("Claude : "+r.msg); return; }
   let v; try{ v=JSON.parse(d.layers); }catch(_){ return; }
   if(!Array.isArray(v) || !v.length || !v.every(l=>l && typeof l.id==="string" && validLayers([Object.assign({visible:true,locked:false,name:"x",group:"mark",fill:"#000000"},l)]))) return;
   if(drag||glyphMode){ setTimeout(()=>applyPatch(d),1500); return; }

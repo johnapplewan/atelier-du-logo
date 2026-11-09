@@ -15,6 +15,11 @@ const fs = require("fs");
   const man = await p.evaluate(async () => { const m = await (await fetch(document.querySelector("link[rel=manifest]").href)).json(); const ok = await Promise.all(m.icons.map(i => fetch(i.src).then(r => r.ok))); return [m.display, m.start_url, ok.every(Boolean)]; });
   check("manifest with icons (installable)", () => assert.deepStrictEqual(man, ["standalone", "./", true]));
 
+  // Content-Security-Policy: only its own origin (and Google Fonts for live text)
+  const csp = await p.evaluate(async () => { const v = []; document.addEventListener("securitypolicyviolation", e => v.push(e.violatedDirective));
+    try { await fetch("https://example.com/x"); } catch (_) {} await new Promise(r => setTimeout(r, 200));
+    return [!!document.querySelector('meta[http-equiv="Content-Security-Policy"]'), v.includes("connect-src")]; });
+  check("CSP: the page cannot send data to another site", () => assert.deepStrictEqual(csp, [true, true]));
   // service worker installed and controlling the page
   await p.evaluate(() => navigator.serviceWorker.ready);
   await p.reload(); await p.waitForFunction(() => navigator.serviceWorker.controller);
@@ -48,6 +53,6 @@ const fs = require("fs");
   });
   await ctx.setOffline(false);
 
-  done(errors);
+  done(errors.filter(e => !/example\.com/.test(e)));  // the blocked request above is deliberate
   await browser.close();
 })();

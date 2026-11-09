@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "node build.js",
-    "test": "node tests/test.js && node tests/t11.js && node tests/patchtest.js && node tests/mock.js && node tests/start.js && node tests/projects.js && node tests/styles.js && node tests/history.js && node tests/book.js && node tests/draw.js && node tests/fonts.js && node tests/rulers.js && node tests/app.js && node tests/panels.js"
+    "mcpb": "cd tools/mcpb && npm install --silent && node build.mjs",
+    "test": "node tests/test.js && node tests/t11.js && node tests/patchtest.js && node tests/mock.js && node tests/start.js && node tests/projects.js && node tests/styles.js && node tests/history.js && node tests/book.js && node tests/draw.js && node tests/fonts.js && node tests/rulers.js && node tests/app.js && node tests/panels.js && node tests/claude.js && node tests/mcpb.js && node tests/mobile.js && node tests/security.js"
   },
   "devDependencies": {
     "playwright": "^1.56.0"
