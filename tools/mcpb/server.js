@@ -1,7 +1,7 @@
 // Atelier du Logo: Claude Desktop extension (MCP over stdio).
 // Serves the workshop on http://127.0.0.1:<port> (works offline) and bridges Claude's tools to the open page:
 // the page listens on /bridge/events (SSE) and posts results to /bridge/result.
-const http = require("http"), fs = require("fs"), path = require("path"), { spawn } = require("child_process");
+const http = require("http"), fs = require("fs"), path = require("path"), crypto = require("crypto"), { spawn } = require("child_process");
 const { McpServer } = require("@modelcontextprotocol/sdk/server/mcp.js");
 const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js");
 const { z } = require("zod");
@@ -14,14 +14,17 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; ch
 const log = (...a) => process.stderr.write("[atelier] " + a.join(" ") + "\n");   // stdout belongs to MCP
 
 let port = PORT0, clients = [], pending = new Map(), seq = 0;
+// bridge token: random per launch, given only to the page this server serves; required on every /bridge/ call
+const TOKEN = crypto.randomBytes(24).toString("hex");
 const url = () => `http://127.0.0.1:${port}/`;
 
 function readBody(req) { return new Promise(ok => { let b = ""; req.on("data", c => { b += c; if (b.length > 2e7) req.destroy(); }); req.on("end", () => ok(b)); }); }
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, "http://127.0.0.1");
-  // only this machine, only this origin
-  const origin = req.headers.origin;
-  if (origin && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin)) { res.writeHead(403); res.end(); return; }
+  // only this machine, only this origin: Host must be ours (blocks DNS rebinding), Origin, when sent, too
+  const here = new RegExp("^(127\\.0\\.0\\.1|localhost):" + port + "$"), origin = req.headers.origin;
+  if (!here.test(req.headers.host || "") || (origin && !/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin))) { res.writeHead(403); res.end(); return; }
+  if (u.pathname.startsWith("/bridge/") && u.searchParams.get("t") !== TOKEN) { res.writeHead(403); res.end(); return; }
   if (u.pathname === "/bridge/ping") { res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" }); res.end(JSON.stringify({ ok: true, version: VERSION })); return; }
   if (u.pathname === "/bridge/events") {
     res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-store", Connection: "keep-alive" });
@@ -36,10 +39,10 @@ const server = http.createServer(async (req, res) => {
   }
   let rel = decodeURIComponent(u.pathname).replace(/^\/+/, "") || "index.html";
   const file = path.join(APP, rel);
-  if (!file.startsWith(APP) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
+  if (!(file + path.sep).startsWith(APP + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
   if (rel === "index.html") { // mark the page as served by the extension, so it connects to the bridge
     res.writeHead(200, { "Content-Type": TYPES[".html"], "Cache-Control": "no-cache" });
-    res.end(fs.readFileSync(file, "utf8").replace("/*__ATELIER_BRIDGE__*/false", "true")); return; }
+    res.end(fs.readFileSync(file, "utf8").replace("/*__ATELIER_BRIDGE__*/false", JSON.stringify(TOKEN))); return; }
   res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream" }); fs.createReadStream(file).pipe(res);
 });
 function listen() {

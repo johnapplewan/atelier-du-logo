@@ -42,6 +42,11 @@ const fs = require("fs"), os = require("os"), path = require("path"), { spawn } 
   check("atelier_appliquer: curves changed in the page, bubble answered, undo banner", () => { assert.match(ap.content[0].text, /Appliqué/); assert.deepStrictEqual(after, [136, "Rayon 20.", true]); });
   const svg = await call("atelier_svg");
   check("atelier_svg: full logo", () => assert.match(svg.content[0].text, /^<svg|<\?xml/));
+  // F3: the bridge needs the per-launch token and our own Host (DNS rebinding, <img> subscriptions)
+  const http = require("http"); const get = (pth, host) => new Promise(ok => { const r = http.get({ host: "127.0.0.1", port, path: pth, headers: host ? { Host: host } : {} }, res => { ok(res.statusCode); res.destroy(); }); r.on("error", () => ok(0)); });
+  const token = await page.evaluate(() => new URL(bridge.es.url).searchParams.get("t"));
+  const codes = [await get("/bridge/events"), await get("/bridge/events?t=wrong"), await get("/bridge/events?t=" + token, "evil.example:" + port), await get("/index.html", "evil.example:" + port), await get("/bridge/ping?t=" + token)];
+  check("bridge refuses no token, wrong token and a foreign Host; accepts the page's token", () => assert.deepStrictEqual(codes, [403, 403, 403, 403, 200]));
   const f404 = await page.evaluate(async () => (await fetch("/../../manifest.json")).status);
   check("server serves only the app folder", () => assert.notStrictEqual(f404, 200));
 

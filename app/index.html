@@ -316,7 +316,7 @@ h3{font:500 14px/1.3 Inter,system-ui,sans-serif;margin:16px 0 8px}
 .pcard{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px;display:flex;flex-direction:column;gap:6px}
 .pcard.cur{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
 .pthumb{height:110px;padding:8px;background:var(--cream);border:0;border-radius:8px;display:flex;align-items:center;justify-content:center}
-.pthumb svg{width:100%;height:100%}
+.pthumb svg,.pthumb img{width:100%;height:100%;object-fit:contain}
 .pname{font:600 14px Inter,system-ui,sans-serif;border:1px solid transparent;border-radius:6px;padding:3px 5px;background:none}
 .pname:hover,.pname:focus{border-color:var(--line);background:#fff}
 .pmeta{font-size:12px;color:var(--muted);padding:0 5px}
@@ -802,6 +802,8 @@ let tool = "move";
 let view = {k:1, tx:0, ty:0};
 let grid = {on:false, snap:false, size:4};
 
+/* untrusted text that ends up in SVG attributes: letters, digits, spaces and a little punctuation only (no quotes, <, >, =) */
+const LIVE_FAMILY=/^[\p{L}\p{N} .,&()_+-]{1,60}$/u;
 function validLayers(v){
   if(!Array.isArray(v)) return false;   // an empty page is a valid document
   const pt = p => p===null || (p && Number.isFinite(p.x) && Number.isFinite(p.y));
@@ -810,7 +812,9 @@ function validLayers(v){
     && (l.opacity===undefined || (Number.isFinite(l.opacity) && l.opacity>=0 && l.opacity<=1))
     && (l.blend===undefined || (typeof l.blend==="string" && /^[a-z-]{3,20}$/.test(l.blend)))
     && (l.name.length<=80)
-    && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && l.live.family.length<=60
+    && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && LIVE_FAMILY.test(l.live.family)
+         && (l.live.lang===undefined || l.live.lang==="" || (typeof l.live.lang==="string" && /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}$/.test(l.live.lang)))
+         && (l.live.dir===undefined || ["auto","ltr","rtl"].includes(l.live.dir)) && (l.live.weight===undefined || (Number.isInteger(l.live.weight) && l.live.weight>=100 && l.live.weight<=900))
          && Number.isFinite(l.live.w0) && Number.isFinite(l.live.h0) && Number.isFinite(l.live.bx) && Number.isFinite(l.live.by) && l.subs.length===1 && l.subs[0].length===4))
     && validFx(l.fx)
     && (l.open===undefined || typeof l.open==="boolean") && (l.sw===undefined || (Number.isFinite(l.sw) && l.sw>0 && l.sw<=400))
@@ -947,7 +951,7 @@ function reportKept(kept){ if(kept.length) toast("Gardé tel quel car modifié e
 function undo(){ const e=[...hist].reverse().find(x=>x.on); if(!e) return; const kept=toggleEntry(e,false); redoIds.push(e.id); changed(); renderHistory(); reportKept(kept); }
 function redo(){ let e=null; while(redoIds.length&&!e){ const id=redoIds.pop(); e=hist.find(x=>x.id===id&&!x.on)||null; } if(!e) return; const kept=toggleEntry(e,true); changed(); renderHistory(); reportKept(kept); }
 const canUndo=()=>hist.some(x=>x.on), canRedo=()=>redoIds.some(id=>hist.some(x=>x.id===id&&!x.on));
-function validHist(v){ return Array.isArray(v)&&v.length<=300&&v.every(e=>e&&typeof e.id==="string"&&typeof e.label==="string"&&typeof e.on==="boolean"&&e.d&&e.d.ents&&typeof e.d.ents==="object"&&e.d.pos&&e.d.doc); }
+function validHist(v){ return Array.isArray(v)&&v.length<=300&&v.every(e=>e&&typeof e.id==="string"&&/^[\w-]{1,40}$/.test(e.id)&&typeof e.label==="string"&&e.label.length<=200&&(e.at===undefined||Number.isFinite(e.at))&&typeof e.on==="boolean"&&e.d&&e.d.ents&&typeof e.d.ents==="object"&&e.d.pos&&e.d.doc); }
 /* --- the history panel (long press or right click on "Annuler") --- */
 let histHover=null;
 function relTime(t){ const s=Math.round((Date.now()-t)/1000); return s<60?"à l'instant":s<3600?Math.floor(s/60)+" min":s<86400?Math.floor(s/3600)+" h":new Date(t).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); }
@@ -955,7 +959,7 @@ function openHistory(){ const p=$("#histPanel"); p.hidden=false; renderHistory()
 function closeHistory(){ $("#histPanel").hidden=true; histHover=null; renderHistHi(); }
 function renderHistory(){
   updateButtons(); const p=$("#histPanel"); if(!p||p.hidden) return;
-  $("#histList").innerHTML=hist.length?hist.slice().reverse().map(e=>`<li class="${e.on?"":"off"}" data-h="${e.id}"><label><input type="checkbox" ${e.on?"checked":""} data-hc="${e.id}" aria-label="${e.on?"Décocher":"Recocher"} : ${esc(e.label)}"><span class="hl">${esc(e.label)}</span></label><span class="ht">${relTime(e.at)}</span></li>`).join("")
+  $("#histList").innerHTML=hist.length?hist.slice().reverse().map(e=>`<li class="${e.on?"":"off"}" data-h="${esc(e.id)}"><label><input type="checkbox" ${e.on?"checked":""} data-hc="${esc(e.id)}" aria-label="${e.on?"Décocher":"Recocher"} : ${esc(e.label)}"><span class="hl">${esc(e.label)}</span></label><span class="ht">${relTime(e.at)}</span></li>`).join("")
     :`<li class="muted" style="padding:10px">Aucune modification pour l'instant.</li>`;
   $("#histCount").textContent=hist.length?hist.filter(e=>e.on).length+" / "+hist.length+" actives":"";
 }
@@ -2390,7 +2394,11 @@ function registerCustom(cf){ window.__G=window.__G||{}; window.__G[cf.gkey]=cf.G
 function mergeCustomFonts(){ customFonts.forEach(registerCustom); }
 async function saveCustomFonts(){ try{ await P.setMeta("fonts", customFonts); }catch(_){ toast("Espace de l'appareil plein : la police n'a pas pu être enregistrée."); } }
 async function initCustomFonts(){ try{ const v=await P.meta("fonts"); if(Array.isArray(v)) customFonts=v.filter(validCustom); mergeCustomFonts(); }catch(_){} }
-function validCustom(cf){ return cf&&typeof cf.id==="string"&&/^custom-[\w-]{1,60}$/.test(cf.id)&&typeof cf.name==="string"&&cf.name.length<=80&&cf.G&&Number.isFinite(cf.G.upem)&&cf.G.adv&&cf.G.gl&&Number.isFinite(cf.k); }
+const GLYPH_D=/^[MLQCZ0-9eE.\s+-]*$/i, finiteMap=o=>o&&typeof o==="object"&&Object.values(o).every(Number.isFinite);
+function validCustom(cf){ return cf&&typeof cf.id==="string"&&/^custom-[\w-]{1,60}$/.test(cf.id)&&typeof cf.name==="string"&&cf.name.length<=80
+  &&(cf.gkey===undefined||(typeof cf.gkey==="string"&&/^custom-[\w-]{1,80}$/.test(cf.gkey)))&&cf.G&&Number.isFinite(cf.G.upem)&&cf.G.upem>0&&Number.isFinite(cf.k)
+  &&finiteMap(cf.G.adv)&&(cf.G.kern===undefined||finiteMap(cf.G.kern))&&(cf.G.m===undefined||finiteMap(cf.G.m))
+  &&cf.G.gl&&typeof cf.G.gl==="object"&&Object.values(cf.G.gl).every(d=>typeof d==="string"&&d.length<20000&&GLYPH_D.test(d)); }
 const newFontId=name=>"custom-"+slug(name,"police")+"-"+Date.now().toString(36);
 /* metrics read from the outlines when the file gives none */
 function glyphBox(G,ch){ if(!G.gl[ch]) return null; const subs=parseGlyph(G.gl[ch],0); if(!subs.length) return null; return bounds([{subs}]); }
@@ -2780,7 +2788,7 @@ const measureSvg=document.createElementNS("http://www.w3.org/2000/svg","svg");
 measureSvg.setAttribute("style","position:absolute;left:-9999px;top:0;width:10px;height:10px;visibility:hidden"); document.body.appendChild(measureSvg);
 function liveAttrs(lv){
   const vert=!!lv.vert, dir=lv.dir==="auto"?(isRTL(lv.str)?"rtl":"ltr"):lv.dir;
-  return `font-family="'${lv.family.replace(/'/g,"")}', sans-serif" font-weight="${lv.weight||400}"${lv.italic?` font-style="italic"`:""} font-size="100" direction="${dir}" xml:lang="${lv.lang||""}"`+
+  return `font-family="'${esc(lv.family.replace(/'/g,""))}', sans-serif" font-weight="${esc(lv.weight||400)}"${lv.italic?` font-style="italic"`:""} font-size="100" direction="${esc(dir)}" xml:lang="${esc(lv.lang||"")}"`+
     (vert?` writing-mode="vertical-rl" style="writing-mode:vertical-rl;text-orientation:${lv.script==="latn"?"mixed":"upright"}"`:"")+(dir==="rtl"?` unicode-bidi="plaintext"`:"");
 }
 async function measureLive(lv){
@@ -4553,6 +4561,10 @@ async function exportProjects(ids, label){
   const cols=collections.filter(c=>ps.some(p=>p.collection===c.id)), used=new Set(ps.flatMap(p=>((p.doc&&p.doc.layers)||[]).map(l=>l.font)));
   await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps, fonts:customFonts.filter(c=>used.has(c.id))}));
 }
+/* imported projects: the thumbnail is redrawn from the validated drawing, never taken from the file */
+function importThumb(doc){ try{ const pal=Array.isArray(doc.pals)&&doc.pals.length?doc.pals:[{id:"main",name:"Principale",colors:[]}];
+  return withDoc({layers:clone(doc.layers), pals:clone(pal), groups:clone(doc.groups||[])}, ()=>thumbSVG(layers)); }catch(_){ return ""; } }
+const thumbImg=t=>/^<svg[\s>]/.test(t||"")?`<img alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(t)}">`:"";
 async function importFile(file){
   let v; try{ v=JSON.parse(await file.text()); }catch(_){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
   if(!v||v.format!=="atelier-logo"||!Array.isArray(v.projects)){ toast("Ce fichier n'est pas un projet de l'atelier."); return; }
@@ -4564,7 +4576,8 @@ async function importFile(file){
   if(nf) await saveCustomFonts();
   const existing=new Set((await P.all()).map(p=>p.id)); let n=0;
   for(const p of v.projects){ if(!p||typeof p.name!=="string"||!validDoc(p.doc)) continue;
-    const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:typeof p.thumb==="string"?p.thumb:""};
+    if(p.doc.hist!==undefined && !validHist(p.doc.hist)) delete p.doc.hist;   // an unsafe history is dropped, the drawing is kept
+    const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:importThumb(p.doc)};
     if(!/^[\w-]+$/.test(q.id)) q.id=newPid(); await P.put(q); n++; }
   renderProjects(); toast(n?n+" projet"+(n>1?"s importés":" importé")+".":"Aucun projet lisible dans ce fichier.");
 }
@@ -4582,7 +4595,7 @@ async function renderProjects(){
   const fmt=t=>new Date(t).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"});
   $("#projGrid").innerHTML=list.length?list.map(p=>{ const cur=curProject&&p.id===curProject.id;
     return `<article class="pcard${cur?" cur":""}" data-pid="${esc(p.id)}">
-      <button class="pthumb" data-open="${esc(p.id)}" title="${cur?"Projet ouvert":"Ouvrir"}">${p.thumb||'<span class="muted">Page vierge</span>'}</button>
+      <button class="pthumb" data-open="${esc(p.id)}" title="${cur?"Projet ouvert":"Ouvrir"}">${thumbImg(p.thumb)||'<span class="muted">Page vierge</span>'}</button>
       <input class="pname" data-pname="${esc(p.id)}" value="${esc(p.name)}" maxlength="80" aria-label="Nom du projet">
       <div class="pmeta">${cur?'<b>Ouvert</b> · ':""}${fmt(p.updated)} · ${(p.doc&&p.doc.layers||[]).length} calques</div>
       <select data-pcoll="${esc(p.id)}" aria-label="Collection du projet"><option value="">Sans collection</option>${collections.map(c=>`<option value="${esc(c.id)}" ${p.collection===c.id?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
@@ -4953,15 +4966,17 @@ async function bridgeCmd(cmd, args){
 }
 async function connectBridge(){
   // the extension's server flips this marker when it serves the page: no blind probing elsewhere
-  const servedByExtension=/*__ATELIER_BRIDGE__*/false;
-  if(!servedByExtension || window.top!==window) return;
-  try{ const r=await fetch("bridge/ping",{cache:"no-store"}); if(!r.ok) return; bridge.version=(await r.json()).version||""; }catch(_){ return; }
-  const es=new EventSource("bridge/events"); bridge.es=es;
+  // the extension's server replaces this marker with its per-launch token when it serves the page: no blind probing elsewhere
+  const token=/*__ATELIER_BRIDGE__*/false;
+  if(typeof token!=="string" || !/^[0-9a-f]{48}$/.test(token) || window.top!==window) return;
+  const q="?t="+token;
+  try{ const r=await fetch("bridge/ping"+q,{cache:"no-store"}); if(!r.ok) return; bridge.version=(await r.json()).version||""; }catch(_){ return; }
+  const es=new EventSource("bridge/events"+q); bridge.es=es;
   es.onopen=()=>{ bridge.on=true; renderMcpSec(); };
   es.onerror=()=>{ bridge.on=false; renderMcpSec(); };
   es.onmessage=async e=>{ let m; try{ m=JSON.parse(e.data); }catch(_){ return; }
     let result; try{ result=await bridgeCmd(m.cmd, m.args||{}); }catch(err){ result={error:String(err&&err.message||err)}; }
-    try{ await fetch("bridge/result",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:m.id, result})}); }catch(_){} };
+    try{ await fetch("bridge/result"+q,{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:m.id, result})}); }catch(_){} };
 }
 function renderMcpSec(){
   const el=$("#cdMcpSec"); if(!el) return; el.hidden=false;
