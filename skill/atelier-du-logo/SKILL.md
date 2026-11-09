@@ -60,6 +60,17 @@ The json block holds `marque`, `palette`, `calques` (with `d` paths) and `bulles
 - Layer effects (`effets`) are kept when you change a layer's path.
 - `fait: false` leaves a bubble open (for a question back to the user).
 
+## Design rules (premium)
+
+When you draw or redraw a logo, follow the workshop's design rules (full text: `DESIGN-RULES.md` in the repository, https://github.com/johnapplewan/atelier-du-logo/blob/main/DESIGN-RULES.md):
+
+- One idea per logo, sayable in one sentence. Layouts: stacked and centred, horizontal, framed monogram, emblem, or wordmark with one ownable detail.
+- Two colours: an ink (name, frame) and one accent (symbol or a single detail). A dark version is an extra, on a deep plate, with cream text and a muted gold accent (#C2A15F).
+- Name in capitals with tracking that fits the face (+14 to +18 % of the em for fine serif capitals, +6 to +10 % for bold sans); the tagline smaller (≈ 0.32 to 0.4 of the name's cap height), wider (+28 to +40 %), lighter. Two type families at most.
+- Stacked: symbol ≈ 3.5 × the name's cap height, gap ≈ 0.9 × cap height, name 1.4 to 2.6 × the symbol's width.
+- Symbols evoke, they don't illustrate: one flat colour, no gradients, shadows or bevels, no detail under 1/48 of the mark, readable at 16 px. Monograms are cut out of their frame (real holes).
+- Optical centring (symbol 1 to 2 % above the geometric centre), round forms overshoot slightly.
+
 ## Good practice
 
 - Look before and after (preview image or the paths). Small, precise steps beat one large rewrite.

@@ -60,8 +60,9 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   await p.click('[data-start="proposal"]');
   await p.waitForSelector("#stProps [data-prop] svg", { timeout: 20000 });
   const props = await p.evaluate(() => ({ titles: [...document.querySelectorAll("#stProps [data-prop] b")].map(b => b.textContent), found: document.querySelector("#stProps p").textContent }));
-  check("six concepts from the keywords", () => { assert.strictEqual(props.titles.length, 6); assert.match(props.found, /cerf/); assert.match(props.found, /matière : bois/);
-    assert.ok(props.titles.includes("Planche gravée") && props.titles.includes("AN entrelacés") && props.titles.some(t => /^Demi-cerf/.test(t)), props.titles.join(" | ")); });
+  check("nine concepts: five premium layouts, then illustrated ones", () => { assert.strictEqual(props.titles.length, 9); assert.match(props.found, /cerf/); assert.match(props.found, /matière : bois/);
+    assert.deepStrictEqual(props.titles.slice(0, 5), ["Signature empilée", "Monogramme encadré", "Emblème à double filet", "Logotype à détail", "Version sombre"]);
+    assert.ok(props.titles.includes("Planche gravée") && props.titles.some(t => /^Écusson/.test(t)) && props.titles.some(t => /^Demi-cerf/.test(t)), props.titles.join(" | ")); });
   await p.locator("#startDlg").screenshot({ path: __dirname + "/s10.png" });
   const esc = props.titles.findIndex(t => /^Écusson/.test(t));
   await p.click(`#stProps [data-prop="${esc}"]`); await p.click("#stGo"); await p.waitForTimeout(600);
@@ -79,7 +80,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   await p.fill("#stKw", "loutre, rivière"); await p.waitForTimeout(400); await p.waitForFunction(() => /loutre/.test(document.querySelector("#stProps").textContent), null, { timeout: 15000 });
   await p.click('#stProps [data-prop="0"]'); await p.click("#stGo"); await p.waitForTimeout(500);
   const brief = await p.evaluate(() => ({ ph: __atelier.layers.some(l => l.id === "motif-provisoire"), note: (__atelier.notes.find(n => /loutre/.test(n.text)) || {}).text || "" }));
-  check("unknown subject: placeholder and a bubble brief for Claude", () => { assert.ok(brief.ph); assert.match(brief.note, /dessine le motif « loutre »/); });
+  check("unknown subject: placeholder and a bubble brief for Claude (premium rules)", () => { assert.ok(brief.ph); assert.match(brief.note, /dessine le motif « loutre »/); assert.match(brief.note, /aplat d'une seule couleur/); });
 
   // blank page: a plain link next to "Plus tard"
   await p.click("#startBtn");

@@ -20,6 +20,10 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 
 - `hist` entries store per-layer diffs (`d.ents[id] = [before, after]` as stable JSON, plus order and palettes). `toggleEntry` puts a property back only if it still holds this entry's value, so later changes are never overwritten. Use `commit(before, label)` with a clear French label for new actions; Claude's patches are recorded as "Claude : <note>". The history is saved in the project (`doc.hist`).
 
+## Premium concepts
+
+- `premiumPlans` / `buildPremium` build five layouts from `DESIGN-RULES.md` (read it before changing them): two colours, tracked capitals (`textLine`), flat symbols, monograms cut out of their frame (`knockout`, nonzero winding), tile backgrounds in the previews. They come before the illustrated concepts (`conceptPlan`). Keep the rules file, the generator and the skill's « Design rules » section in step.
+
 ## Brand book
 
 - Answers live in `brand.book` (theme, format, colour roles, title/body fonts, mood, voice, sections, site, email). Pages are SVG built by `bookPages(cfg)`; all text is drawn from glyph files (`tx`, `para`), so the PDF shows the exact typefaces. `buildPdf` writes the PDF itself (one JPEG per page); `buildBookZip` makes the deposit pack.

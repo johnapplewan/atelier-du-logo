@@ -3536,6 +3536,108 @@ function monoLayers(str, f, G, box, fill){ const {letters}=layoutText(str, f, G,
   const b=bounds(letters.map(l=>({subs:l.subs}))), s=Math.min(box.w/(b.x1-b.x0||1), box.h/(b.y1-b.y0||1)), ox=box.cx-(b.x0+b.x1)/2*s, oy=box.cy-(b.y0+b.y1)/2*s, T=p=>p&&{x:r2(ox+p.x*s),y:r2(oy+p.y*s)};
   return letters.map((g,i)=>({visible:true,locked:false,id:"mono-"+(i+1),name:"Monogramme "+g.ch,group:"mark",fill,font:f.id,ch:g.ch,subs:g.subs.map(sub=>sub.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i),o:T(n.o)})))})); }
 const STYLE_LABEL=k=>(STYLES[k]||{n:k}).n.toLowerCase();
+/* ---------- Premium concepts (DESIGN-RULES.md) ----------
+   Five layouts built on the rules: stacked & centred, framed monogram (letters cut out of the frame), emblem with a
+   double ring, wordmark with one ownable detail, and the dark version on a deep plate. Two colours (ink + accent),
+   two type families at most, name in tracked capitals, tagline smaller and wider, flat symbol without effects. */
+const PREMIUM_TYPE={ // mood -> [name font, tagline font, tracking of the name (em)]
+  luxe:["cinzel","raleway",0.16], nature:["ebgaramond","josefin",0.16], tech:["spacegrotesk","inter",0.08], artisan:["ebgaramond","josefin",0.16],
+  chaleur:["youngserif","raleway",0.08], fun:["poppins","poppins",0.06], minimal:["josefin","inter",0.14], mer:["josefin","raleway",0.14],
+  solide:["montserrat-caps","montserrat",0.08], creatif:["dmserif","josefin",0.1] };
+const PREMIUM_ALT=[["cinzel","raleway",0.16],["montserrat-caps","montserrat",0.08],["playfair","josefin",0.14],["josefin","inter",0.16],["baskerville","raleway",0.14]];
+const PREMIUM_GOLD="#C2A15F";
+function capUnits(G){ try{ const s=parseGlyph(G.gl.H||G.gl.E||"",0); let m=0; s.forEach(c=>c.forEach(n=>{ m=Math.min(m,n.y); })); return -m||G.upem*0.7; }catch(_){ return (G.upem||1000)*0.7; } }
+function shiftLs(ls, dx, dy){ ls.forEach(L=>{ L.subs.forEach(s=>s.forEach(n=>moveNode(n,dx,dy))); if(L.bl!==undefined) L.bl=r2(L.bl+dy); if(L.gy) L.gy=L.gy.map(v=>r2(v+dy)); }); return ls; }
+/* a text line: capitals (optional), tracking in em, cap height in drawing units; returned at x0=0, baseline 0 */
+function textLine(str, f, G, o){
+  const s=(o.caps?String(str).toUpperCase():String(str)).trim(); if(!s) return [];
+  const scale=o.cap/(capUnits(G)*f.k), {letters}=layoutText(s, f, G, 0, 0, f.k*scale), tr=(o.track||0)*G.upem*f.k*scale;
+  return letters.map((g,i)=>{ const L={visible:true,locked:false,id:(o.idp||"lettre")+"-"+(i+1),name:(o.label||"Lettre")+" "+g.ch+" · "+(i+1),group:o.group||"word",fill:o.fill,font:f.id,ch:g.ch,subs:g.subs};
+    if(tr) L.subs.forEach(sub=>sub.forEach(n=>moveNode(n,i*tr,0))); if(o.group!=="mark") stamp(L,0); return L; });
+}
+const lineW=ls=>{ if(!ls.length) return 0; const b=bounds(ls); return b.x1-b.x0; };
+function circleSub(cx,cy,r){ const k=0.5523*r; return [{x:cx,y:cy-r,i:{x:cx-k,y:cy-r},o:{x:cx+k,y:cy-r}},{x:cx+r,y:cy,i:{x:cx+r,y:cy-k},o:{x:cx+r,y:cy+k}},{x:cx,y:cy+r,i:{x:cx+k,y:cy+r},o:{x:cx-k,y:cy+r}},{x:cx-r,y:cy,i:{x:cx-r,y:cy+k},o:{x:cx-r,y:cy-k}}].map(n=>({x:r2(n.x),y:r2(n.y),i:{x:r2(n.i.x),y:r2(n.i.y)},o:{x:r2(n.o.x),y:r2(n.o.y)}})); }
+const revSub=s=>s.slice().reverse().map(n=>({x:n.x,y:n.y,i:n.o?{...n.o}:null,o:n.i?{...n.i}:null}));
+const subArea=s=>area3(s.flatMap(n=>[n]));
+function ring(cx,cy,r,w){ const o=circleSub(cx,cy,r), i=circleSub(cx,cy,r-w); return [o, subArea(o)*subArea(i)>0?revSub(i):i]; }
+/* letters cut out of a filled frame: one layer, nonzero fill (letters wound against the frame, their counters with it) */
+function knockout(frameSubs, letterLayers){
+  const fs=frameSubs, dir=Math.sign(subArea(fs[0]));
+  const holes=letterLayers.flatMap(L=>{ const outer=L.subs.reduce((a,s)=>Math.abs(subArea(s))>Math.abs(subArea(a))?s:a, L.subs[0]);
+    return Math.sign(subArea(outer))===dir?L.subs.map(revSub):L.subs.map(s=>s.map(n=>({...n}))); });
+  return fs.concat(holes);
+}
+function premiumPlans(info, round){
+  const kw=readKeywords(info.keywords), moods=rankMoods(info.keywords), mood=moods[0], M=MOODS[mood];
+  const type=round%2===0&&PREMIUM_TYPE[mood]?PREMIUM_TYPE[mood]:PREMIUM_ALT[(round+moods.length)%PREMIUM_ALT.length];
+  const pal=M.c[round%M.c.length], ink=pal[0], paper=pal[1], accent=pal[2];
+  const subject=kw.subjects.filter(s=>ICONS[s])[0]||null, letters=keyLetters(info.name, info.letters).toUpperCase().slice(0,2);
+  const base={premium:true, style:"flat", font:type[0], subject, letters, ink, paper, accent, nameFont:type[0], tagFont:type[1], track:type[2], unknown:subject?null:(kw.unknown[0]||null)};
+  const lex=subject?ICONS[subject].n:null;
+  return [
+    Object.assign({}, base, {kind:"p-stack", title:"Signature empilée", desc:(lex?"Le "+lex+" en aplat":"Le monogramme")+" au-dessus du nom en capitales espacées, la signature dessous."}),
+    Object.assign({}, base, {kind:"p-frame", title:"Monogramme encadré", desc:`${letters.split("").join(" et ")} découpés dans un carré arrondi, le nom à côté.`}),
+    Object.assign({}, base, {kind:"p-emblem", title:"Emblème à double filet", desc:"Un cercle à double filet autour "+(lex?"du "+lex:"des initiales")+", le nom dessous."}),
+    Object.assign({}, base, {kind:"p-word", title:"Logotype à détail", desc:"Le nom seul, souligné d'un trait d'accent, la signature entre deux filets."}),
+    Object.assign({}, base, {kind:"p-dark", title:"Version sombre", desc:"La signature empilée sur une plaque profonde, nom crème et symbole or."}),
+  ];
+}
+async function buildPremium(plan, info){
+  const fN=fontById(plan.nameFont)||fontById("cinzel"), fT=fontById(plan.tagFont)||fN, GN=await loadGlyphs(fN.gkey), GT=fT===fN?GN:await loadGlyphs(fT.gkey);
+  const dark=plan.kind==="p-dark", ink=dark?plan.paper:plan.ink, accent=dark?PREMIUM_GOLD:plan.accent, tagline=info.tagline||"";
+  const doc={layers:[], pals:[{id:"main",name:"Principale",colors:dark?[plan.ink,plan.paper,PREMIUM_GOLD]:[plan.ink,plan.accent,plan.paper]}], groups:[]};
+  let out=[];
+  // symbol: library pictogram as a flat single-colour shape, or the monogram
+  const symbol=(cx,cy,size,fill)=>{
+    if(plan.subject){ const ic=placeIcon(plan.subject,{x:0,y:0,s:1},{main:fill,second:fill,detail:fill}); const b=bounds(ic), k=size/Math.max(b.x1-b.x0,b.y1-b.y0);
+      ic.forEach(L=>L.subs.forEach(s=>s.forEach(n=>{ for(const p of [n,n.i,n.o]) if(p){ p.x=r2(cx+(p.x-(b.x0+b.x1)/2)*k); p.y=r2(cy-size*0.015+(p.y-(b.y0+b.y1)/2)*k); } }))); return ic; }
+    if(plan.unknown && plan.kind==="p-stack"){ const c=circleSub(cx,cy,size*0.42); return [{visible:true,locked:false,id:"motif-provisoire",name:"À dessiner : "+plan.unknown,group:"mark",fill,subs:[c, revSub(circleSub(cx,cy,size*0.42-3))]}]; }
+    const r=size*0.5, lt=monoLayers(plan.letters, fN, GN, {cx, cy:cy-size*0.015, w:size*(plan.letters.length>1?0.62:0.5), h:size*0.42}, fill);
+    return [{visible:true,locked:false,id:"monogramme",name:"Monogramme "+plan.letters,group:"mark",fill,subs:knockout([circleSub(cx,cy-size*0.015,r)], lt)}];
+  };
+  const name=(cap,fill)=>textLine(info.name, fN, GN, {caps:true, track:plan.track, cap, fill});
+  const tag=(cap,fill)=>tagline?textLine(tagline, fT, GT, {caps:true, track:0.28, cap, fill, group:"mark", idp:"signature", label:"Signature"}):[];
+  const centerX=(ls,cx)=>{ if(ls.length){ const b=bounds(ls); shiftLs(ls, cx-(b.x0+b.x1)/2, 0); } return ls; };
+  const cap0=34;
+  if(plan.kind==="p-stack"||plan.kind==="p-dark"){
+    const S=cap0*3.5, sym=symbol(128, 20+S/2, S, accent); let nm=name(cap0, ink);
+    const w=lineW(nm); if(w>S*2.6){ nm=name(cap0*S*2.6/w, ink); }
+    const capN=Math.min(cap0, cap0*S*2.6/Math.max(w,1)); shiftLs(nm, 0, 20+S+capN*0.9+capN); centerX(nm,128);
+    const tg=tag(capN*0.4, dark?PREMIUM_GOLD:shade(ink,0.25)); if(tg.length){ shiftLs(tg,0,bounds(nm).y1+capN*0.6+capN*0.4); centerX(tg,128); }
+    out=[...sym, ...nm, ...tg];
+    if(dark){ const b=bounds(out), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*0.16;
+      out.unshift({visible:true,locked:false,id:"fond",name:"Fond (plaque)",group:"mark",fill:plan.ink,subs:roundRect(b.x0-pad,b.y0-pad,b.x1-b.x0+2*pad,b.y1-b.y0+2*pad,Math.min(28,pad))}); }
+  }
+  else if(plan.kind==="p-frame"){
+    const side=150, x0=53, y0=53, frame=roundRect(x0,y0,side,side,side*0.22), lt=monoLayers(plan.letters, fN, GN, {cx:128, cy:125, w:side*(plan.letters.length>1?0.68:0.5), h:side*0.48}, ink);
+    if(lt.length===2){ const g=(bounds([lt[1]]).x0-bounds([lt[0]]).x1)-side*0.03; shiftLs([lt[1]],-g/2,0); shiftLs([lt[0]],g/2,0); }
+    const fr={visible:true,locked:false,id:"monogramme",name:"Monogramme "+plan.letters,group:"mark",fill:ink,subs:knockout(frame, lt)};
+    const cN=42, nm=name(cN, ink), tg=tag(cN*0.4, accent), hBlock=cN+(tg.length?cN*0.6+cN*0.4:0);
+    shiftLs(nm, x0+side+side*0.24, 128-hBlock/2+cN); if(tg.length) shiftLs(tg, x0+side+side*0.24+cN*0.04, bounds(nm).y1+cN*0.6+cN*0.4);
+    const accentBar={visible:true,locked:false,id:"accent",name:"Trait d'accent",group:"mark",fill:accent,subs:roundRect(x0+side*0.3,y0+side*0.8,side*0.4,side*0.035,side*0.0175)};
+    out=[fr, accentBar, ...nm, ...tg];
+  }
+  else if(plan.kind==="p-emblem"){
+    const R=110, cx=128, cy=128;
+    const rings={visible:true,locked:false,id:"filets",name:"Double filet",group:"mark",fill:ink,subs:[...ring(cx,cy,R,R/24*2), ...ring(cx,cy,R*0.86,R/64*2)]};
+    const sym=symbol(cx, cy, R*1.04, accent);
+    const cE=40; let nm=name(cE, ink); const wE=lineW(nm); if(wE>R*2*1.6) nm=name(cE*R*2*1.6/wE, ink); const cN=Math.min(cE, cE*R*2*1.6/Math.max(wE,1));
+    shiftLs(nm,0,cy+R+cN*1.1+cN); centerX(nm,cx);
+    const tg=tag(cN*0.4, accent); if(tg.length){ shiftLs(tg,0,bounds(nm).y1+cN*0.6+cN*0.4); centerX(tg,cx); }
+    out=[rings, ...sym, ...nm, ...tg];
+  }
+  else if(plan.kind==="p-word"){
+    const cap=cap0*1.6; let nm=textLine(info.name, fN, GN, {caps:true, track:plan.track*0.7, cap, fill:ink}); shiftLs(nm, 30, 160); const b=bounds(nm);
+    const bar={visible:true,locked:false,id:"accent",name:"Trait d'accent",group:"mark",fill:accent,subs:roundRect(b.x0, b.y1+cap*0.28, Math.max(cap*0.9,(b.x1-b.x0)*0.16), cap*0.09, cap*0.045)};
+    const tg=tag(cap*0.24, ink); out=[...nm, bar];
+    if(tg.length){ const y=b.y1+cap*0.28+cap*0.09+cap*0.62; shiftLs(tg,0,y); centerX(tg,(b.x0+b.x1)/2); const tb=bounds(tg), gap=cap*0.35, ruleW=Math.max(12,((b.x1-b.x0)-(tb.x1-tb.x0))/2-gap);
+      const mid=(tb.y0+tb.y1)/2, h=Math.max(1.2,cap*0.03);
+      out.push(...tg, {visible:true,locked:false,id:"filets",name:"Filets",group:"mark",fill:ink,subs:[...roundRect(tb.x0-gap-ruleW,mid-h/2,ruleW,h,0), ...roundRect(tb.x1+gap,mid-h/2,ruleW,h,0)]});
+      bar.subs=roundRect((b.x0+b.x1)/2-cap*0.45, b.y1+cap*0.28, cap*0.9, cap*0.09, cap*0.045); }
+  }
+  const sig=out.filter(L=>/^signature-/.test(L.id)); if(sig.length){ doc.groups.push({id:"grp-signature",name:"Signature",pal:null,open:false}); sig.forEach(L=>{ L.grp="grp-signature"; }); }
+  return withDoc(doc, ()=>{ layers=out; ensureZones(); return {doc:{layers:clone(layers), pals:clone(pals), groups:clone(groups)}, missing:plan.kind==="p-stack"&&!plan.subject&&!!plan.unknown, bg:dark?null:plan.paper, word:info.name}; });
+}
 function conceptPlan(info, round){
   const kw=readKeywords(info.keywords), moods=rankMoods(info.keywords), mood=MOODS[moods[0]];
   const tones=kw.material?MATERIAL_COLORS[kw.material]:{main:mood.c[0][0],second:mood.c[0][2],detail:mood.c[0][1],text:mood.c[0][0],light:mood.c[0][1]};
@@ -3554,10 +3656,12 @@ function conceptPlan(info, round){
   push({kind:"demi", style:s2, font:font(s2,2), lines:2, title:`Demi-${lex} ${STYLE_LABEL(s2)}`, desc:`Une moitié de ${lex} stylisée en ${STYLE_LABEL(s2)}, le nom sur deux lignes.`});
   push({kind:"entrelacs", style:s3, font:["cinzel","playfair","dmserif","baskerville"][round%4], second:main==="cerf"?"bois":(sub2||main), title:`${letters} entrelacés`, desc:`${letters.split("").join(" et ")} entrelacés dans un écusson${main?", d'où sortent "+(main==="cerf"?"des bois de cerf":"des éléments du "+lex):""}.`});
   push({kind:"mono3d", style:kw.material==="or"?"dore":"gravebois", font:["bebas","oswald","cinzel","dmserif"][round%4], title:`${letters} en 3D`, desc:`${letters} ${kw.material==="or"?"dorés":"gravés dans du bois massif"}, vus de trois quarts avec profondeur.`});
-  return {plans, kw};
+  const pool=plans.filter(p=>!(p.kind==="planche"&&kw.material!=="bois") && !(p.kind==="mono3d"&&!kw.material)), k=(round*4)%pool.length, illus=[0,1,2,3].map(i=>pool[(k+i)%pool.length]).filter((p,i,a)=>a.indexOf(p)===i);
+  return {plans:premiumPlans(info, round).concat(illus), kw};
 }
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 async function buildConcept(plan, info){
+  if(plan.premium) return buildPremium(plan, info);
   const f=fontById(plan.font)||fontById("instrument"), G=await loadGlyphs(f.gkey), t=plan.tones, doc={layers:[], pals:[{id:"main",name:"Principale",colors:[t.main,t.text,t.light]}], groups:[]};
   const missing=!plan.subject;
   const icon=(box,tones)=>plan.subject?placeIcon(plan.subject, box, tones):[{visible:true,locked:false,id:"motif-provisoire",name:"À dessiner : "+(plan.unknown||"symbole"),group:"mark",fill:tones.main,subs:START_SHAPES.cercle[1]().map(s=>s.map(n=>({x:r2(box.x+(n.x-28)*box.s),y:r2(box.y+(n.y-28)*box.s),i:n.i&&{x:r2(box.x+(n.i.x-28)*box.s),y:r2(box.y+(n.i.y-28)*box.s)},o:n.o&&{x:r2(box.x+(n.o.x-28)*box.s),y:r2(box.y+(n.o.y-28)*box.s)}})))}];
@@ -3589,11 +3693,12 @@ async function buildConcept(plan, info){
     return {doc:{layers:clone(layers), pals:clone(pals), groups:clone(groups)}, missing};
   });
 }
-function conceptSVG(doc, k){
+function conceptSVG(doc, k, bg){
   const ls=doc.layers.filter(l=>l.visible!==false); if(!ls.length) return "";
-  return withDoc({layers:clone(doc.layers), pals:clone(doc.pals), groups:clone(doc.groups)}, ()=>{ const b=bounds(layers), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*0.08; let defs="", body="";
+  return withDoc({layers:clone(doc.layers), pals:clone(doc.pals), groups:clone(doc.groups)}, ()=>{ const b=bounds(layers), pad=Math.max(b.x1-b.x0,b.y1-b.y0)*(bg!==undefined?0.16:0.08); let defs="", body="";
     layers.forEach(l=>{ const r=layerSVG(l,{pfx:"c"+k}); defs+=r.defs; body+=r.body; });
-    return `<svg viewBox="${r2(b.x0-pad)} ${r2(b.y0-pad)} ${r2(b.x1-b.x0+2*pad)} ${r2(b.y1-b.y0+2*pad)}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${body}</svg>`; });
+    const vb=[b.x0-pad,b.y0-pad,b.x1-b.x0+2*pad,b.y1-b.y0+2*pad].map(r2);
+    return `<svg viewBox="${vb.join(" ")}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>${defs}</defs>${bg?`<rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" fill="${esc(bg)}"/>`:""}${body}</svg>`; });
 }
 
 /* ---------- Brand book ----------
@@ -3944,7 +4049,7 @@ async function renderProposals(){
     prop.list=plans; prop.docs=docs; if(prop.pick>=plans.length||!docs[prop.pick]) prop.pick=docs.findIndex(Boolean);
     const found=kw.subjects.map(s=>ICONS[s]&&ICONS[s].n).filter(Boolean);
     el.innerHTML=`<p class="muted" style="margin:0 0 8px">${found.length?"Sujets repérés : "+esc(found.join(", ")):"Aucun sujet illustré repéré dans les mots-clés"}${kw.material?" · matière : "+esc(kw.material):""}${kw.unknown.length&&!found.length?" · « "+esc(kw.unknown[0])+" » sera à dessiner par Claude":""}.</p>
-      <div class="props">${docs.map((d,i)=>d?`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}">${conceptSVG(d.doc,i)}<b>${esc(plans[i].title)}</b><span>${esc(plans[i].desc)} · ${esc((fontById(plans[i].font)||{name:""}).name)}${d.missing?" · à dessiner par Claude":""}</span></button>`:"").join("")}</div>
+      <div class="props">${docs.map((d,i)=>d?`<button type="button" data-prop="${i}" class="${i===prop.pick?"on":""}" aria-pressed="${i===prop.pick}">${conceptSVG(d.doc,i,d.bg)}<b>${esc(plans[i].title)}</b><span>${esc(plans[i].desc)} · ${esc((fontById(plans[i].font)||{name:""}).name)}${d.missing?" · à dessiner par Claude":""}</span></button>`:"").join("")}</div>
       <div class="row"><button type="button" id="stMore">Autres concepts</button><span class="muted">Tout reste modifiable : formes, styles, couleurs, police.</span></div>`;
   } finally { if(n===prop.busy) el.removeAttribute("aria-busy"); }
 }
@@ -3986,7 +4091,8 @@ async function applyStart(choice, info, shape){
     layers = choice==="example" ? clone(ORIGIN) : [];
     if(choice==="proposal"){ const c=prop.docs[prop.pick], plan=prop.list[prop.pick]; layers=clone(c.doc.layers); pals=clone(c.doc.pals); groups=clone(c.doc.groups);
       if(c.missing){ const b=bounds(layers.filter(l=>l.id==="motif-provisoire")); notes.push({id:"n"+Date.now().toString(36), n:notes.reduce((m,x)=>Math.max(m,x.n),0)+1, x:r2((b.x0+b.x1)/2), y:r2((b.y0+b.y1)/2), audio:null, at:new Date().toISOString(),
-        text:`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
+        text:plan.premium?`Concept « ${plan.title} » : dessine le motif « ${plan.unknown} » à la place du cercle provisoire, en aplat d'une seule couleur (${plan.accent}), simple et lisible à 16 px, sans effet (règles premium : DESIGN-RULES.md). Mots-clés : ${brand.keywords.join(", ")}.`
+          :`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
     if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
     ensureZones(); wordText=brand.name;
     if(choice==="word"||choice==="shape"||choice==="example"){

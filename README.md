@@ -28,6 +28,10 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 - **Bulles d'annotation** (texte et voix), envoyées à Claude. Les retouches de Claude arrivent avec un bandeau pour les annuler.
 - **Export** : SVG, PNG et JPG, par groupe ou par calque, en ZIP.
 
+## Propositions de logo
+
+« Proposition de logo » (au premier lancement ou dans « Marque et départ ») propose 9 concepts à partir du nom, du slogan, des mots-clés et des lettres clés : 5 compositions premium (signature empilée, monogramme encadré, emblème à double filet, logotype à détail, version sombre), construites selon [DESIGN-RULES.md](DESIGN-RULES.md), puis 4 concepts illustrés (styles low poly, gravure, line art…). « Autres concepts » change de palette, de typographie et d'illustrations.
+
 ## Tablette et téléphone
 
 Sous 900 px de large (téléphone, tablette en portrait), le dessin occupe tout l'écran. Une barre d'onglets en bas (Outils, Calques, Sélection, Palette, Bulles) ouvre chaque panneau en volet, et un toucher sur le dessin le referme. Les actions secondaires passent dans le menu ☰. Le dessin se fait au doigt ou au stylet (pression), avec zoom à deux doigts. En paysage, une tablette garde les trois colonnes.
