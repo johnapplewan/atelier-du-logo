@@ -1,0 +1,8 @@
+{
+  "name": "atelier-claude-sdk-bundle",
+  "private": true,
+  "description": "Bundles the official Anthropic TypeScript SDK for the browser into app/vendor/anthropic-sdk.js (window.Anthropic).",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": { "@anthropic-ai/sdk": "latest" },
+  "devDependencies": { "esbuild": "latest" }
+}

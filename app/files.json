@@ -1,5 +1,5 @@
 {
- "version": "c56d8654e045",
+ "version": "623807627f27",
  "files": [
   "sw.js",
   "files.json",
@@ -54,8 +54,10 @@
   "icons/maskable-512.png",
   "index.html",
   "manifest.webmanifest",
+  "vendor/LICENSE-anthropic-sdk.txt",
   "vendor/LICENSE-jszip.md",
   "vendor/LICENSE-opentype.txt",
+  "vendor/anthropic-sdk.js",
   "vendor/fonts/LICENSE-fonts.txt",
   "vendor/fonts/instrument-serif-latin-ext.woff2",
   "vendor/fonts/instrument-serif-latin.woff2",
