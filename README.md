@@ -62,18 +62,17 @@ L'atelier fonctionne aussi hors de Claude, comme une application installable uti
 
 ## Travailler avec Claude
 
-Trois façons, dans « Connexions Claude » (sous les bulles) :
+Dans « Connexions Claude » (sous les bulles) :
 
 - **Dans l'artifact** : « Envoyer à Claude » transmet les bulles à la conversation, Claude modifie le dessin par le canal `atelier/patch`.
 - **Copier-coller avec claude.ai** (gratuit) : « Copier la demande » copie le contexte (marque, calques en tracés SVG, bulles) et le format de réponse ; on colle la réponse de Claude avec « Coller la réponse ».
-- **Clé API Anthropic** (appli autonome, payé à l'usage) : « Demander (clé API) » envoie les bulles et une image du logo à Claude Opus 5.5 via le SDK officiel (`app/vendor/anthropic-sdk.js`, sortie JSON structurée, `fallbacks: "default"`). La clé reste dans le navigateur.
 - **Claude Desktop** : l'extension `app/downloads/atelier-du-logo.mcpb` sert l'atelier en local (hors ligne, http://127.0.0.1:4718) et donne à Claude les outils `atelier_ouvrir`, `atelier_etat`, `atelier_apercu`, `atelier_svg`, `atelier_appliquer`. La page lui répond par `/bridge/events` (SSE) et `/bridge/result`.
 
 Le skill `skill/atelier-du-logo/SKILL.md` (zip : `app/downloads/atelier-du-logo-skill.zip`) apprend à Claude à travailler avec l'atelier dans chacun de ces modes. Guide utilisateur : [GUIDE.md](GUIDE.md).
 
 Toutes les réponses passent par `applyClaudeReply` : bandeau « Annuler la modification de Claude », entrée « Claude : note » dans l'historique, calques verrouillés intouchés.
 
-Reconstruire l'extension après une modification de l'appli : `npm run build` puis `npm run mcpb`. Le SDK Anthropic se met à jour avec `npm run sdk`.
+Reconstruire l'extension après une modification de l'appli : `npm run build` puis `npm run mcpb`.
 
 ## Arborescence
 
@@ -86,7 +85,6 @@ Reconstruire l'extension après une modification de l'appli : `npm run build` pu
 | `app/vendor/` | opentype.js et JSZip (MIT), polices de l'interface Instrument Serif et Inter (OFL) |
 | `src/sw.js` | Source du service worker (hors ligne) |
 | `tools/mcpb/` | Extension Claude Desktop : `server.js` (serveur MCP + pont vers la page), `build.mjs` → `app/downloads/atelier-du-logo.mcpb` |
-| `tools/claude-sdk/` | Empaquetage du SDK Anthropic pour le navigateur → `app/vendor/anthropic-sdk.js` |
 | `tests/` | Tests Playwright (Chromium) sur `app/` servi en local : `npm test` |
 
 ## Licences

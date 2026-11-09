@@ -1,10 +1,10 @@
-// Claude connections outside the artifact: copy the request (context + reply format), paste Claude's reply,
+// Claude connections outside the artifact (copy-paste and Claude Desktop): copy the request (context + reply format), paste Claude's reply,
 // SVG paths parsed into editable curves, undo banner and history, bubble replies, locked layers left alone.
 const { chromium, assert, open, worldToScreen, check, done } = require("./helpers");
 
 (async () => {
   const browser = await chromium.launch();
-  const { ctx, page: p, errors } = await open(browser);
+  const { ctx, page: p, errors } = await open(browser, { init: () => localStorage.setItem("atelier-logo-api-key", "sk-ant-old-version-key") });
   await ctx.grantPermissions(["clipboard-read", "clipboard-write"]);
   const ws = worldToScreen(p);
 
@@ -43,43 +43,15 @@ const { chromium, assert, open, worldToScreen, check, done } = require("./helper
   check("unreadable reply explained", () => assert.match(bad, /illisible/));
   await p.click("#cdClose");
 
-  // API key: request to api.anthropic.com (mocked, streamed), reply applied
-  let sent = null;
-  await p.route("https://api.anthropic.com/**", async r => {
-    sent = { url: r.request().url(), headers: r.request().headers(), body: JSON.parse(r.request().postData()) };
-    const json = JSON.stringify({ note: "Disque agrandi", calques: [{ id: "disque", d: "M60 128 C60 90 90 60 128 60 C166 60 196 90 196 128 C196 166 166 196 128 196 C90 196 60 166 60 128 Z" }], supprimer: [], reponses: [{ n: 2, texte: "Disque agrandi.", fait: true }] });
-    const ev = (t, d) => `event: ${t}\ndata: ${JSON.stringify(Object.assign({ type: t }, d))}\n\n`;
-    const body = ev("message_start", { message: { id: "msg_1", type: "message", role: "assistant", model: "claude-opus-5-5", content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 900, output_tokens: 1 } } }) +
-      ev("content_block_start", { index: 0, content_block: { type: "text", text: "" } }) +
-      ev("content_block_delta", { index: 0, delta: { type: "text_delta", text: json.slice(0, 40) } }) + ev("content_block_delta", { index: 0, delta: { type: "text_delta", text: json.slice(40) } }) +
-      ev("content_block_stop", { index: 0 }) + ev("message_delta", { delta: { stop_reason: "end_turn", stop_sequence: null }, usage: { output_tokens: 120 } }) + ev("message_stop", {});
-    await r.fulfill({ status: 200, headers: { "content-type": "text/event-stream", "access-control-allow-origin": "*" }, body });
-  });
-  const noBtn = await p.locator("#askApi").count();
-  await p.click("#cdOpen"); await p.fill("#cdKey", "sk-ant-api03-" + "x".repeat(40)); await p.click("#cdKeySave"); await p.click("#cdClose");
-  await p.keyboard.press("b"); q = await ws(128, 200); await p.mouse.click(q.x, q.y);
-  await p.fill("#noteText", "Agrandis le disque"); await p.locator("#noteText").blur(); await p.waitForTimeout(300);
-  await p.click("#askApi"); await p.waitForFunction(() => /Claude a répondu|Erreur|Clé/.test(document.querySelector("#sendMsg").textContent), null, { timeout: 15000 });
-  const apiMsg = await p.textContent("#sendMsg");
-  const disk = await p.evaluate(() => { const L = __atelier.layers.find(l => l.id === "disque"); return [L.subs[0].length, L.subs[0][0].x, __atelier.notes.find(n => n.n === 2).reply]; });
-  check("API button only once a key is saved", () => assert.strictEqual(noBtn, 0));
-  check("API request: Opus 5.5, server-side fallbacks, structured output, logo image, key header", () => {
-    assert.strictEqual(sent.body.model, "claude-opus-5-5"); assert.strictEqual(sent.body.fallbacks, "default"); assert.match(sent.headers["anthropic-beta"], /server-side-fallback-2026-07-01/);
-    assert.strictEqual(sent.body.output_config.format.type, "json_schema"); assert.strictEqual(sent.body.messages[0].content[0].type, "image");
-    assert.match(sent.body.messages[0].content[1].text, /Agrandis le disque/); assert.match(sent.headers["x-api-key"] || sent.headers.authorization || "", /sk-ant-/); assert.ok(sent.body.stream); });
-  check("API reply applied to the drawing and the bubble", () => { assert.match(apiMsg, /Claude a répondu/); assert.deepStrictEqual(disk, [4, 60, "Disque agrandi."]); });
-  await p.route("https://api.anthropic.com/**", r => r.fulfill({ status: 401, headers: { "content-type": "application/json", "access-control-allow-origin": "*" }, body: JSON.stringify({ type: "error", error: { type: "authentication_error", message: "invalid x-api-key" } }) }));
-  await p.fill("#noteText", "Encore"); await p.locator("#noteText").blur(); await p.evaluate(() => { __atelier.notes.forEach(n => n.done = false); renderNotes(); });
-  await p.waitForTimeout(200); await p.click("#askApi"); await p.waitForFunction(() => /Clé API refusée/.test(document.querySelector("#sendMsg").textContent), null, { timeout: 15000 }).catch(() => {});
-  const badKey = await p.textContent("#sendMsg");
-  check("bad key explained in French", () => assert.match(badKey, /Clé API refusée/));
-
+  // no API key option any more, and an old stored key is erased
+  const noApi = await p.evaluate(() => [!!document.querySelector("#askApi"), !!document.querySelector("#cdApiSec"), localStorage.getItem("atelier-logo-api-key")]);
+  check("no API key option, no key kept in the browser", () => assert.deepStrictEqual(noApi, [false, false, null]));
   // Claude Desktop section: extension download
   await p.click("#cdOpen");
   const [mdl] = await Promise.all([p.waitForEvent("download"), p.click("#cdMcpDl")]);
   check("Claude Desktop extension downloadable from « Connexions Claude »", () => assert.strictEqual(mdl.suggestedFilename(), "atelier-du-logo.mcpb"));
   await p.click("#cdClose");
 
-  done(errors.filter(e => !/status of 401/.test(e))); // the 401 above is the bad-key scenario
+  done(errors);
   await browser.close();
 })();

@@ -51,7 +51,6 @@ Le bouton **?** liste tous les raccourcis. **Annuler** défait la dernière acti
    - **dans Claude (artifact)** : « Envoyer à Claude » ;
    - **sur claude.ai, gratuit** : « Copier la demande », collez-la dans une conversation, puis copiez la réponse de Claude et faites « Coller la réponse » ;
    - **avec Claude Desktop** : installez l'extension (Connexions Claude › Télécharger l'extension), puis demandez dans une conversation « Traite mes bulles dans l'atelier » ;
-   - **avec une clé API** (payant à l'usage, appli autonome) : enregistrez la clé dans Connexions Claude, puis « Demander (clé API) ».
 3. Les changements de Claude arrivent avec un bandeau **« Annuler la modification de Claude »**. Claude répond aussi dans chaque bulle.
 
 Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des calques).

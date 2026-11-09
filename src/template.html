@@ -721,7 +721,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   <p>L'atelier s'installe comme une application et fonctionne ensuite sans connexion. Vous pouvez aussi télécharger ses fichiers pour l'héberger vous-même (GitHub Pages, un serveur, une clé USB avec un petit serveur local).</p>
   <div class="row" id="abApp"><button id="abInstall" class="primary" hidden>Installer l'appli</button><button id="abZip">Télécharger l'appli (zip)</button><span class="muted" id="abAppMsg"></span></div>
   <h3>Crédits</h3>
-  <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js, JSZip et le SDK Anthropic (licence MIT). Icônes et interface en Instrument Serif et Inter (OFL). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
+  <p class="muted">Polices libres (SIL Open Font License 1.1 ou Apache 2.0), converties en contours. opentype.js et JSZip (licence MIT). Icônes et interface en Instrument Serif et Inter (OFL). Dictionnaires CC-CEDICT et KANJIDIC (CC BY-SA). Code de l'atelier sous licence MIT.</p>
   <div class="row" style="justify-content:flex-end"><button id="abClose">Fermer</button></div>
 </dialog>
 <dialog id="claudeDlg" class="claudedlg" aria-labelledby="cdTitle">
@@ -733,7 +733,6 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     <textarea id="cdPaste" rows="6" placeholder="Collez ici la réponse de Claude (le bloc json suffit)" spellcheck="false"></textarea>
     <div class="row"><button id="cdApply" class="primary">Appliquer la réponse</button><span class="muted" id="cdMsg" role="status"></span></div>
   </section>
-  <section class="cdsec" id="cdApiSec"></section>
   <section class="cdsec" id="cdMcpSec"></section>
 </dialog>
 <dialog id="scDlg" class="scdlg" aria-labelledby="scTitle">
@@ -1902,15 +1901,14 @@ function renderSendBox(){
     no_session:"Aucune session Claude n'écoute cette page pour l'instant : copiez la demande et collez-la dans la conversation.",
     writers_only:"Seul un éditeur de la page peut envoyer à Claude : copiez la demande.", checking:"Vérification…"}[sendState];
   const html=`<div class="row"><button id="sendAll" class="primary" ${!open.length||sendState!=="available"?"disabled":""}>Envoyer à Claude${open.length?" ("+open.length+")":""}</button>
-    <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button><button id="pasteReply" title="Coller la réponse de Claude (claude.ai)">Coller la réponse</button>${apiReady()?`<button id="askApi" ${open.length?"":"disabled"} title="Envoyer directement avec votre clé API">Demander (clé API)</button>`:""}</div>
-    <p class="muted"><button class="linkbtn" id="cdOpen">Connexions Claude : copier-coller, clé API, Claude Desktop</button></p><p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
+    <button id="copyReq" ${open.length?"":"disabled"}>Copier la demande</button><button id="pasteReply" title="Coller la réponse de Claude (claude.ai)">Coller la réponse</button></div>
+    <p class="muted"><button class="linkbtn" id="cdOpen">Connexions Claude : copier-coller, Claude Desktop</button></p><p class="muted" id="sendMsg">${!open.length?(notes.length?"Toutes les bulles sont traitées.":"Posez des bulles, puis envoyez-les à Claude."):sendState==="available"?"Claude reçoit les bulles non traitées, modifie le dessin ici et répond dans chaque bulle.":reason}</p>`;
   // same content: keep the buttons (replacing them under a click would swallow it)
   if(el.__html===html) return; el.__html=html; el.innerHTML=html;
   $("#sendAll").onclick=()=>sendToClaude(open);
   $("#copyReq").onclick=async()=>{ $("#sendMsg").textContent=await copyRequest(open); };
   $("#pasteReply").onclick=()=>openClaudeDlg(true);
   $("#cdOpen").onclick=()=>openClaudeDlg(false);
-  if($("#askApi")) $("#askApi").onclick=()=>askClaudeApi(open);
 }
 async function sendToClaude(list){
   list=list.filter(n=>n.text.trim()||n.audio);
@@ -4888,69 +4886,15 @@ async function copyRequest(list){
   catch(_){ openClaudeDlg(false); $("#cdPaste").value=claudePrompt(list); $("#cdPaste").select(); return "Copie refusée par le navigateur : la demande est sélectionnée dans la fenêtre Claude, copiez-la (Ctrl+C)."; }
 }
 function openClaudeDlg(focusPaste){
-  $("#cdMsg").textContent=""; $("#cdCopyMsg").textContent=""; renderApiSec(); renderMcpSec();
+  $("#cdMsg").textContent=""; $("#cdCopyMsg").textContent=""; renderMcpSec();
   if(!$("#claudeDlg").open) $("#claudeDlg").showModal(); if(focusPaste){ $("#cdPaste").value=""; $("#cdPaste").focus(); }
 }
 $("#cdClose").onclick=()=>$("#claudeDlg").close();
 $("#cdCopy").onclick=async()=>{ $("#cdCopyMsg").textContent=await copyRequest(notes.filter(n=>!n.done)); };
 $("#cdApply").onclick=()=>{ const o=extractReply($("#cdPaste").value), r=applyClaudeReply(o); $("#cdMsg").textContent=r.msg; if(r.ok){ $("#cdPaste").value=""; toast("Réponse de Claude appliquée. "+r.msg); } };
 /* placeholders, filled by the API and Claude Desktop sections below */
-/* API key: direct calls to the Messages API from the standalone app (pay per use on the user's Anthropic account).
-   The key stays in this browser (localStorage) and is only sent to api.anthropic.com, through the official SDK
-   bundled in vendor/anthropic-sdk.js. The artifact frame blocks these calls (CSP), so it is offered only outside. */
-const API_KEY_LS="atelier-logo-api-key", API_MODEL="claude-opus-5-5";
-const apiKey=()=>{ try{ return localStorage.getItem(API_KEY_LS)||""; }catch(_){ return ""; } };
-const apiAllowed=()=>window.top===window && /^https?:$/.test(location.protocol);
-function apiReady(){ return apiAllowed() && !!apiKey(); }
-function loadAnthropic(){
-  if(window.Anthropic) return Promise.resolve(window.Anthropic);
-  return new Promise((ok,ko)=>{ const sc=document.createElement("script"); sc.src="vendor/anthropic-sdk.js"; sc.onload=()=>window.Anthropic?ok(window.Anthropic):ko(new Error("sdk")); sc.onerror=()=>ko(new Error("sdk")); document.head.appendChild(sc); });
-}
-const REPLY_SCHEMA={type:"object", additionalProperties:false, required:["note","calques","supprimer","reponses"], properties:{
-  note:{type:"string"},
-  calques:{type:"array", items:{type:"object", additionalProperties:false, required:["id"], properties:{id:{type:"string"}, d:{type:"string"}, couleur:{type:"string"}, nom:{type:"string"}, groupe:{type:"string", enum:["symbole","mot"]}}}},
-  supprimer:{type:"array", items:{type:"string"}},
-  reponses:{type:"array", items:{type:"object", additionalProperties:false, required:["n","texte","fait"], properties:{n:{type:"integer"}, texte:{type:"string"}, fait:{type:"boolean"}}}} }};
-const API_SYSTEM="Tu es le directeur artistique de l'Atelier du Logo, un éditeur vectoriel. Tu reçois une image du logo et ses calques en tracés SVG. Tu traites les bulles d'annotation de l'utilisateur en modifiant ou en ajoutant des tracés précis et propres (peu de points, courbes C lisses), en gardant le style existant. Tu réponds en français dans chaque bulle.";
-async function askClaudeApi(list){
-  list=list.filter(n=>n.text.trim()); const m=t=>{ const e=$("#sendMsg"); if(e) e.textContent=t; };
-  if(!list.length){ m("Écrivez d'abord une demande dans une bulle."); return; }
-  if(!apiReady()){ openClaudeDlg(false); return; }
-  const btn=$("#askApi"); if(btn) btn.disabled=true; m("Claude travaille sur "+(list.length>1?list.length+" bulles":"la bulle")+"…");
-  try{
-    const Anthropic=await loadAnthropic(), client=new Anthropic({apiKey:apiKey(), dangerouslyAllowBrowser:true});
-    let image=null; try{ const blob=await rasterize(exportSpec("full",false).svg, 1024, "#FFFFFF", "png"); image=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(String(fr.result).split(",")[1]); fr.readAsDataURL(blob); }); }catch(_){}
-    const content=[]; if(image) content.push({type:"image", source:{type:"base64", media_type:"image/png", data:image}});
-    content.push({type:"text", text:"Bulles à traiter et calques du logo :\n```json\n"+JSON.stringify(claudeContext(list))+"\n```\nRègles : ne renvoie dans \"calques\" que ce que tu modifies ou ajoutes (d en coordonnées absolues, M/L/C/Q/Z, formes fermées par Z, pas d'arcs). Ne touche pas aux calques verrouillés. Réponds à chaque bulle."});
-    // fallbacks "default": a declined request is re-run server-side on Anthropic's recommended fallback model
-    const final=await client.beta.messages.stream({ model:API_MODEL, max_tokens:16000, betas:["server-side-fallback-2026-07-01"], fallbacks:"default",
-      system:API_SYSTEM, output_config:{format:{type:"json_schema", schema:REPLY_SCHEMA}}, messages:[{role:"user", content}] }).finalMessage();
-    if(final.stop_reason==="refusal"){ m("Claude a décliné cette demande. Reformulez la bulle, ou passez par le copier-coller."); return; }
-    if(final.stop_reason==="max_tokens"){ m("Réponse trop longue, coupée : demandez moins de changements à la fois."); return; }
-    const text=final.content.filter(b=>b.type==="text").map(b=>b.text).join("");
-    let o=null; try{ o=JSON.parse(text); }catch(_){ o=extractReply(text); }
-    const r=applyClaudeReply(o); m(r.ok?"Claude a répondu : "+r.msg:r.msg); if(r.ok) toast("Réponse de Claude appliquée. "+r.msg);
-  }catch(e){
-    const A=window.Anthropic;
-    m(!A?"Le module Claude n'a pas pu se charger.":
-      e instanceof A.AuthenticationError?"Clé API refusée : vérifiez-la dans « Connexions Claude ».":
-      e instanceof A.PermissionDeniedError?"Cette clé n'a pas accès à ce modèle.":
-      e instanceof A.RateLimitError?"Trop de demandes ou crédit épuisé : réessayez plus tard, ou vérifiez votre compte Anthropic.":
-      e instanceof A.APIConnectionError?"Pas de connexion à Claude : vérifiez internet (la clé API a besoin du réseau).":
-      e instanceof A.APIError?"Erreur de Claude ("+(e.status||"?")+") : "+String(e.message||"").slice(0,160):"Erreur : "+String(e.message||e).slice(0,160));
-  }finally{ const b=$("#askApi"); if(b) b.disabled=false; }
-}
-function renderApiSec(){
-  const el=$("#cdApiSec"); el.hidden=false; const k=apiKey();
-  el.innerHTML=`<h3>Clé API Anthropic <span class="muted">· sans conversation, payé à l'usage</span></h3>`+(!apiAllowed()
-    ?`<p class="muted">Disponible dans l'appli autonome (site GitHub Pages ou appli installée) : ici, la page Claude bloque les appels directs. Dans l'artifact, utilisez « Envoyer à Claude ».</p>`
-    :`<p class="muted">Avec une clé de console.anthropic.com, le bouton « Demander (clé API) » envoie les bulles et une image du logo à Claude Opus 5.5, puis applique sa réponse ici. Facturé sur votre compte Anthropic, à chaque demande. La clé reste dans ce navigateur et n'est envoyée qu'à api.anthropic.com.</p>
-    <div class="row"><input type="password" id="cdKey" placeholder="sk-ant-…" autocomplete="off" value="${k?"••••••••••••":""}"><button id="cdKeySave">Enregistrer</button>${k?`<button id="cdKeyDel" class="danger">Oublier la clé</button>`:""}</div><p class="muted" id="cdKeyMsg">${k?"Clé enregistrée sur cet appareil.":""}</p>`);
-  if(!apiAllowed()) return;
-  $("#cdKeySave").onclick=()=>{ const v=$("#cdKey").value.trim(); if(!/^sk-ant-[\w-]{20,}$/.test(v)){ $("#cdKeyMsg").textContent="Ce n'est pas une clé Anthropic (elle commence par sk-ant-)."; return; }
-    try{ localStorage.setItem(API_KEY_LS, v); }catch(_){} delete $("#sendBox").__html; renderSendBox(); renderApiSec(); };
-  if($("#cdKeyDel")) $("#cdKeyDel").onclick=()=>{ try{ localStorage.removeItem(API_KEY_LS); }catch(_){} delete $("#sendBox").__html; renderSendBox(); renderApiSec(); };
-}
+/* No API key option: the workshop never stores or sends an Anthropic key. Any key left by an earlier version is erased. */
+try{ localStorage.removeItem("atelier-logo-api-key"); }catch(_){}
 /* Claude Desktop extension (downloads/atelier-du-logo.mcpb): a local server serves this page on 127.0.0.1 and gives
    Claude tools (state, preview, svg, apply). The page answers them through /bridge/events (SSE) + /bridge/result. */
 const bridge={on:false, es:null, version:""};
