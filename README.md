@@ -30,7 +30,18 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 
 ## Propositions de logo
 
-« Proposition de logo » (au premier lancement ou dans « Marque et départ ») propose 9 concepts à partir du nom, du slogan, des mots-clés et des lettres clés : 5 compositions premium (signature empilée, monogramme encadré, emblème à double filet, logotype à détail, version sombre), construites selon [DESIGN-RULES.md](DESIGN-RULES.md), puis 4 concepts illustrés (styles low poly, gravure, line art…). « Autres concepts » change de palette, de typographie et d'illustrations.
+« Proposition de logo » (au premier lancement ou dans « Marque et départ ») tire ses propositions du nom, du slogan, des mots-clés et des lettres clés. Elle les présente par séries de 9 : 5 premium et 4 illustrées. « Autres concepts » passe à la série suivante.
+
+- **36 compositions premium**, construites selon [DESIGN-RULES.md](DESIGN-RULES.md) :
+  - signature empilée ou en ligne, symbole seul ou dans un contenant (disque, cercle fin, carré arrondi, écusson, losange, hexagone, arche) ;
+  - monogrammes découpés dans leur cadre ;
+  - emblèmes à double filet ;
+  - sceaux au nom écrit en cercle ;
+  - six logotypes à détail ;
+  - versions sombres sur plaque.
+- **Jusqu'à 26 propositions illustrées** quand un sujet est reconnu : chaque composition dans plusieurs styles (low poly, gravure, line art, pixel…), des sceaux, emblèmes et signatures illustrés, et la planche gravée pour le bois.
+- **Sans sujet reconnu**, les compositions premium utilisent les initiales.
+- **Si le sujet n'est pas dans la bibliothèque**, la proposition garde une place vide et une bulle demande à Claude de le dessiner.
 
 ## Tablette et téléphone
 

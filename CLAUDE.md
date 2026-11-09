@@ -22,7 +22,8 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 
 ## Premium concepts
 
-- `premiumPlans` / `buildPremium` build five layouts from `DESIGN-RULES.md` (read it before changing them): two colours, tracked capitals (`textLine`), flat symbols, monograms cut out of their frame (`knockout`, nonzero winding), tile backgrounds in the previews. They come before the illustrated concepts (`conceptPlan`). Keep the rules file, the generator and the skill's « Design rules » section in step.
+- `PREMIUM_CATALOG` (36 entries: layout × container × variant × dark) feeds `premiumPlanFor` / `buildPremium`, built from `DESIGN-RULES.md`; `conceptPlan` adds an illustrated catalogue (styles × compositions, illustrated seals/emblems) and shows 5 + 4 per round (`conceptPlan.counts`). Circular text: `arcText`. Never style a `motif-provisoire` placeholder (Claude draws it).
+- Earlier summary: (read it before changing them): two colours, tracked capitals (`textLine`), flat symbols, monograms cut out of their frame (`knockout`, nonzero winding), tile backgrounds in the previews. They come before the illustrated concepts (`conceptPlan`). Keep the rules file, the generator and the skill's « Design rules » section in step.
 
 ## Brand book
 
