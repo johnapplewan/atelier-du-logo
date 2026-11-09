@@ -4517,6 +4517,7 @@ function renderApiSec(){
 /* Claude Desktop extension (downloads/atelier-du-logo.mcpb): a local server serves this page on 127.0.0.1 and gives
    Claude tools (state, preview, svg, apply). The page answers them through /bridge/events (SSE) + /bridge/result. */
 const bridge={on:false, es:null, version:""};
+const MCPB_URL="https://johnapplewan.github.io/atelier-du-logo/downloads/atelier-du-logo.mcpb";
 async function bridgeCmd(cmd, args){
   if(cmd==="state") return Object.assign(claudeContext(notes.filter(n=>!n.done)), {projet:$("#projName")?$("#projName").textContent:"", bullesTraitees:notes.filter(n=>n.done).length});
   if(cmd==="svg") return {svg:exportSpec("full",false).svg};
@@ -4547,7 +4548,7 @@ function renderMcpSec(){
     <div class="row"><button id="cdMcpDl">Télécharger l'extension (.mcpb)</button><span class="muted" id="cdMcpMsg"></span></div>`);
   if($("#cdMcpDl")) $("#cdMcpDl").onclick=async()=>{ const m=$("#cdMcpMsg"); m.textContent="Téléchargement…";
     try{ const r=await fetch("downloads/atelier-du-logo.mcpb"); if(!r.ok) throw new Error(r.status); const blob=await r.blob(); await saveBlob("atelier-du-logo.mcpb", blob); m.textContent="Extension téléchargée ("+Math.round(blob.size/1024/1024*10)/10+" Mo) : ouvrez-la pour l'installer dans Claude Desktop."; }
-    catch(e){ m.textContent="Téléchargement impossible ("+(e.message||e)+")."; } };
+    catch(e){ m.innerHTML="Téléchargez-la depuis le site de l'atelier : <strong>"+esc(MCPB_URL)+"</strong>"; } };
 }
 connectBridge();
 
