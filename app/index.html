@@ -1979,6 +1979,8 @@ function palOf(L){ const g=L&&L.grp?groupById(L.grp):null; return palById(g&&g.p
 function paintOf(L){ const P=palOf(L); const arr=(previewPal&&P.id===curPal)?previewPal:P.colors; return arr[L.zone]||arr[0]; }
 function setCurColors(arr){ curPalObj().colors=arr; palette=arr; }
 function ensureZones(){
+  // text blocks (Texte tool) are text: older projects filed them with the symbol
+  for(const L of layers) if(L.group==="mark"&&L.grp){ const G=groupById(L.grp); if(G&&G.text) L.group="word"; }
   if(!validPals(pals)) pals=[{id:"main",name:"Principale",colors:[]}];
   if(!pals.find(p=>p.id===curPal)) curPal="main";
   groups=groups.filter(g=>g&&g.id); groups.forEach(g=>{ if(g.pal&&!pals.find(p=>p.id===g.pal)) g.pal=null; });
@@ -2549,11 +2551,14 @@ function loadFonts(){
 }
 const letterIdx=id=>{ const m=/^lettre-(\d+)$/.exec(id); return m?+m[1]-1:-1; };
 const wordLayers=()=>layers.filter(l=>l.group==="word"&&letterIdx(l.id)>=0).sort((a,b)=>letterIdx(a.id)-letterIdx(b.id));
-function selLetters(){ return selLayers().filter(id=>{ const L=layerById(id); return L&&L.group==="word"&&letterIdx(id)>=0; }); }
+/* letters of the current text target: the word (lettre-n) or a text block (<group>-n) */
+const blockIdx=id=>{ const m=/-(\d+)$/.exec(id); return m?+m[1]-1:-1; };
+function targetLetters(t){ t=t||textTarget(); return t.kind==="word"?wordLayers():t.layers.filter(l=>blockIdx(l.id)>=0).sort((a,b)=>blockIdx(a.id)-blockIdx(b.id)); }
+function selLetters(){ const t=textTarget(), set=new Set(targetLetters(t).map(l=>l.id)); return selLayers().filter(id=>set.has(id)); }
 /* the character a letter layer draws (stored since the word is typed by the user; older layers: from the name) */
 function letterCh(L){ if(typeof L.ch==="string"&&L.ch) return L.ch; const m=/^Lettre (.+) · \d+$/u.exec(L.name||""); return m&&[...m[1]].length===1?m[1]:null; }
 /* letters can be swapped one by one while the word is Latin outlines (one layer per character) in per-letter typefaces */
-function perLetterOK(){ const w=wordLayers(); return textTarget().kind==="word" && w.length>0 && !liveOf(w) && scriptOf(wordText)==="latn" && w.every(l=>letterCh(l) && (!l.font || l.font==="instrument" || !FONTS || (fontById(l.font)||{}).perLetter)); }
+function perLetterOK(){ const t=textTarget(), w=targetLetters(t), str=t.kind==="block"?t.g.text.str:wordText; return w.length>0 && !liveOf(w) && scriptOf(str)==="latn" && w.every(l=>letterCh(l) && (!l.font || l.font==="instrument" || !FONTS || (fontById(l.font)||{}).perLetter)); }
 function renderFontSec(){
   if(textTarget().kind==="block"){ $("#fontHint").textContent="Police du bloc de texte sélectionné"; return; }
   const n=selLetters().length; $("#fontHint").textContent = n ? "Police de "+(n>1?n+" lettres sélectionnées":"la lettre sélectionnée") : "Police du mot (sélectionnez des lettres pour les modifier seules)";
@@ -2563,9 +2568,8 @@ function renderFontSec(){
 const previewCache=new Map();
 function previewText(idxs){
   const tt=textTarget();
-  if(tt.kind==="block") return tt.g.text.str;
-  if(idxs.length){ const w=wordLayers(); return idxs.map(i=>w[i]&&letterCh(w[i])||"").join(""); }
-  return wordText;
+  if(idxs.length){ const w=targetLetters(tt); return idxs.map(i=>w[i]&&letterCh(w[i])||"").join(""); }
+  return tt.kind==="block"?tt.g.text.str:wordText;
 }
 function fontPreview(f, str){
   str=[...String(str||"").trim()].slice(0,28).join("");
@@ -2593,8 +2597,8 @@ function renderFontMenu(){
   if(!FONTS){ m.innerHTML=`<p class="muted" style="margin:6px">Chargement des 56 polices…</p>`;
     loadFonts().then(()=>{ if(!m.hidden) renderFontMenu(); }).catch(()=>{ m.innerHTML=`<p class="muted" style="margin:6px">Les polices n'ont pas pu être chargées. Rechargez la page.</p>`; }); return; }
   const sl=selLetters(), okL=perLetterOK(); if(!sl.length||!okL) fontScope="word";
-  const idxs = fontScope==="word" ? [] : sl.map(letterIdx).sort((a,b)=>a-b);
-  const curFonts=new Set((fontScope==="word"?wordLayers().map(l=>l.id):sl).map(id=>(layerById(id)||{}).font||"instrument"));
+  const tl=targetLetters(), idxs = fontScope==="word" ? [] : sl.map(id=>tl.findIndex(l=>l.id===id)).filter(i=>i>=0).sort((a,b)=>a-b);
+  const curFonts=new Set((fontScope==="word"?tl.map(l=>l.id):sl).map(id=>(layerById(id)||{}).font||"instrument"));
   const q=fontFilter.trim().toLowerCase();
   const tgt=textTarget(), ptxt=previewText(idxs);
   const list=FONTS.map((f,i)=>({f,i})).filter(({f})=>(fontScope==="word"||f.perLetter) && (!q || (f.name+" "+f.cat).toLowerCase().includes(q)));
@@ -2625,7 +2629,7 @@ async function applyFont(f, ids){
     const ok=await setText(tt, str, f); if(ok){ renderFontMenu(); toast("Police « "+f.name+" » appliquée (Annuler pour revenir)."); } return; }
   if(!f.gkey || !f.perLetter || !perLetterOK()){ toast("Cette police s'applique au mot entier."); return; }
   let G; try{ G=await loadGlyphs(f.gkey); }catch(_){ toast("Glyphes de « "+f.name+" » introuvables. Rechargez la page."); return; }
-  const before=snapshot(), word=wordLayers(), m=textMetrics(word), targets=new Set(ids), missing=[]; let shift=0;
+  const before=snapshot(), word=targetLetters(tt), m=textMetrics(word), targets=new Set(ids), missing=[]; let shift=0;
   for(const L of word){
     const ob=bounds([L]);
     if(targets.has(L.id)){
@@ -2746,7 +2750,7 @@ async function addTextBlock(w){
   await loadFonts(); const f=currentFontOf(wordLayers())||FONTS[0];
   const g={id:"txt"+Date.now().toString(36), name:"Texte "+(++textN), pal:null, open:true, text:{str:"Texte", font:f.id}};
   groups.push(g);
-  const ok=await setText({kind:"block", g, layers:[], x0:w.x, baseline:w.y, proto:{fill:primary(palette[0]||EX.ink),zone:0,group:"mark"}}, "Texte", f);
+  const ok=await setText({kind:"block", g, layers:[], x0:w.x, baseline:w.y, proto:{fill:primary(palette[0]||EX.ink),zone:0,group:"word"}}, "Texte", f);
   if(!ok){ groups=groups.filter(x=>x!==g); return; }
   setTool("move"); const inp=$("#txtIn"); renderTextRow(); inp.focus(); inp.select();
   toast("Bloc de texte créé : tapez votre texte puis Entrée. Le bouton F change sa police.");

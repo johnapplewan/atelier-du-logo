@@ -116,6 +116,20 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   check("about: PayPal link; Wero number hidden until « Afficher le numéro »", () => { assert.deepStrictEqual(sup, ["https://www.paypal.com/paypalme/exemple", false]); assert.strictEqual(shown, "06 00 00 00 12"); });
   await p.click("#abClose");
 
+  // Texte tool: the block is text (not symbol), exports with the word, and takes a typeface letter by letter
+  await p.keyboard.press("t"); q = await ws(60, 330); await p.mouse.click(q.x, q.y); await p.waitForTimeout(600);
+  await p.fill("#txtIn", "Studio"); await p.press("#txtIn", "Enter"); await p.waitForTimeout(600);
+  const blk = await p.evaluate(() => __atelier.layers.filter(l => l.grp && /^txt/.test(l.grp)).map(l => [l.id, l.group]));
+  check("text block filed as text, not symbol", () => { assert.strictEqual(blk.length, 6); assert.ok(blk.every(x => x[1] === "word"), JSON.stringify(blk)); });
+  await p.click(`.layer[data-id="${blk[0][0]}"] .nm`); await p.click("#fontBtn"); await p.waitForSelector("#fontMenu .fontitem");
+  const sc = await p.evaluate(() => document.querySelector("input[name=fscope]:checked").value);
+  const mt = await p.evaluate(() => [...document.querySelectorAll("#fontMenu .fontitem")].findIndex(x => x.querySelector(".fn").textContent.trim() === "Montserrat"));
+  await p.locator("#fontMenu .fontitem").nth(mt).click(); await p.waitForTimeout(600);
+  const bf = await p.evaluate(() => __atelier.layers.filter(l => l.grp && /^txt/.test(l.grp)).map(l => l.font));
+  check("one letter of a text block changes typeface alone", () => { assert.strictEqual(sc, "sel"); assert.strictEqual(bf[0], "montserrat"); assert.ok(bf.slice(1).every(f => f !== "montserrat"), bf.join()); });
+  await p.click("#exportBtn"); await p.check("input[name=exm][value=mark]"); const mk = await p.inputValue("#svgcode"); await p.check("input[name=exm][value=word]"); const wd = await p.inputValue("#svgcode"); await p.click("#exClose");
+  check("export: the symbol without the text, the text with the word", () => { assert.ok(!/Studio|txt/.test(mk) && (mk.match(/<path/g) || []).length < (wd.match(/<path/g) || []).length); });
+
   // tablet: tap a node and drag it by touch
   const { ctx: tctx, page: tp, errors: terr } = await open(browser, { context: { viewport: { width: 1024, height: 1366 }, hasTouch: true, isMobile: true } });
   const tws = worldToScreen(tp);
