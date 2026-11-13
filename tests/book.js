@@ -18,7 +18,7 @@ const { chromium, assert, open, check, done } = require("./helpers");
   // 2. exact colours, from the logo
   await p.click("#bookNext"); await p.waitForSelector("[data-bhex=primary]");
   const pre = await p.$$eval("[data-bhex]", is => is.map(i => i.value));
-  check("colour roles prefilled from the logo", () => assert.ok(pre.includes("#E0703A") && pre.includes("#22252B"), pre.join()));
+  check("colour roles prefilled from the logo", () => assert.ok(pre.includes("#E0703A") && pre.some(c => /^#(000000|1D1D1F)$/i.test(c)), pre.join()));
   await p.fill("[data-bhex=primary]", "#123456"); await p.dispatchEvent("[data-bhex=primary]", "input");
   await p.click('[data-bset="light"][data-c="#FFFFFF"]');
   // 3. typefaces

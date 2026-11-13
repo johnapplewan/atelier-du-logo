@@ -9,7 +9,7 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   // neutral example: frame, disc, dot + the word "Marque"
   const ids = await p.evaluate(() => __atelier.layers.map(l => l.id));
   check("example document", () => assert.deepStrictEqual(ids, ["cadre", "disque", "point", "lettre-1", "lettre-2", "lettre-3", "lettre-4", "lettre-5", "lettre-6"]));
-  const word = await p.evaluate(() => __atelier.layers.filter(l => l.group === "word").map(l => l.ch).join(""));
+  const word = await p.evaluate(() => __atelier.layers.filter(l => /^lettre-/.test(l.id)).map(l => l.ch).join(""));
   check("word is Marque, letters remember their character", () => assert.strictEqual(word, "Marque"));
   const rendered = await p.locator("#art path").count();
   check("all layers rendered", () => assert.strictEqual(rendered, 9));
@@ -62,19 +62,20 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
 
   // back to the example through "Marque et départ"
   await p.click("#startBtn"); await p.fill("#stName", "Atelier Nova"); await p.click('[data-start="example"]'); await p.click("#stGo"); await p.waitForTimeout(500);
-  const reset0 = (await layer(p, "cadre")).subs[0][0];
-  check("reset", () => assert.deepStrictEqual(reset0, { x: 84, y: 28, i: { x: 53.07, y: 28 }, o: null }));
+  const ex = await p.evaluate(() => ({ ids: __atelier.layers.map(l => l.id), word: wordText, fx: (__atelier.layers.find(l => l.id === "tranche") || {}).fx }));
+  check("« Le logo d'exemple » loads the stylised workshop logo", () => { for (const id of ["construction", "cotes", "croquis-hachures", "tranche", "cadre", "courbe", "points", "lettre-1", "txt-origine-1"]) assert.ok(ex.ids.includes(id), id);
+    assert.strictEqual(ex.word, "ATELIER"); assert.ok(ex.fx.some(f => f.t === "brosse") && ex.fx.some(f => f.t === "fondu")); });
 
   // fonts: previews show the user's word, whole-word and per-letter swaps
   await p.fill("#txtIn", "Atelier Nova"); await p.press("#txtIn", "Enter"); await p.waitForTimeout(400);
-  const w2 = await p.evaluate(() => __atelier.layers.filter(l => l.group === "word").map(l => l.ch).join(""));
-  check("typed word re-shaped", () => assert.strictEqual(w2, "AtelierNova"));
+  const w2 = await p.evaluate(() => __atelier.layers.filter(l => /^lettre-/.test(l.id)).map(l => l.ch).join(""));
+  check("typed word re-shaped (capitals font of the example)", () => assert.strictEqual(w2.toUpperCase(), "ATELIERNOVA"));
   await p.click("#fontBtn"); await p.waitForSelector("#fontMenu .fontitem svg", { timeout: 5000 });
   const prevLetters = await p.evaluate(() => document.querySelector('#fontMenu .fontitem svg').querySelectorAll("path").length);
   check("font preview draws the typed word", () => assert.strictEqual(prevLetters, 11));
   const mont = await p.evaluate(() => [...document.querySelectorAll("#fontMenu .fontitem")].findIndex(b => b.querySelector(".fn").textContent.trim() === "Montserrat"));
   await p.locator("#fontMenu .fontitem").nth(mont).click(); await p.waitForTimeout(600);
-  const fonts = await p.evaluate(() => [...new Set(__atelier.layers.filter(l => l.group === "word").map(l => l.font))]);
+  const fonts = await p.evaluate(() => [...new Set(__atelier.layers.filter(l => /^lettre-/.test(l.id)).map(l => l.font))]);
   check("whole word in Montserrat", () => assert.deepStrictEqual(fonts, ["montserrat"]));
   // per letter: select the first two letters, apply Playfair Display
   await p.click("#fontBtn");
@@ -83,7 +84,7 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   await p.check("input[name=fscope][value=sel]");
   const play = await p.evaluate(() => [...document.querySelectorAll("#fontMenu .fontitem")].findIndex(b => b.querySelector(".fn").textContent.trim() === "Playfair Display"));
   await p.locator("#fontMenu .fontitem").nth(play).click(); await p.waitForTimeout(600);
-  const per = await p.evaluate(() => __atelier.layers.filter(l => l.group === "word").map(l => l.font + ":" + l.ch));
+  const per = await p.evaluate(() => __atelier.layers.filter(l => /^lettre-/.test(l.id)).map(l => l.font + ":" + l.ch));
   check("per-letter swap on any word", () => assert.deepStrictEqual(per.slice(0, 3), ["playfair:A", "playfair:t", "montserrat:e"]));
   await p.click("#exportBtn"); await p.check("input[value=full]");
   const save2 = await p.textContent("#exSave");
@@ -91,16 +92,16 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   await p.click("#exClose");
 
   // delete layers: right click in the list, confirmation, undo; Suppr with the Calque tool
-  await p.click('.layer[data-id="point"] .nm', { button: "right" }); await p.waitForSelector("#confirmDlg[open]");
+  await p.click('.layer[data-id="lettre-7"] .nm', { button: "right" }); await p.waitForSelector("#confirmDlg[open]");
   const askTxt = await p.textContent("#cfTitle"); await p.click("#cfNo");
-  const stillThere = await p.evaluate(() => __atelier.layers.some(l => l.id === "point"));
-  check("right click asks before deleting; Annuler keeps the layer", () => { assert.match(askTxt, /Supprimer « Point » \?/); assert.ok(stillThere); });
-  await p.click('.layer[data-id="point"] .nm', { button: "right" }); await p.click("#cfYes"); await p.waitForTimeout(100);
-  const gone = await p.evaluate(() => !__atelier.layers.some(l => l.id === "point"));
-  await p.keyboard.press("Control+z"); const back = await p.evaluate(() => __atelier.layers.some(l => l.id === "point"));
+  const stillThere = await p.evaluate(() => __atelier.layers.some(l => l.id === "lettre-7"));
+  check("right click asks before deleting; Annuler keeps the layer", () => { assert.match(askTxt, /Supprimer « Lettre r · 7 » \?/i); assert.ok(stillThere); });
+  await p.click('.layer[data-id="lettre-7"] .nm', { button: "right" }); await p.click("#cfYes"); await p.waitForTimeout(100);
+  const gone = await p.evaluate(() => !__atelier.layers.some(l => l.id === "lettre-7"));
+  await p.keyboard.press("Control+z"); const back = await p.evaluate(() => __atelier.layers.some(l => l.id === "lettre-7"));
   check("layer deleted after confirmation, undo brings it back", () => assert.ok(gone && back));
-  await p.keyboard.press("v"); await p.click('.layer[data-id="disque"] .nm'); await p.focus("body"); await p.keyboard.press("Delete"); await p.click("#cfYes"); await p.waitForTimeout(100);
-  const delKey = await p.evaluate(() => !__atelier.layers.some(l => l.id === "disque")); await p.keyboard.press("Control+z");
+  await p.keyboard.press("v"); await p.click('.layer[data-id="lettre-6"] .nm'); await p.focus("body"); await p.keyboard.press("Delete"); await p.click("#cfYes"); await p.waitForTimeout(100);
+  const delKey = await p.evaluate(() => !__atelier.layers.some(l => l.id === "lettre-6")); await p.keyboard.press("Control+z");
   check("Suppr deletes the selected layer (Calque tool)", () => assert.ok(delKey));
 
   // "À propos": project, author, support buttons only when configured
@@ -119,13 +120,13 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   // Texte tool: the block is text (not symbol), exports with the word, and takes a typeface letter by letter
   await p.keyboard.press("t"); q = await ws(60, 330); await p.mouse.click(q.x, q.y); await p.waitForTimeout(600);
   await p.fill("#txtIn", "Studio"); await p.press("#txtIn", "Enter"); await p.waitForTimeout(600);
-  const blk = await p.evaluate(() => __atelier.layers.filter(l => l.grp && /^txt/.test(l.grp)).map(l => [l.id, l.group]));
+  const blk = await p.evaluate(() => __atelier.layers.filter(l => l.grp && /^txt(?!-origine)/.test(l.grp)).map(l => [l.id, l.group]));
   check("text block filed as text, not symbol", () => { assert.strictEqual(blk.length, 6); assert.ok(blk.every(x => x[1] === "word"), JSON.stringify(blk)); });
   await p.click(`.layer[data-id="${blk[0][0]}"] .nm`); await p.click("#fontBtn"); await p.waitForSelector("#fontMenu .fontitem");
   const sc = await p.evaluate(() => document.querySelector("input[name=fscope]:checked").value);
   const mt = await p.evaluate(() => [...document.querySelectorAll("#fontMenu .fontitem")].findIndex(x => x.querySelector(".fn").textContent.trim() === "Montserrat"));
   await p.locator("#fontMenu .fontitem").nth(mt).click(); await p.waitForTimeout(600);
-  const bf = await p.evaluate(() => __atelier.layers.filter(l => l.grp && /^txt/.test(l.grp)).map(l => l.font));
+  const bf = await p.evaluate(() => __atelier.layers.filter(l => l.grp && /^txt(?!-origine)/.test(l.grp)).map(l => l.font));
   check("one letter of a text block changes typeface alone", () => { assert.strictEqual(sc, "sel"); assert.strictEqual(bf[0], "montserrat"); assert.ok(bf.slice(1).every(f => f !== "montserrat"), bf.join()); });
   await p.click("#exportBtn"); await p.check("input[name=exm][value=mark]"); const mk = await p.inputValue("#svgcode"); await p.check("input[name=exm][value=word]"); const wd = await p.inputValue("#svgcode"); await p.click("#exClose");
   check("export: the symbol without the text, the text with the word", () => { assert.ok(!/Studio|txt/.test(mk) && (mk.match(/<path/g) || []).length < (wd.match(/<path/g) || []).length); });

@@ -789,14 +789,81 @@ function circle(cx,cy,r){
     {x:r2(cx),y:r2(cy+r),i:P(cx+k,cy+r),o:P(cx-k,cy+r)},{x:r2(cx-r),y:r2(cy),i:P(cx-r,cy+k),o:P(cx-r,cy-k)}]];
 }
 /* The neutral example: a simple mark (frame, disc, dot) and the default word, laid out at build time */
+/* Default example: the workshop's own logo, stylised design version (the brand book uses the clean one).
+   Everything is editable layers: construction lines and measures (architect's plan), the mark drawn in pencil on the
+   left and rendered on the right (brushed-metal edge = 16 stacked slices, lacquered top, raised curve and handles),
+   "ATELIER" (the word) and "DU LOGO" (a text block) outlined on the left, solid on the right. The left-to-right
+   transition uses the "fondu" / "efface" effects, placed on the drawing's width. */
+// palettes: a group can carry its own (max 6 colours each), so pencil, render and text stay separately editable
+const ORIGIN_PALS=[{id:"main",name:"Principale",colors:["#1D1D1F","#E0703A","#E6E6E3"]},
+  {id:"crayon",name:"Crayon",colors:["#3A3A3A","#8A8A86"]},
+  {id:"rendu",name:"Rendu 3D",colors:["#B9BDC2","#E6E6E3","#FFFFFF","#000000","#1D1D1F","#E0703A"]}];
+const ORIGIN_GROUPS=[
+  {id:"construction", name:"Traits de construction", pal:"crayon", open:false}, {id:"cotes", name:"Cotes", pal:"crayon", open:false},
+  {id:"picto-croquis", name:"Symbole au crayon", pal:"crayon", open:false}, {id:"picto-rendu", name:"Symbole rendu", pal:"rendu", open:false},
+  {id:"texte-croquis", name:"Texte au crayon", pal:"crayon", open:false},
+  {id:"txt-origine", name:"Texte « DU LOGO »", pal:null, open:true, text:{str:GLYPHS.line2.str, font:GLYPHS.font}}];
 function buildOriginal(){
-  const L = [
-    {id:"cadre",name:"Cadre",group:"mark",fill:EX.ink,subs:roundRect(28,28,200,200,56)},
-    {id:"disque",name:"Disque",group:"mark",fill:EX.paper,subs:circle(128,128,64)},
-    {id:"point",name:"Point",group:"mark",fill:EX.accent,subs:circle(156,100,22)},
-  ];
-  GLYPHS.letters.forEach((g,i)=>{ const l={id:"lettre-"+(i+1),name:"Lettre "+g.ch+" · "+(i+1),group:"word",fill:EX.ink,font:"instrument",ch:g.ch,subs:clone(g.subs)}; stamp(l, GLYPHS.baseline); L.push(l); });
-  return L.map(l=>Object.assign({visible:true,locked:false},l));
+  const GR="#3A3A3A", DIM="#8A8A86", INK="#1D1D1F", ACC=EX.accent, FACE="#E6E6E3", D=16, DX=0.42, DY=0.88;
+  const N=(x,y,i,o)=>({x,y,i:i||null,o:o||null}), mv=(subs,dx,dy)=>subs.map(c=>c.map(n=>({x:r2(n.x+dx),y:r2(n.y+dy),i:n.i&&{x:r2(n.i.x+dx),y:r2(n.i.y+dy)},o:n.o&&{x:r2(n.o.x+dx),y:r2(n.o.y+dy)}})));
+  const loop=subs=>subs.map(c=>c.concat([{x:c[0].x,y:c[0].y,i:c[0].i,o:null}]).map((n,k)=>k===0?{...n,i:null}:n));   // closed outline as an open stroke
+  const seg=(x1,y1,x2,y2)=>[N(x1,y1),N(x2,y2)];
+  const RR=roundRect(16,16,224,224,60), CURVE=[[N(64,180,null,{x:84,y:92}),N(192,76,{x:172,y:164},null)]], HAND=[[N(64,180),N(84,104)],[N(192,76),N(172,152)]];
+  const L=[], add=(o)=>{ L.push(Object.assign({visible:true,locked:false,group:"mark"},o)); return o; };
+  const letter=(g,id,name,fill,grp,extra)=>{ const l={id,name,group:"word",fill,font:GLYPHS.font,ch:g.ch,subs:clone(g.subs),bl:g.bl,gy:g.gy.slice()}; if(grp) l.grp=grp; return Object.assign(l,extra||{}); };
+  const w1=GLYPHS.letters, w2=GLYPHS.line2.letters, [c1,c2]=GLYPHS.caps;
+  const box=ls=>bounds(ls.map(g=>({subs:g.subs}))), b1=box(w1), b2=box(w2), tEnd=Math.max(b1.x1,b2.x1);
+  // construction lines
+  const cons=[seg(-30,16,tEnd+40,16),seg(-30,240,270,240),seg(16,-40,16,280),seg(240,-30,240,270),
+    seg(b1.x0-30,c1.baseline,b1.x1+40,c1.baseline),seg(b1.x0-30,c1.baseline-c1.cap,b1.x1+40,c1.baseline-c1.cap),
+    seg(b2.x0-30,c2.baseline,b2.x1+40,c2.baseline),seg(b2.x0-30,c2.baseline-c2.cap,b2.x1+40,c2.baseline-c2.cap)];
+  [[w1,c1],[w2,c2]].forEach(([w,c])=>w.forEach((g,i)=>{ if(i%2===0){ const x=box([g]).x0; cons.push(seg(x,c.baseline-c.cap-10,x,c.baseline+10)); } }));
+  add({id:"construction",name:"Traits de construction",grp:"construction",fill:GR,open:true,sw:0.6,opacity:0.55,subs:cons});
+  // measures (dimension lines + arrows + labels)
+  const lab=k=>GLYPHS.labels.find(x=>x.at===k), place=(lb,x,y,rot)=>lb.letters.map(g=>({ch:g.ch,subs:g.subs.map(c=>c.map(n=>{ const T=p=>p&&(rot?{x:r2(x+p.y),y:r2(y-p.x)}:{x:r2(x+p.x),y:r2(y+p.y)}); return {x:T(n).x,y:T(n).y,i:T(n.i)||null,o:T(n.o)||null}; }))}));
+  const dl=[], arrows=[], labs=[];
+  const hdim=(x1,x2,y,k)=>{ dl.push(seg(x1,y,x2,y),seg(x1,y-4,x1,y+4),seg(x2,y-4,x2,y+4)); arrows.push([N(x1,y),N(x1+5,y-2),N(x1+5,y+2)],[N(x2,y),N(x2-5,y-2),N(x2-5,y+2)]); const lb=lab(k); labs.push(...place(lb,(x1+x2)/2-lb.width/2,y-4)); };
+  const vdim=(x,y1,y2,k,left)=>{ dl.push(seg(x,y1,x,y2),seg(x-4,y1,x+4,y1),seg(x-4,y2,x+4,y2)); arrows.push([N(x,y1),N(x-2,y1+5),N(x+2,y1+5)],[N(x,y2),N(x-2,y2-5),N(x+2,y2-5)]); const lb=lab(k); labs.push(...(left?place(lb,x-6,(y1+y2)/2+lb.width/2,true):place(lb,x+6,(y1+y2)/2+3))); };
+  hdim(16,240,-22,"picto"); hdim(240+D*DX+4,b1.x0-4,-22,"ecart"); hdim(b1.x0,b1.x1,-22,"mot");
+  vdim(tEnd+22,c1.baseline-c1.cap,c1.baseline,"cap1"); vdim(tEnd+22,c2.baseline-c2.cap,c2.baseline,"cap2"); vdim(-16,16,240,"picto",true);
+  labs.push(...place(lab("note"),16,276));
+  add({id:"cotes",name:"Lignes de cote",grp:"cotes",fill:DIM,open:true,sw:0.8,subs:dl});
+  add({id:"cotes-fleches",name:"Flèches de cote",grp:"cotes",fill:DIM,subs:arrows});
+  add({id:"cotes-mesures",name:"Mesures",grp:"cotes",fill:DIM,subs:labs.flatMap(g=>g.subs)});
+  // the mark, pencil side
+  const ef=a=>[{t:"efface",a}], fo=a=>[{t:"fondu",a}];
+  const pc=[], pr=[];   // layers to receive the mark's sweep
+  pc.push(add({id:"croquis-hachures",name:"Hachures",grp:"picto-croquis",fill:GR,opacity:0.6,subs:clone(RR),fx:[{t:"hachures",a:8}]}));
+  pc.push(add({id:"croquis-contour",name:"Contour au crayon",grp:"picto-croquis",fill:GR,open:true,sw:2,subs:loop(RR)}));
+  pc.push(add({id:"croquis-contour-2",name:"Contour repris",grp:"picto-croquis",fill:GR,open:true,sw:1.6,opacity:0.4,subs:loop(mv(RR,1.3,-0.9))}));
+  pc.push(add({id:"croquis-epaisseur",name:"Épaisseur esquissée",grp:"picto-croquis",fill:GR,open:true,sw:1,opacity:0.6,subs:loop(mv(RR,D*DX,D*DY)).concat([seg(76,16,76+D*DX,16+D*DY),seg(240,76,240+D*DX,76+D*DY),seg(240,180,240+D*DX,180+D*DY),seg(16,180,16+D*DX,180+D*DY)])}));
+  pc.push(add({id:"croquis-courbe-ombre",name:"Courbe estompée",grp:"picto-croquis",fill:GR,open:true,sw:16,opacity:0.2,subs:clone(CURVE)}));
+  pc.push(add({id:"croquis-courbe",name:"Courbe au crayon",grp:"picto-croquis",fill:GR,open:true,sw:3,subs:clone(CURVE).concat(mv(CURVE,1,-1.2))}));
+  pc.push(add({id:"croquis-poignees",name:"Poignées au crayon",grp:"picto-croquis",fill:GR,open:true,sw:2.4,subs:clone(HAND).concat(loop(circle(84,104,14)),loop(circle(172,152,14)))}));
+  // the mark, rendered side
+  const slices=[]; for(let i=D;i>=1;i--) slices.push(...mv(RR,i*DX,i*DY));
+  pr.push(add({id:"tranche",name:"Tranche en métal brossé",grp:"picto-rendu",fill:"#B9BDC2",subs:slices,fx:[{t:"or",a:60,c:"#B9BDC2"},{t:"brosse",a:55}]}));
+  pr.push(add({id:"cadre",name:"Dessus laqué",grp:"picto-rendu",fill:FACE,subs:clone(RR),fx:[{t:"degrade",a:30,c:"#FFFFFF"}]}));
+  pr.push(add({id:"reflet",name:"Reflet du vernis",grp:"picto-rendu",fill:"#FFFFFF",opacity:0.4,subs:[[N(156,16),N(178,16),N(16,178),N(16,156)]]}));
+  pr.push(add({id:"courbe-ombre",name:"Ombre de la courbe",grp:"picto-rendu",fill:"#000000",open:true,sw:19,opacity:0.22,subs:mv(CURVE,2.2,3.6)}));
+  pr.push(add({id:"courbe",name:"Courbe",grp:"picto-rendu",fill:INK,open:true,sw:18,subs:clone(CURVE)}));
+  pr.push(add({id:"courbe-reflet",name:"Reflet de la courbe",grp:"picto-rendu",fill:"#FFFFFF",open:true,sw:3.5,opacity:0.28,subs:mv(CURVE,-1.4,-2.4)}));
+  pr.push(add({id:"poignees-ombre",name:"Ombre des poignées",grp:"picto-rendu",fill:"#000000",open:true,sw:8,opacity:0.18,subs:mv(HAND,1.6,2.6)}));
+  pr.push(add({id:"poignees",name:"Poignées",grp:"picto-rendu",fill:ACC,open:true,sw:8,subs:clone(HAND)}));
+  pr.push(add({id:"points-ombre",name:"Ombre des points",grp:"picto-rendu",fill:"#000000",opacity:0.2,subs:[...mv(circle(84,104,14),1.6,2.8),...mv(circle(172,152,14),1.6,2.8)]}));
+  pr.push(add({id:"points",name:"Points",grp:"picto-rendu",fill:ACC,subs:[...circle(84,104,14),...circle(172,152,14)]}));
+  pr.push(add({id:"points-reflet",name:"Reflets des points",grp:"picto-rendu",fill:"#FFFFFF",opacity:0.6,subs:[...circle(79.5,99,5),...circle(167.5,147,5)]}));
+  // text: pencil outlines, then the solid letters
+  const tc=[], tr=[];
+  w1.concat(w2).forEach((g,i)=>tc.push(add({id:"esquisse-"+(i+1),name:"Esquisse "+g.ch,group:"word",grp:"texte-croquis",fill:GR,subs:clone(g.subs),fx:[{t:"contour",a:3}]})));
+  w1.forEach((g,i)=>{ const l=letter(g,"lettre-"+(i+1),"Lettre "+g.ch+" · "+(i+1),INK); L.push(Object.assign({visible:true,locked:false},l)); tr.push(l); });
+  w2.forEach((g,i)=>{ const l=letter(g,"txt-origine-"+(i+1),g.ch+" · "+(i+1),ACC,"txt-origine"); L.push(Object.assign({visible:true,locked:false},l)); tr.push(l); });
+  // one sweep for the mark, one for the text, as a share of the whole drawing's width
+  const all=bounds(L), W=all.x1-all.x0, pos=x=>r2((x-all.x0)/W*100), pm=pos(16+224*0.46), pt=pos(b1.x0+(tEnd-b1.x0)*0.24);
+  const byId=new Map(L.map(l=>[l.id,l]));
+  pc.forEach(o=>{ const l=byId.get(o.id); l.fx=(l.fx||[]).concat(ef(pm)); }); pr.forEach(o=>{ const l=byId.get(o.id); l.fx=(l.fx||[]).concat(fo(pm)); });
+  tc.forEach(o=>{ const l=byId.get(o.id); l.fx=(l.fx||[]).concat(ef(pt)); }); tr.forEach(o=>{ const l=byId.get(o.id); l.fx=(l.fx||[]).concat(fo(pt)); });
+  return L;
 }
 const ORIGIN = buildOriginal();
 
@@ -1946,8 +2013,8 @@ async function sendToClaude(list){
    Reordering a palette moves its paints between zones; editing a paint recolours all its areas. */
 const HEX=/^#[0-9a-fA-F]{6}$/;
 const MAXZ=6;
-let pals=[{id:"main", name:"Principale", colors:[]}];
-let groups=[];          // {id, name, pal: palette id or null, open}
+let pals=clone(ORIGIN_PALS);
+let groups=clone(ORIGIN_GROUPS);          // {id, name, pal: palette id or null, open}
 let curPal="main";      // palette shown in the Palette panel
 let palette=pals[0].colors;
 let previewPal=null;
@@ -3202,6 +3269,10 @@ const FX={
   riso:{n:"Risographie", a:45, c:"#FF48B0"},
   papier:{n:"Papier découpé", a:45},
   verre:{n:"Verre", a:50},
+  degrade:{n:"Dégradé de couleur", a:45, c:"#FFFFFF"},
+  brosse:{n:"Métal brossé (texture)", a:50},
+  fondu:{n:"Fondu : apparaît vers la droite", a:50},
+  efface:{n:"Fondu : s'efface vers la droite", a:50},
 };
 const FX_IDS=new Set(Object.keys(FX));
 function validFx(v){ return v===undefined||(Array.isArray(v)&&v.length<=4&&v.every(e=>e&&FX_IDS.has(e.t)&&Number.isFinite(e.a)&&e.a>=0&&e.a<=100&&(e.c===undefined||/^#[0-9a-fA-F]{6}$/.test(e.c)))); }
@@ -3217,7 +3288,9 @@ function applyFx(L, r, opts){
   const b=bounds([L]), S=Math.max(b.x1-b.x0,b.y1-b.y0)||1, d=layerD(L);
   const base=baseOf(L);
   const id=(opts.pfx||"g")+"-fx-"+L.id.replace(/[^\w-]/g,"");
-  let defs=r.defs, body=r.body, under="", over="", wrap=[];
+  let defs=r.defs, body=r.body, under="", over="", wrap=[], outer=[];
+  // sweep effects are placed on the whole drawing's width, so all layers share one transition
+  const all=(()=>{ try{ const v=layers.filter(l=>l.visible!==false&&l.subs&&l.subs.length); return v.length?bounds(v):b; }catch(_){ return b; } })();
   const clip=`${id}-clip`; let needClip=false;
   const steps=(len,ang,col,op,sfx)=>{ const n=Math.max(2,Math.min(70,Math.round(len/Math.max(0.6,S/160)))), dx=Math.cos(ang)*len/n, dy=Math.sin(ang)*len/n;
     defs+=`<path id="${id}-p${sfx}" d="${d}"/>`; let s=`<g fill="${col}"${op<1?` opacity="${op}"`:""} pointer-events="none">`;
@@ -3257,13 +3330,22 @@ function applyFx(L, r, opts){
       case "riso": { const o=r2(S*(0.006+a*0.03)); under+=`<path d="${d}" transform="translate(${o} ${r2(-o*0.6)})" fill="${c}" style="mix-blend-mode:multiply" opacity=".85" pointer-events="none"/>`; break; }
       case "papier": { const o=r2(S*(0.01+a*0.04)); defs+=`<filter id="${fid}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="${r2(o*0.7)}"/></filter>`;
         under+=`<path d="${d}" transform="translate(${r2(o*0.6)} ${r2(o*1.6)})" fill="#000" opacity=".28" filter="url(#${fid})" pointer-events="none"/><path d="${d}" transform="translate(0 ${o})" fill="${shade(base,-0.25)}" pointer-events="none"/>`; break; }
+      case "degrade": { const g=`<linearGradient id="${fid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="${r2(0.15+a*0.75)}" stop-color="${base}"/><stop offset="1" stop-color="${shade(base,-0.08)}"/></linearGradient>`; defs+=g;
+        body=L.open?body.replace(/ stroke="([^"]+)"/, ` stroke="url(#${fid})"`):body.replace(/ fill="([^"]+)"/, ` fill="url(#${fid})"`); break; }
+      case "brosse": defs+=`<filter id="${fid}" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="${r2(0.6/S)} ${r2(Math.min(2,140/S))}" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComponentTransfer in="g" result="g2"><feFuncA type="table" tableValues="0 ${r2(0.15+a*0.5)}"/></feComponentTransfer><feComposite in="g2" in2="SourceAlpha" operator="in" result="t"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="t"/></feMerge></filter>`;
+        wrap.push(`filter="url(#${fid})"`); break;
+      case "fondu": case "efface": { const W=all.x1-all.x0||1, cx=all.x0+W*a, half=W*0.06, show=e.t==="fondu";
+        defs+=`<linearGradient id="${fid}g" gradientUnits="userSpaceOnUse" x1="${r2(cx-half)}" x2="${r2(cx+half)}" y1="0" y2="0"><stop offset="0" stop-color="${show?"#000":"#fff"}"/><stop offset="1" stop-color="${show?"#fff":"#000"}"/></linearGradient>`+
+          `<mask id="${fid}" maskUnits="userSpaceOnUse" x="${r2(all.x0-W)}" y="${r2(all.y0-W)}" width="${r2(W*3)}" height="${r2((all.y1-all.y0)+W*2)}"><rect x="${r2(all.x0-W)}" y="${r2(all.y0-W)}" width="${r2(W*3)}" height="${r2((all.y1-all.y0)+W*2)}" fill="url(#${fid}g)"/></mask>`;
+        outer.push(`mask="url(#${fid})"`); break; }
       case "verre": { needClip=true; body=body.replace(/ fill="([^"]+)"/, ` fill="$1" fill-opacity="${r2(0.75-a*0.5)}"`);
         over+=`<g clip-path="url(#${clip})" pointer-events="none"><ellipse cx="${r2(b.x0+(b.x1-b.x0)*0.3)}" cy="${r2(b.y0)}" rx="${r2((b.x1-b.x0)*0.6)}" ry="${r2((b.y1-b.y0)*0.45)}" fill="#fff" opacity="${r2(0.25+a*0.3)}"/></g><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="${r2(S*0.006)}" pointer-events="none"/>`; break; }
     }
   });
   if(needClip) defs+=`<clipPath id="${clip}"><path d="${d}"/></clipPath>`;
   for(const w of wrap) body=`<g ${w}>${body}</g>`;
-  return {defs, body:under+body+over};
+  let out=under+body+over; for(const w of outer) out=`<g ${w}>${out}</g>`;
+  return {defs, body:out};
 }
 
 /* ---- geometry helpers for transformations ---- */
@@ -4358,14 +4440,14 @@ async function applyStart(choice, info, shape){
   const b0=snapshot(), h0=hist.length;
   if(choice!=="keep"){
     groups=[]; curPal="main"; pals=[{id:"main",name:"Principale",colors:[]}]; sel={layer:null,node:null};
-    layers = choice==="example" ? clone(ORIGIN) : [];
+    layers = choice==="example" ? clone(ORIGIN) : []; if(choice==="example"){ groups=clone(ORIGIN_GROUPS); pals=clone(ORIGIN_PALS); }
     if(choice==="proposal"){ const c=prop.docs[prop.pick], plan=prop.list[prop.pick]; layers=clone(c.doc.layers); pals=clone(c.doc.pals); groups=clone(c.doc.groups);
       if(c.missing){ const ph=layers.filter(l=>l.id==="motif-provisoire"), b=bounds(ph.length?ph:layers.filter(l=>l.group==="mark").concat(layers).slice(0,Math.max(1,layers.length))); notes.push({id:"n"+Date.now().toString(36), n:notes.reduce((m,x)=>Math.max(m,x.n),0)+1, x:r2((b.x0+b.x1)/2), y:r2((b.y0+b.y1)/2), audio:null, at:new Date().toISOString(),
         text:plan.premium?`Concept « ${plan.title} » : dessine le motif « ${plan.unknown} » à la place du cercle provisoire, en aplat d'une seule couleur (${plan.accent}), simple et lisible à 16 px, sans effet (règles premium : DESIGN-RULES.md). Mots-clés : ${brand.keywords.join(", ")}.`
           :`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
     if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
-    ensureZones(); wordText=brand.name;
-    if(choice==="word"||choice==="shape"||choice==="example"){
+    ensureZones(); wordText=choice==="example"?GLYPHS.word:brand.name;   // the example is the workshop's own logo, kept as designed
+    if(choice==="word"||choice==="shape"){
       await loadFonts().catch(()=>null); const f=fontById("instrument");
       if(f) await setText({kind:"word", layers:wordLayers(), x0:choice==="word"?28:undefined}, brand.name, f);
       else if(choice!=="example") wordText=brand.name;

@@ -6,11 +6,12 @@ const path = require("path");
 const vm = require("vm");
 const root = __dirname;
 
-const DEFAULT_WORD = "Marque";
-const SCALE = 0.218959;   // Instrument Serif at 219 units per em, as in the font list (fonts.js "k")
-const BASELINE = 202.46;  // shared baseline of the word line (mark spans 0..256)
-const X0 = 301;           // text starts after the mark + gap
-
+// Default example: the workshop's own logo. Line 1 "ATELIER" is the word, line 2 "DU LOGO" a text block,
+// both in Montserrat SemiBold capitals (font "montserrat-caps"), tracked like the brand-book version.
+const DEFAULT_WORD = "ATELIER", DEFAULT_LINE2 = "DU LOGO";
+const FONT_KEY = "montserrat_600SemiBold", FONT_K = 0.227778;   // fonts.js "k" of montserrat-caps (native size)
+const X0 = 301;            // text starts after the mark + gap
+const L1 = { cap: 74, track: 0.12, baseline: 150 }, L2 = { cap: 31, track: 0.62, baseline: 214 };
 const r2 = n => Math.round(n * 100) / 100;
 
 function loadGlyphFile(key) {
@@ -45,18 +46,44 @@ function parseGlyph(d, ox) {
   return subs.filter(s => s.length >= 2);
 }
 
-function layoutWord(str, G) {
-  const chars = [...str], letters = []; let pen = 0;
+function capUnits(G) { let m = 0; parseGlyph(G.gl.H, 0).forEach(c => c.forEach(n => { m = Math.min(m, n.y); })); return -m; }
+// one line of capitals at a given cap height and tracking; each letter keeps its baseline (bl) and its box at the
+// font's native size (gy), so the workshop re-sets it at the right size when the text or the typeface changes
+function layoutLine(str, G, o) {
+  const S = o.cap / capUnits(G), chars = [...str], out = []; let pen = 0;
   chars.forEach((ch, i) => {
     if (G.adv[ch] === undefined) throw new Error("missing glyph " + ch);
-    if (G.gl[ch]) letters.push({ ch, subs: parseGlyph(G.gl[ch], pen) });
-    pen += G.adv[ch] + ((G.kern && G.kern[ch + (chars[i + 1] || "")]) || 0);
+    if (G.gl[ch]) {
+      const subs = parseGlyph(G.gl[ch], 0); let y0 = Infinity, y1 = -Infinity;
+      subs.forEach(c => c.forEach(n => { y0 = Math.min(y0, n.y); y1 = Math.max(y1, n.y); }));
+      const T = p => p && { x: r2(X0 + pen + p.x * S), y: r2(o.baseline + p.y * S) };
+      out.push({ ch, subs: subs.map(c => c.map(n => ({ x: T(n).x, y: T(n).y, i: T(n.i) || null, o: T(n.o) || null }))), bl: o.baseline, gy: [r2(o.baseline + y0 * FONT_K), r2(o.baseline + y1 * FONT_K)] });
+    }
+    pen += G.adv[ch] * S + o.track * o.cap;
   });
-  const T = p => p && { x: r2(X0 + p.x * SCALE), y: r2(BASELINE + p.y * SCALE) };
-  return letters.map(l => ({ ch: l.ch, subs: l.subs.map(s => s.map(n => ({ x: T(n).x, y: T(n).y, i: T(n.i) || null, o: T(n.o) || null }))) }));
+  return out;
 }
-
-const glyphs = { word: DEFAULT_WORD, baseline: BASELINE, letters: layoutWord(DEFAULT_WORD, loadGlyphFile("instrument")) };
+const G = loadGlyphFile(FONT_KEY);
+// measurement labels of the default example (dimension lines, as on an architect's plan), in Inter
+function labelLine(str, GL, cap, x, baseline, track) {
+  const S = cap / capUnits(GL), out = []; let pen = 0;
+  for (const ch of str) { const adv = GL.adv[ch]; if (adv === undefined) throw new Error("missing label glyph " + ch);
+    if (GL.gl[ch]) { const T = p => p && { x: r2(x + pen + p.x * S), y: r2(baseline + p.y * S) }; out.push({ ch, subs: parseGlyph(GL.gl[ch], 0).map(c => c.map(n => ({ x: T(n).x, y: T(n).y, i: T(n.i) || null, o: T(n.o) || null }))) }); }
+    pen += adv * S + (track || 0) * cap; }
+  return { str, letters: out, width: pen };
+}
+const GI = loadGlyphFile("inter_500Medium");
+const lettersBox = ls => { let x0 = Infinity, x1 = -Infinity; ls.forEach(l => l.subs.forEach(c => c.forEach(n => { x0 = Math.min(x0, n.x); x1 = Math.max(x1, n.x); }))); return [x0, x1]; };
+const word1 = layoutLine(DEFAULT_WORD, G, L1), word2 = layoutLine(DEFAULT_LINE2, G, L2), [w1x0, w1x1] = lettersBox(word1);
+const LAB = 7.5, labels = [
+  Object.assign(labelLine("224", GI, LAB, 0, 0), { at: "picto" }),
+  Object.assign(labelLine(String(Math.round(w1x0 - 240)), GI, LAB, 0, 0), { at: "ecart" }),
+  Object.assign(labelLine("ATELIER " + Math.round(w1x1 - w1x0), GI, LAB, 0, 0, 0.08), { at: "mot" }),
+  Object.assign(labelLine("cap " + L1.cap, GI, LAB, 0, 0), { at: "cap1" }),
+  Object.assign(labelLine(String(L2.cap), GI, LAB, 0, 0), { at: "cap2" }),
+  Object.assign(labelLine("rayon 60 - épaisseur 16", GI, LAB, 0, 0, 0.06), { at: "note" }),
+];
+const glyphs = { word: DEFAULT_WORD, font: "montserrat-caps", baseline: L1.baseline, letters: word1, line2: { str: DEFAULT_LINE2, letters: word2 }, caps: [L1, L2], labels };
 const template = fs.readFileSync(path.join(root, "src/template.html"), "utf8");
 if (!template.includes("__GLYPHS__")) throw new Error("src/template.html has no __GLYPHS__ placeholder");
 // Support links for "À propos", kept out of git: about.local.json ({paypal, wero}, git-ignored) or env vars.
@@ -72,7 +99,7 @@ function aboutLinks() {
 }
 const about = aboutLinks();
 fs.writeFileSync(path.join(root, "app/index.html"), template.replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
-console.log("app/index.html written (default word: " + DEFAULT_WORD + ")");
+console.log("app/index.html written (default example: " + DEFAULT_WORD + " / " + DEFAULT_LINE2 + ")");
 
 // ---------- Standalone app: offline file list + service worker ----------
 // files.json lists every file the app needs (used by sw.js to precache and by « Télécharger l'appli » to zip).
