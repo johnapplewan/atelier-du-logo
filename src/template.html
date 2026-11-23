@@ -470,6 +470,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     <button data-sec="1" id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
     <button data-sec="1" id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
     <button data-sec="1" id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
+    <button id="motionBtn" title="Motion : animer le logo du projet (apparition, texte, son, export vidéo)">Animer</button>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
 </header>
@@ -4535,7 +4536,7 @@ const P={
 let curProject=null, collections=[], projFilter="all", projQuery="", projReady=false;
 const newPid=()=>"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const emptyBrand=()=>({name:"",tagline:"",keywords:[],letters:""});
-function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist), guides:clone(guides)}; }
+function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist), guides:clone(guides), motion:motionNow()}; }
 function validDoc(d){ return d && validLayers(d.layers) && (d.notes===undefined||validNotes(d.notes)) && (d.pals===undefined||validPals(d.pals)) && (d.groups===undefined||validGroups(d.groups)); }
 function thumbSVG(ls){
   const vis=(ls||layers).filter(l=>l.visible!==false); if(!vis.length) return "";
@@ -4547,7 +4548,7 @@ function loadDoc(d){
   layers=validLayers(d.layers)?clone(d.layers):[]; notes=validNotes(d.notes)?clone(d.notes):[];
   pals=validPals(d.pals)?clone(d.pals):[{id:"main",name:"Principale",colors:[]}]; groups=validGroups(d.groups)?clone(d.groups):[];
   curPal=typeof d.curPal==="string"?d.curPal:"main"; wordText=typeof d.wordText==="string"?d.wordText:""; brand=validBrand(d.brand)?clone(d.brand):emptyBrand();
-  hist=validHist(d.hist)?clone(d.hist):[]; redoIds=[]; guides=validGuides(d.guides)?clone(d.guides):[]; renderGuides(); sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
+  hist=validHist(d.hist)?clone(d.hist):[]; motionLoad(d.motion); redoIds=[]; guides=validGuides(d.guides)?clone(d.guides):[]; renderGuides(); sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
   ensureZones(); fixSel(); setClaudeUndo(null);
   const ed=$("#noteEditor"); if(ed) ed.dataset.for="";
   renderAll(); renderPins(); renderNotes(); renderNoteEditor(); updateButtons(); fit();
@@ -4668,7 +4669,7 @@ async function importFile(file){
   if(nf) await saveCustomFonts();
   const existing=new Set((await P.all()).map(p=>p.id)); let n=0;
   for(const p of v.projects){ if(!p||typeof p.name!=="string"||!validDoc(p.doc)) continue;
-    if(p.doc.hist!==undefined && !validHist(p.doc.hist)) delete p.doc.hist;   // an unsafe history is dropped, the drawing is kept
+    if(p.doc.hist!==undefined && !validHist(p.doc.hist)) delete p.doc.hist; if(p.doc.motion!==undefined && !validMotion(p.doc.motion)) delete p.doc.motion;   // an unsafe history is dropped, the drawing is kept
     const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:importThumb(p.doc)};
     if(!/^[\w-]+$/.test(q.id)) q.id=newPid(); await P.put(q); n++; }
   renderProjects(); toast(n?n+" projet"+(n>1?"s importés":" importé")+".":"Aucun projet lisible dans ce fichier.");
@@ -4878,9 +4879,9 @@ $("#abZip").onclick=async()=>{ const m=$("#abAppMsg"), b=$("#abZip"); b.disabled
   b.disabled=false; };
 const LS_KEY="atelier-logo-v1";
 function setStatus(txt, err){ const s=$("#status"); s.classList.toggle("err",!!err); s.querySelector("span").textContent=txt; }
-const palDoc=()=>({v:2, pals, groups, wt:wordText, brand, guides});
+const palDoc=()=>({v:2, pals, groups, wt:wordText, brand, guides, mo:motionNow()});
 function loadPalDoc(v){ if(Array.isArray(v)){ if(validPalette(v)){ pals=[{id:"main",name:"Principale",colors:v}]; } return true; }
-  if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; if(validBrand(v.brand)) brand=v.brand; if(validGuides(v.guides)) guides=v.guides; return true; } return false; }
+  if(v&&v.v===2&&validPals(v.pals)&&validGroups(v.groups||[])){ pals=v.pals; groups=v.groups||[]; if(typeof v.wt==="string"&&v.wt.length<=120) wordText=v.wt; if(validBrand(v.brand)) brand=v.brand; if(validGuides(v.guides)) guides=v.guides; if(v.mo!==undefined) motionLoad(v.mo); return true; } return false; }
 function localSave(){ projectTouch(); try{ localStorage.setItem(LS_KEY, JSON.stringify({layers, notes, at:Date.now()})); localStorage.setItem("atelier-logo-palette",JSON.stringify(palDoc())); return true; }catch(_){ return false; } }
 function localLoad(){ try{ const v=JSON.parse(localStorage.getItem(LS_KEY)||"null"); return v; }catch(_){ return null; } }
 const saveTimers={}, saving={}, pendingSave={}, lastAt={shape:0,notes:0,patch:0,palette:0};
@@ -5135,6 +5136,9 @@ async function initPersistence(){
   }catch(err){ clearTimeout(timeout); setStatus("Stockage en ligne indisponible · sauvegarde dans ce navigateur", true); }
   if(sendState==="checking"){ sendState="off"; renderSendBox(); }
 }
+
+/* ---------- Motion module (src/motion.js, inlined by build.js) ---------- */
+/*__MOTION__*/
 
 /* ---------- Start ---------- */
 setTool("move");

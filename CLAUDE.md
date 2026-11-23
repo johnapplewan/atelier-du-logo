@@ -21,6 +21,12 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 
 - Layer effects are data (`L.fx = [{t, a, c?}]`, max 4; includes `degrade` colour gradient, `brosse` brushed metal, `fondu` / `efface` left-to-right sweeps placed on the whole drawing's width) rendered by `applyFx` inside `layerSVG`, so canvas, previews and exports match. Transformations rewrite curves into new layers (own group + palette). When Claude edits a styled layer through a patch, keep its `fx` unless asked.
 
+## Motion (animation module)
+
+- Twin module to animate the open project's logo (~5 s, 1–12 s). Source: `src/motion.js`, inlined by `build.js` at `/*__MOTION__*/` in the workshop script. It only reads the drawing (renders each visible layer once with `layerSVG`, then sets opacity / transform per frame) and never edits layers; it must not break the workshop.
+- Data: `doc.motion = {v:1, dur, loop}` (`validMotion`, `motionNow`, `motionLoad`), saved with the project (`docNow` / `loadDoc`) and the local cache (`palDoc.mo`). Opened by « Animer » (`openMotion`); keys are captured while open. Tests: `tests/motion.js`.
+- Plan: 1 foundations (done) · 2 presets per layer with sliders · 3 timeline, keys, custom easing curves · 4 one-click recipes (incl. « Du croquis au rendu ») · 5 exports WebM / MP4 / GIF / animated SVG · 6 sound (user's sound bank in `sons/`, generator on key moments, editable track, Web Audio effects) · 7 secure import (logo in layers, sound) + terms of use · phone: preview, recipes, quick presets, export; tablet: everything. Later: home with loading animation and « Crée ton logo / Anime ton logo ».
+
 ## History
 
 - `hist` entries store per-layer diffs (`d.ents[id] = [before, after]` as stable JSON, plus order and palettes). `toggleEntry` puts a property back only if it still holds this entry's value, so later changes are never overwritten. Use `commit(before, label)` with a clear French label for new actions; Claude's patches are recorded as "Claude : <note>". The history is saved in the project (`doc.hist`).

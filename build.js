@@ -98,7 +98,10 @@ function aboutLinks() {
   return { paypal, wero: enc };
 }
 const about = aboutLinks();
-fs.writeFileSync(path.join(root, "app/index.html"), template.replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
+// Motion module: its own source file, inlined at the end of the workshop script (shares its renderer, never edits it)
+const motionSrc = fs.readFileSync(path.join(root, "src/motion.js"), "utf8");
+if (!template.includes("/*__MOTION__*/")) throw new Error("src/template.html has no /*__MOTION__*/ placeholder");
+fs.writeFileSync(path.join(root, "app/index.html"), template.replace("/*__MOTION__*/", () => motionSrc).replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
 console.log("app/index.html written (default example: " + DEFAULT_WORD + " / " + DEFAULT_LINE2 + ")");
 
 // ---------- Standalone app: offline file list + service worker ----------
