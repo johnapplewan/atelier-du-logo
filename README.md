@@ -28,6 +28,15 @@ Un éditeur vectoriel de logo et de charte graphique qui s'utilise avec Claude. 
 - **Bulles d'annotation** (texte et voix), envoyées à Claude. Les retouches de Claude arrivent avec un bandeau pour les annuler.
 - **Export** : SVG, PNG et JPG, par groupe ou par calque, en ZIP.
 
+## Logo de l'atelier
+
+L'exemple chargé par défaut est le logo de l'atelier, dans sa version design stylisée, entièrement en calques modifiables :
+- les traits de construction et les cotes ;
+- le symbole au crayon à gauche, rendu à droite (tranche en métal brossé, dessus laqué) ;
+- « ATELIER / DU LOGO ».
+
+Le passage du crayon au rendu utilise les effets « Fondu ». Les versions officielles pour la charte (claire, sombre, symbole à plat) sont dans `docs/charte/`.
+
 ## Propositions de logo
 
 « Proposition de logo » (au premier lancement ou dans « Marque et départ ») tire ses propositions du nom, du slogan, des mots-clés et des lettres clés. Elle les présente par séries de 9 : 5 premium et 4 illustrées. « Autres concepts » passe à la série suivante.

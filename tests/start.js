@@ -20,7 +20,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   const browser = await chromium.launch();
 
   // 1. fresh open: the welcome dialog asks for the brand
-  const { page: p, errors } = await open(browser, { welcome: true });
+  const { page: p, errors } = await open(browser, { welcome: true, fresh: true });
   const shown = await p.isVisible("#startDlg");
   const keepHidden = await p.isHidden("#stKeep");
   check("welcome dialog on first open", () => assert.ok(shown));
@@ -38,7 +38,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   check("exports named after the brand", () => assert.match(save, /atelier-nova-logo\.svg/));
   await p.keyboard.press("Control+z"); await p.waitForTimeout(200);
   const undone = await p.evaluate(() => __atelier.layers.map(l => l.id));
-  check("the start is one undo step", () => assert.deepStrictEqual(undone.slice(0, 3), ["cadre", "disque", "point"]));
+  check("the start is one undo step", () => assert.deepStrictEqual(undone.slice(0, 3), ["construction", "cotes", "cotes-fleches"]));
   await p.keyboard.press("Control+Shift+z");
 
   // brand kept across reloads, dialog not shown again

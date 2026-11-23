@@ -12,9 +12,20 @@
 
 Make the workshop a distributable tool. Anyone should be able to load it as an artifact, or through a skill, and design their logo and brand book with Claude.
 
+## Default example
+
+- The default drawing is the workshop's own logo, stylised design version (`buildOriginal`, `ORIGIN_GROUPS`, `ORIGIN_PALS`): construction lines, measures, the mark in pencil (left) and rendered (right: brushed-metal edge of 16 stacked slices, lacquered top, raised curve and handles), « ATELIER » (the word, Montserrat SemiBold capitals laid out by `build.js`) and « DU LOGO » (text block `txt-origine`). The pencil → render transition uses the `fondu` / `efface` effects. Brand-book (official) versions: `docs/charte/` (no measures, no pencil).
+- Most tests run on the former neutral example (« Marque »), seeded from `tests/fixtures/example-marque.json` by `tests/helpers.js`; pass `{ fresh: true }` to `open()` to test the real default.
+
 ## Styles
 
-- Layer effects are data (`L.fx = [{t, a, c?}]`, max 4) rendered by `applyFx` inside `layerSVG`, so canvas, previews and exports match. Transformations rewrite curves into new layers (own group + palette). When Claude edits a styled layer through a patch, keep its `fx` unless asked.
+- Layer effects are data (`L.fx = [{t, a, c?}]`, max 4; includes `degrade` colour gradient, `brosse` brushed metal, `fondu` / `efface` left-to-right sweeps placed on the whole drawing's width) rendered by `applyFx` inside `layerSVG`, so canvas, previews and exports match. Transformations rewrite curves into new layers (own group + palette). When Claude edits a styled layer through a patch, keep its `fx` unless asked.
+
+## Motion (animation module)
+
+- Twin module to animate the open project's logo (~5 s, 1–12 s). Source: `src/motion.js`, inlined by `build.js` at `/*__MOTION__*/` in the workshop script. It only reads the drawing (renders each visible layer once with `layerSVG`, then sets opacity / transform per frame) and never edits layers; it must not break the workshop.
+- Data: `doc.motion = {v:1, dur, loop}` (`validMotion`, `motionNow`, `motionLoad`), saved with the project (`docNow` / `loadDoc`) and the local cache (`palDoc.mo`). Opened by « Animer » (`openMotion`); keys are captured while open. Tests: `tests/motion.js`.
+- Plan: 1 foundations (done) · 2 presets per layer with sliders · 3 timeline, keys, custom easing curves · 4 one-click recipes (incl. « Du croquis au rendu ») · 5 exports WebM / MP4 / GIF / animated SVG · 6 sound (user's sound bank in `sons/`, generator on key moments, editable track, Web Audio effects) · 7 secure import (logo in layers, sound) + terms of use · phone: preview, recipes, quick presets, export; tablet: everything. Later: home with loading animation and « Crée ton logo / Anime ton logo ».
 
 ## History
 

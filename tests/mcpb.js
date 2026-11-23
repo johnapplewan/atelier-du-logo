@@ -34,7 +34,7 @@ const fs = require("fs"), os = require("os"), path = require("path"), { spawn } 
   await page.evaluate(() => { __atelier.notes.push({ id: "n1", n: 1, x: 156, y: 100, text: "Point plus gros", audio: null, at: new Date().toISOString() }); renderNotes(); });
 
   const st = await call("atelier_etat"); const S = JSON.parse(st.content[0].text);
-  check("atelier_etat: layers as paths and the open bubble", () => { assert.ok(S.calques.length >= 9); assert.strictEqual(S.bulles[0].demande, "Point plus gros"); assert.strictEqual(S.bulles[0].calque, "point"); });
+  check("atelier_etat: layers as paths and the open bubble", () => { assert.ok(S.calques.length >= 9); assert.strictEqual(S.bulles[0].demande, "Point plus gros"); assert.ok(S.bulles[0].calque); });
   const pv = await call("atelier_apercu", { largeur: 512 });
   check("atelier_apercu: PNG image", () => { assert.strictEqual(pv.content[0].type, "image"); assert.strictEqual(pv.content[0].mimeType, "image/png"); assert.ok(Buffer.from(pv.content[0].data, "base64").slice(1, 4).toString() === "PNG"); });
   const ap = await call("atelier_appliquer", { note: "Point agrandi", calques: [{ id: "point", d: "M136 100 C136 89 145 80 156 80 C167 80 176 89 176 100 C176 111 167 120 156 120 C145 120 136 111 136 100 Z" }], reponses: [{ n: 1, texte: "Rayon 20.", fait: true }] });

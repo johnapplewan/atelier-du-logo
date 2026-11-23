@@ -8,6 +8,7 @@ const http = require("http"), fs = require("fs");
 const ROOT = path.resolve(__dirname, "../app");
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css", ".json": "application/json", ".webmanifest": "application/manifest+json", ".svg": "image/svg+xml", ".png": "image/png", ".woff2": "font/woff2" };
 let server = null, APP = null;
+const FIXTURE = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures/example-marque.json"), "utf8"));
 function serve() {
   if (server) return Promise.resolve(APP);
   server = http.createServer((req, res) => {
@@ -29,6 +30,10 @@ async function open(browser, opts = {}) {
   await page.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
   // the welcome dialog is tested in start.js; other tests start with it postponed ("Plus tard")
   if (!opts.welcome) await page.addInitScript(() => { try { localStorage.setItem("atelier-logo-welcome-later", "1"); } catch (_) {} });
+  // Most tests were written against the former neutral example (frame, disc, dot + "Marque"): it is seeded as the
+  // saved drawing of a fresh browser, unless the test asks for the real default ({ fresh: true }).
+  if (!opts.fresh) await page.addInitScript(fx => { try { if (!sessionStorage.getItem("__seeded") && !localStorage.getItem("atelier-logo-v1")) { sessionStorage.setItem("__seeded", "1"); localStorage.setItem("atelier-logo-v1", fx.s); localStorage.setItem("atelier-logo-palette", fx.p); } } catch (_) {} },
+    { s: JSON.stringify(FIXTURE.shape), p: JSON.stringify(FIXTURE.palette) });
   if (opts.init) await page.addInitScript(opts.init);
   await page.goto(await serve());
   await page.waitForFunction(() => window.__atelier && Array.isArray(window.__atelier.layers));
