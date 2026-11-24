@@ -15,14 +15,13 @@ concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
-  deploy:
+  # Two jobs, as in GitHub's own Pages template: the deploy job starts only once the build job has finished,
+  # so the uploaded "github-pages" artifact is always visible to it (a single job once failed with "Found 0 artifact(s)").
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Build (support links from secrets)
@@ -30,8 +29,15 @@ jobs:
         env:
           ATELIER_WERO: ${{ secrets.ATELIER_WERO }}
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: app
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
