@@ -5207,6 +5207,7 @@ const MO_PARAMS = {
   amp: { n: "Amplitude", min: 0, max: 40, step: 1, u: " %" },
   rep: { n: "Répétitions", min: 1, max: 12, step: 1, u: "" },
   sp: { n: "Écartement", min: 0, max: 300, step: 5, u: " %" },
+  de: { n: "Départ du balayage", min: 0, max: 120, step: 1, u: " %" },
 };
 
 /* ---------- Presets ----------
@@ -5227,6 +5228,7 @@ const MO_PRESETS = {
   masque: { cat: "in", n: "Révélation par masque", len: 1, ease: "douce", o: { dir: "gauche" }, feat: "clip", fn: (u, o) => ({ clip: { k: "wipe", dir: o.dir, v: mo01(u) } }) },
   pochoir: { cat: "in", n: "Pochoir", len: 1.2, ease: "sortie", o: { bands: 8 }, feat: "clip", fn: (u, o) => ({ o: mo01(u * 3), clip: { k: "bands", n: o.bands, v: mo01(u) } }) },
   flou: { cat: "in", n: "Mise au point", len: 1, ease: "sortie", o: { blur: 40 }, feat: "filter", fn: (u, o) => ({ o: mo01(u * 1.3), blur: (1 - mo01(u)) * o.blur }) },
+  balayage: { cat: "in", n: "Balayage du rendu", len: 1, ease: "douce", o: { de: 112 }, fn: (u, o) => ({ sweep: { de: o.de / 100, u } }) },
   liquide: { cat: "in", n: "Liquide", len: 1.4, ease: "sortie", o: { liq: 60 }, feat: "filter", fn: (u, o) => ({ o: mo01(u * 1.6), liq: (1 - mo01(u)) * o.liq }) },
   // text (letters are layers: the order and the stagger make the effect)
   lettres: { cat: "texte", n: "Lettre par lettre", len: .55, ease: "sortie", stg: .06, ord: "gauche", o: { dir: "bas", dist: 6 }, fn: moRise },
@@ -5288,12 +5290,13 @@ function motionLoad(m) {
 
 /* ---------- Timing engine ---------- */
 var MO = { open: false, t: 0, playing: false, raf: 0, last: 0, auto: {}, ranks: {}, info: {}, S: 1, sel: new Set(), tab: "in", focus: null, undo: [], redo: [], pend: null };
-const moRest = () => ({ o: 1, x: 0, y: 0, s: 1, sx: 1, ky: 0, r: 0, blur: 0, liq: 0, draw: null, clip: null });
+const moRest = () => ({ o: 1, x: 0, y: 0, s: 1, sx: 1, ky: 0, r: 0, blur: 0, liq: 0, draw: null, clip: null, sweep: null });
 function moMix(st, q) {
   if (q.o !== undefined) st.o *= q.o; if (q.x) st.x += q.x; if (q.y) st.y += q.y; if (q.s !== undefined) st.s *= q.s;
   if (q.sx !== undefined) st.sx *= q.sx; if (q.ky) st.ky += q.ky; if (q.r) st.r += q.r; if (q.blur) st.blur += q.blur; if (q.liq) st.liq += q.liq;
   if (q.draw !== undefined && q.draw !== null) st.draw = st.draw === null ? q.draw : Math.min(st.draw, q.draw);
   if (q.clip && (!st.clip || q.clip.v < st.clip.v)) st.clip = q.clip;
+  if (q.sweep) st.sweep = q.sweep;
 }
 /* provisional preview while no animation is chosen: groups fade and rise in turn (step 1) */
 function moAutoPlan() {
@@ -5415,6 +5418,10 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-tabs button[aria-pressed=true]{background:var(--night);color:#fff;border-color:var(--night)}
 #motion .mo-presets{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #motion .mo-presets button{text-align:left;font-size:13px;padding:8px 10px;min-height:38px}
+#motion .mo-recipes{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#motion .mo-recipes button{text-align:left;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-height:56px}
+#motion .mo-recipes b{font-size:13px;font-weight:600}
+#motion .mo-recipes small{font-size:11px;color:var(--muted);line-height:1.3}
 #motion .mo-hint{color:var(--muted);font-size:12px;margin:6px 0 0}
 #motion .mo-anim{border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:8px}
 #motion .mo-anim[open]{box-shadow:0 2px 10px rgba(0,0,0,.05)}
@@ -5467,6 +5474,7 @@ body.motion-open .toast{z-index:1000}
     </div>
   </div>
   <div class="mo-side" id="moSide" role="region" aria-label="Animations">
+    <section><h3>Recettes en un clic</h3><div class="mo-recipes" id="moRecipes"></div></section>
     <section><h3>Calques</h3>
       <div class="mo-quick"><button data-q="all">Tout</button><button data-q="mark">Symbole</button><button data-q="word">Texte</button><button data-q="none">Aucun</button></div>
       <div class="mo-layers" id="moLayers"></div></section>
@@ -5493,6 +5501,7 @@ body.motion-open .toast{z-index:1000}
     moSelect(g.dataset.mo, e.shiftKey || e.metaKey || e.ctrlKey); });
   const side = moEl("moSide");
   side.addEventListener("click", e => {
+    const rcp = e.target.closest("[data-recipe]"); if (rcp) { moApplyRecipe(rcp.dataset.recipe); return; }
     const q = e.target.closest("[data-q]"), tab = e.target.closest("[data-tab]"), pr = e.target.closest("[data-preset]"), act = e.target.closest("[data-act]");
     if (q) { const k = q.dataset.q; MO.sel = new Set(k === "none" ? [] : moVisible().filter(l => k === "all" || l.group === k).map(l => l.id)); moPanel(); moSelBoxes(); }
     else if (tab) { MO.tab = tab.dataset.tab; moPanel(); }
@@ -5647,11 +5656,15 @@ function moBuild() {
   svg.innerHTML = (defs ? `<defs>${defs}</defs>` : "") + (body ? `<g data-scene>${body}</g><g data-selbox pointer-events="none"></g>` : `<text x="80" y="47" text-anchor="middle" font-size="6" fill="#6B6B70" font-family="Inter,system-ui,sans-serif">Le projet ne contient encore aucun calque visible.</text>`);
   MO.groups = {}; svg.querySelectorAll("g[data-mo]").forEach(g => { MO.groups[g.dataset.mo] = { g, c: g.firstChild, b: g.firstChild.firstChild, tr: g.querySelector("[data-tr]") }; });
   MO.scene = svg.querySelector("g[data-scene]");
+  MO.sweeps = {};
+  if (vis.length) { const b = bounds(vis); MO.all = { x0: b.x0, W: (b.x1 - b.x0) || 1 };
+    vis.forEach(L => (L.fx || []).forEach((e, k) => { if (e.t !== "fondu" && e.t !== "efface") return;
+      const el = document.getElementById(`mo-fx-${L.id.replace(/[^\w-]/g, "")}-${k}g`); if (el) (MO.sweeps[L.id] || (MO.sweeps[L.id] = [])).push({ el, a: e.a / 100 }); })); }
   for (const id of [...MO.sel]) if (!MO.info[id]) MO.sel.delete(id);
   for (const a of motion.anims) if (a.k !== "cam") MO.ranks[a.id] = moRanks(a);
   const dur = moEl("moDur"); dur.value = motion.dur; moEl("moDurOut").textContent = moNum(motion.dur) + " s";
   moEl("moScrub").max = motion.dur; moEl("moLoop").checked = motion.loop;
-  moEl("moNote").textContent = motion.anims.length ? "" : "Aperçu automatique : choisissez des calques puis une animation dans le panneau « Ajouter une animation » pour composer la vôtre.";
+  moEl("moNote").textContent = motion.anims.length ? "" : "Aperçu automatique : choisissez une recette en un clic, ou des calques puis une animation, pour composer la vôtre.";
   moSelBoxes(); moSeek(Math.min(MO.t, motion.dur));
 }
 function moTransform(s, c) {
@@ -5682,6 +5695,9 @@ function moRender(t) {
       if (d !== null && d < 1) { G.tr.style.display = ""; G.tr.setAttribute("stroke-dashoffset", r2(1 - d)); G.b.setAttribute("opacity", r2(mo01((d - .55) / .45))); }
       else { G.tr.style.display = "none"; G.b.removeAttribute("opacity"); } }
   }
+  for (const id in MO.sweeps) { const sw = st[id] && st[id].sweep;
+    for (const g of MO.sweeps[id]) { const pos = sw ? sw.de + (g.a - sw.de) * sw.u : g.a, cx = MO.all.x0 + MO.all.W * pos, h = MO.all.W * .06;
+      g.el.setAttribute("x1", r2(cx - h)); g.el.setAttribute("x2", r2(cx + h)); } }
   if (MO.scene) { const s = st[MO_SCENE]; const tr = s ? moTransform(s, MO.c) : ""; if (tr) MO.scene.setAttribute("transform", tr); else MO.scene.removeAttribute("transform");
     if (s && s.o < 1) MO.scene.setAttribute("opacity", r2(mo01(s.o))); else MO.scene.removeAttribute("opacity"); }
 }
@@ -5698,6 +5714,84 @@ function moSelect(id, add) {
   if (add) { if (MO.sel.has(id)) MO.sel.delete(id); else MO.sel.add(id); } else MO.sel = new Set([id]);
   moPanel(); moSelBoxes();
   const row = moEl("moLayers").querySelector(`[data-layer="${CSS.escape(id)}"]`); if (row) row.closest("label").scrollIntoView({ block: "nearest" });
+}
+
+/* ---------- One-click recipes ----------
+   A recipe reads the drawing (symbol / text blocks / sketch and render layers) and writes a complete set of
+   animations, timed in fractions of the current duration. It replaces the current animations (undoable). */
+function moParts() {
+  const vis = moVisible(), has = (l, t) => Array.isArray(l.fx) && l.fx.some(e => e.t === t);
+  const mark = vis.filter(l => l.group === "mark"), word = vis.filter(l => l.group === "word");
+  const bk = {}; word.forEach(l => { const k = l.grp || "word"; (bk[k] || (bk[k] = [])).push(l); });
+  const blocks = Object.values(bk).map(ls => ({ ids: ls.map(l => l.id), y: bounds(ls).y0 })).sort((p, q) => p.y - q.y).map(b => b.ids);
+  return { vis, has, mark: mark.map(l => l.id), blocks, all: vis.map(l => l.id), words: word.map(l => l.id) };
+}
+function moRecipe(key) {
+  const R = MO_RECIPES[key], T = motion.dur, M = moParts(), list = [];
+  // p preset, k kind, ids, at / len / span as fractions of the duration (span: the whole group ends within it)
+  const mk = (p, k, ids, at, len, x = {}) => {
+    ids = (ids || []).filter(Boolean); if (!ids.length) return;
+    const P = MO_PRESETS[p], n = k === "cam" ? 1 : ids.length, L = Math.max(.04, len * T), units = P.by === "mot" ? new Set(ids.map(id => (layerById(id) && (layerById(id).grp || layerById(id).group)) || id)).size : n;
+    const stg = units > 1 ? Math.max(0, Math.min(2, ((x.span || len) * T - L) / (units - 1))) : 0;
+    let id; do id = "a" + Math.random().toString(36).slice(2, 8); while (list.some(a => a.id === id) || motion.anims.some(a => a.id === id));
+    const a = { id, p, k, ids: k === "cam" ? [MO_SCENE] : ids, at: r2(Math.min(at * T, T - .05)), len: r2(L), stg: r2(stg), ease: x.ease || (k === "out" && P.cat === "in" ? "entree" : P.ease), o: Object.assign(clone(P.o), x.o || {}) };
+    if (x.ord || P.ord || n > 1) a.ord = x.ord || P.ord || "calques";
+    list.push(a);
+  };
+  R.build(M, mk);
+  return list;
+}
+const moTextIn = (M, mk, at, span, p, x) => M.blocks.forEach((ids, i) => mk(i ? "fondu" : p, "in", ids, at + i * span * .8, i ? .14 : Math.min(.16, span * .4), Object.assign({ span: i ? span * .5 : span, ord: "gauche" }, i ? {} : x || {})));
+const MO_RECIPES = {
+  croquis: { n: "Du croquis au rendu", d: "Construction, crayon, puis le rendu balaie le dessin", build: (M, mk) => {
+    const fxA = l => { const e = (l.fx || []).find(e => e.t === "fondu" || e.t === "efface"); return e ? Math.round(e.a * 10) / 10 : null; };
+    const swept = M.vis.filter(l => fxA(l) !== null);
+    if (!swept.length) {   // no sketch / render layers: every contour is drawn, then filled
+      mk("trace", "in", M.mark, 0, .22, { span: .5 }); M.blocks.forEach((ids, i) => mk("trace", "in", ids, .3 + i * .12, .18, { span: .4, ord: "gauche" }));
+      mk("approche", "cam", [MO_SCENE], 0, 1, { o: { sc: 94 } }); return; }
+    const plain = M.vis.filter(l => fxA(l) === null);
+    mk("trace", "in", plain.filter(l => l.open).map(l => l.id), 0, .12, { span: .22 });            // construction lines
+    mk("fondu", "in", plain.filter(l => !l.open).map(l => l.id), .1, .1, { span: .2 });             // measures and labels
+    const sets = [...new Set(swept.map(fxA))].sort((p, q) => p - q);
+    sets.forEach((v, i) => {
+      const ls = swept.filter(l => fxA(l) === v), pencil = ls.filter(l => M.has(l, "efface")).map(l => l.id);
+      mk("trace", "in", pencil, .12 + i * .12, .14, { span: .3, ord: i ? "gauche" : "calques" });
+      // the sweep starts just past this group's right edge, so it crosses the drawing for its whole duration
+      const all = bounds(M.vis), W = (all.x1 - all.x0) || 1, de = Math.round(Math.min(1.2, (bounds(ls).x1 - all.x0) / W + .07) * 100);
+      mk("balayage", "in", ls.map(l => l.id), .46 + i * .15, .2, { o: { de }, ease: "douce" });
+    });
+    mk("approche", "cam", [MO_SCENE], 0, 1, { o: { sc: 94 } }); } },
+  elegante: { n: "Révélation élégante", d: "Symbole en douceur, nom lettre par lettre", build: (M, mk) => {
+    mk("zoom", "in", M.mark, 0, .24, { o: { sc: 88 } }); moTextIn(M, mk, .22, .34, "lettres", { o: { dir: "bas", dist: 5 } });
+    mk("approche", "cam", [MO_SCENE], 0, 1, { o: { sc: 95 } }); } },
+  architecte: { n: "Tracé d'architecte", d: "Chaque contour se dessine puis se remplit", build: (M, mk) => {
+    mk("trace", "in", M.mark, 0, .25, { span: .45 }); M.blocks.forEach((ids, i) => mk("trace", "in", ids, .3 + i * .12, .2, { span: .4, ord: "gauche" })); } },
+  rebond: { n: "Rebond joyeux", d: "Le symbole rebondit, les lettres éclosent", build: (M, mk) => {
+    mk("rebond", "in", M.mark, 0, .26); M.blocks.forEach((ids, i) => mk("eclosion", "in", ids, .2 + i * .14, .14, { span: .32, ord: "centre" }));
+    mk("pulsation", "mo", M.mark, .72, .2, { o: { amp: 6, rep: 1 } }); } },
+  minimal: { n: "Glissé minimal", d: "Symbole et texte glissent en place", build: (M, mk) => {
+    mk("montee", "in", M.mark, 0, .22, { o: { dir: "gauche", dist: 8 } }); M.blocks.forEach((ids, i) => mk("montee", "in", ids, .16 + i * .1, .2, { span: .26, ord: "gauche", o: { dir: "bas", dist: 6 } })); } },
+  machine: { n: "Machine à écrire", d: "Le symbole apparaît, le nom se tape", build: (M, mk) => {
+    mk("fondu", "in", M.mark, 0, .14); moTextIn(M, mk, .14, .46, "machine"); } },
+  liquide: { n: "Encre liquide", d: "Le logo se forme comme une encre", build: (M, mk) => {
+    mk("liquide", "in", M.mark, 0, .36); M.blocks.forEach((ids, i) => mk("flou", "in", ids, .26 + i * .1, .24, { span: .34, ord: "gauche" })); } },
+  pochoir: { n: "Pochoir", d: "Révélation en bandes, texte au masque", build: (M, mk) => {
+    mk("pochoir", "in", M.mark, 0, .3, { o: { bands: 10 } }); M.blocks.forEach((ids, i) => mk("masque", "in", ids, .24 + i * .1, .28, { o: { dir: "gauche" } })); } },
+  orbite: { n: "Orbite", d: "La caméra tourne autour du logo", build: (M, mk) => {
+    mk("orbite", "cam", [MO_SCENE], 0, .6, { o: { ang: 55 } }); mk("fondu", "in", M.mark, 0, .2); moTextIn(M, mk, .16, .3, "lettres", { o: { dir: "bas", dist: 4 } }); } },
+  boucle: { n: "Entrée et sortie", d: "Apparition, pause, puis disparition", build: (M, mk) => {
+    mk("zoom", "in", M.mark, 0, .16, { o: { sc: 80 } }); moTextIn(M, mk, .1, .28, "lettres", { o: { dir: "bas", dist: 5 } });
+    mk("fondu", "out", M.all, .8, .16, { ease: "entree" }); } },
+};
+async function moApplyRecipe(key) {
+  const R = MO_RECIPES[key]; if (!R) return;
+  if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; }
+  moPlay(false);
+  if (motion.anims.length && !(await confirmBox("Appliquer la recette « " + R.n + " » ?", "Elle remplace les animations actuelles. « Annuler » (Ctrl+Z) les rétablit.", "Remplacer"))) return;
+  const list = moRecipe(key);
+  moPush(); motion.anims = list; MO.focus = null; MO.sel = new Set();
+  moBuild(); moPanel(); moSave(); moSeek(0); moPlay(!matchMedia("(prefers-reduced-motion: reduce)").matches);
+  toast("Recette « " + R.n + " » appliquée : chaque animation reste réglable.");
 }
 
 /* ---------- Side panel ---------- */
@@ -5753,6 +5847,7 @@ function moCardWrap(a, P, n, h) {
 function moPanelTimes() { for (const a of motion.anims) { const el = moEl("moList").querySelector(`[data-time="${a.id}"]`); if (el) el.textContent = `${moNum(a.at)}–${moNum(moEnd(a))} s`; } }
 function moPanel() {
   const vis = moVisible().slice().reverse(), gname = l => { const g = groups.find(x => x.id === l.grp); return g ? g.name : l.group === "word" ? "Texte" : "Symbole"; };
+  const rc = moEl("moRecipes"); if (!rc.childElementCount) rc.innerHTML = Object.entries(MO_RECIPES).map(([k, R]) => `<button data-recipe="${k}"><b>${esc(R.n)}</b><small>${esc(R.d)}</small></button>`).join("");
   moEl("moLayers").innerHTML = vis.length ? vis.map(l => `<label class="${MO.sel.has(l.id) ? "on" : ""}"><input type="checkbox" data-layer="${esc(l.id)}"${MO.sel.has(l.id) ? " checked" : ""}><span class="n">${esc(l.name || l.id)}</span><span class="grp">${esc(gname(l))}</span></label>`).join("") : `<p class="mo-hint" style="padding:8px 10px">Aucun calque visible.</p>`;
   moEl("moTabs").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.tab === MO.tab)));
   const cat = MO.tab === "out" ? "in" : MO.tab;
