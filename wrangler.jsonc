@@ -1,0 +1,11 @@
+// Cloudflare Worker that serves the standalone workshop (app/, built by `node build.js`) as static assets.
+// No server code yet: the SaaS routes (accounts, sync to D1 / R2) will be added later as "main".
+// Setup and deployment steps: docs/CLOUDFLARE.md
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "atelier-du-logo",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./app"
+  }
+}
