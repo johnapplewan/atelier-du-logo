@@ -5164,6 +5164,34 @@ const MO_EASES = {
   rebond: { n: "Rebond", f: u => { const n = 7.5625, d = 2.75; if (u < 1 / d) return n * u * u; if (u < 2 / d) return n * (u -= 1.5 / d) * u + .75; if (u < 2.5 / d) return n * (u -= 2.25 / d) * u + .9375; return n * (u -= 2.625 / d) * u + .984375; } },
   net: { n: "Instantanée", f: u => u > 0 ? 1 : 0 },
 };
+/* custom speed curve: cubic-bezier(x1, y1, x2, y2) as in CSS, solved for x (Newton, then bisection) */
+function moBezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const X = t => ((ax * t + bx) * t + cx) * t, Y = t => ((ay * t + by) * t + cy) * t, dX = t => (3 * ax * t + 2 * bx) * t + cx;
+  return u => { if (u <= 0) return 0; if (u >= 1) return 1; let t = u;
+    for (let i = 0; i < 8; i++) { const e = X(t) - u, d = dX(t); if (Math.abs(e) < 1e-6) return Y(t); if (Math.abs(d) < 1e-6) break; t -= e / d; }
+    let lo = 0, hi = 1; t = u; for (let i = 0; i < 40; i++) { const x = X(t); if (Math.abs(x - u) < 1e-6) break; if (x < u) lo = t; else hi = t; t = (lo + hi) / 2; }
+    return Y(t); };
+}
+const MO_BZ = { douce: [.65, 0, .35, 1], sortie: [.33, 1, .68, 1], entree: [.32, 0, .67, 0], lin: [0, 0, 1, 1], depasse: [.34, 1.56, .64, 1] };
+const moEaseOf = a => a.ease === "perso" && Array.isArray(a.bz) ? moBezier(...a.bz) : (MO_EASES[a.ease] || MO_EASES[MO_PRESETS[a.p].ease]).f;
+const MO_EASE_OPTS = Object.assign({}, MO_EASES, { perso: "Courbe personnalisée…" });
+/* free keyframes: values at given times, eased towards the next key */
+const MO_KF = {
+  o: { n: "Opacité", min: 0, max: 100, step: 1, u: " %", d: 100 },
+  x: { n: "Position X", min: -100, max: 100, step: .5, u: " %", d: 0 },
+  y: { n: "Position Y", min: -100, max: 100, step: .5, u: " %", d: 0 },
+  s: { n: "Échelle", min: 0, max: 500, step: 1, u: " %", d: 100 },
+  r: { n: "Rotation", min: -720, max: 720, step: 1, u: "°", d: 0 },
+};
+function moKeyAt(a, t) {
+  const K = a.keys; if (t <= K[0].t) return K[0]; if (t >= K[K.length - 1].t) return K[K.length - 1];
+  let i = 0; while (i < K.length - 2 && t > K[i + 1].t) i++;
+  const A = K[i], B = K[i + 1], u = (MO_EASES[A.e] || MO_EASES.douce).f(mo01((t - A.t) / Math.max(1e-6, B.t - A.t))), v = {};
+  for (const k in MO_KF) v[k] = A[k] + (B[k] - A[k]) * u;
+  return v;
+}
+function moKeySync(a) { a.keys.sort((p, q) => p.t - q.t); a.at = r2(a.keys[0].t); a.len = Math.max(.01, r2(a.keys[a.keys.length - 1].t - a.keys[0].t)); }
 const MO_ORDERS = { calques: "Ordre des calques", gauche: "De gauche à droite", droite: "De droite à gauche", centre: "Du centre vers les bords", hasard: "Au hasard" };
 const MO_DIRS = { bas: [0, 1], haut: [0, -1], gauche: [-1, 0], droite: [1, 0] };
 
@@ -5219,7 +5247,8 @@ const MO_PRESETS = {
   orbite: { cat: "cam", n: "Orbite autour du logo", len: 3, ease: "sortie", o: { ang: 60 }, fn: (u, o) => { const a = o.ang * (1 - u) * Math.PI / 180; return { sx: Math.max(.05, Math.cos(a)), ky: Math.sin(a) * 8 }; } },
   panoramique: { cat: "cam", n: "Panoramique", len: 3, ease: "douce", o: { dir: "droite", dist: 15 }, fn: (u, o, c) => { const v = MO_DIRS[o.dir] || MO_DIRS.droite, d = (1 - u) * o.dist / 100 * c.S; return { x: v[0] * d, y: v[1] * d }; } },
 };
-const MO_TABS = [["in", "Apparition"], ["out", "Disparition"], ["texte", "Texte"], ["mo", "Mouvement"], ["cam", "Caméra"]];
+MO_PRESETS.cles = { cat: "key", n: "Clés libres", len: 1, ease: "douce", o: {}, fn: () => ({}) };
+const MO_TABS = [["in", "Apparition"], ["out", "Disparition"], ["texte", "Texte"], ["mo", "Mouvement"], ["cam", "Caméra"], ["key", "Clés"]];
 
 /* ---------- Data ---------- */
 const moFin = (v, a, b) => Number.isFinite(v) && v >= a && v <= b;
@@ -5228,13 +5257,21 @@ function validAnimOpts(p, o) {
   return Object.keys(o).every(k => { const d = MO_PARAMS[k]; if (!d || !(k in MO_PRESETS[p].o)) return false;
     return d.opts ? typeof o[k] === "string" && Object.prototype.hasOwnProperty.call(d.opts, o[k]) : moFin(o[k], d.min, d.max); });
 }
+function validKey(k) {
+  return !!k && typeof k === "object" && moFin(k.t, 0, MOTION_MAX) && Object.keys(k).every(f => f === "t" || f === "e" || MO_KF[f])
+    && Object.keys(MO_KF).every(f => moFin(k[f], MO_KF[f].min, MO_KF[f].max))
+    && (k.e === undefined || (typeof k.e === "string" && Object.prototype.hasOwnProperty.call(MO_EASES, k.e)));
+}
 function validAnim(a) {
   return !!a && typeof a === "object" && typeof a.id === "string" && /^[\w-]{1,24}$/.test(a.id)
     && typeof a.p === "string" && Object.prototype.hasOwnProperty.call(MO_PRESETS, a.p)
-    && ["in", "out", "mo", "cam"].includes(a.k)
+    && ["in", "out", "mo", "cam", "key"].includes(a.k) && (a.k === "key") === (a.p === "cles")
+    && (a.k !== "key" || (Array.isArray(a.keys) && a.keys.length >= 2 && a.keys.length <= 40 && a.keys.every(validKey)))
+    && (a.bz === undefined || (Array.isArray(a.bz) && a.bz.length === 4 && moFin(a.bz[0], 0, 1) && moFin(a.bz[2], 0, 1) && moFin(a.bz[1], -1, 2) && moFin(a.bz[3], -1, 2)))
+    && (a.ease !== "perso" || Array.isArray(a.bz))
     && Array.isArray(a.ids) && a.ids.length >= 1 && a.ids.length <= 400 && a.ids.every(i => typeof i === "string" && i.length <= 120)
     && moFin(a.at, 0, MOTION_MAX) && moFin(a.len, .01, MOTION_MAX) && (a.stg === undefined || moFin(a.stg, 0, 2))
-    && (a.ease === undefined || (typeof a.ease === "string" && Object.prototype.hasOwnProperty.call(MO_EASES, a.ease)))
+    && (a.ease === undefined || a.ease === "perso" || (typeof a.ease === "string" && Object.prototype.hasOwnProperty.call(MO_EASES, a.ease)))
     && (a.ord === undefined || (typeof a.ord === "string" && Object.prototype.hasOwnProperty.call(MO_ORDERS, a.ord)))
     && validAnimOpts(a.p, a.o);
 }
@@ -5293,12 +5330,13 @@ function moState(t) {
     return out;
   }
   for (const a of motion.anims) {
-    const P = MO_PRESETS[a.p], E = (MO_EASES[a.ease] || MO_EASES[P.ease]).f, o = Object.assign({}, P.o, a.o);
+    const P = MO_PRESETS[a.p], E = moEaseOf(a), o = Object.assign({}, P.o, a.o);
     const targets = a.k === "cam" ? { r: { [MO_SCENE]: { i: 0, lx: 0 } } } : (MO.ranks[a.id] || { r: {} });
     for (const id in targets.r) {
       const rk = targets.r[id], c = { S: MO.S, lx: rk.lx }, st0 = a.at + rk.i * (a.stg || 0), p = mo01((t - st0) / a.len);
       let q;
-      if (a.k === "in" || a.k === "cam") q = P.fn(E(p), o, c);
+      if (a.k === "key") { const v = moKeyAt(a, t - rk.i * (a.stg || 0)); q = { o: v.o / 100, x: v.x / 100 * MO.S, y: v.y / 100 * MO.S, s: v.s / 100, r: v.r }; }
+      else if (a.k === "in" || a.k === "cam") q = P.fn(E(p), o, c);
       else if (a.k === "out") q = P.fn(1 - E(p), o, c);
       else { if (t < st0 || t > st0 + a.len) continue; q = P.fn(p, o, c, E(p)); }
       moMix(out[id] || (out[id] = moRest()), q);
@@ -5326,14 +5364,42 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-dur input{width:150px}
 #motion .mo-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
 #motion .mo-main{display:flex;flex-direction:column;min-width:0;min-height:0}
-#motion .mo-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:20px}
-#motion .mo-frame{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);width:min(100%,calc((100vh - 230px)*16/9));aspect-ratio:16/9;display:flex;overflow:hidden}
+#motion .mo-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px 20px;container-type:size}
+#motion .mo-frame{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);width:min(100cqw,100cqh*16/9);aspect-ratio:16/9;display:flex;overflow:hidden}
 #motion .mo-frame svg{width:100%;height:100%;display:block}
 #motion .mo-frame g[data-mo]{cursor:pointer}
 #motion .mo-bar{display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
 #motion .mo-bar button{min-width:36px;height:36px}
 #motion .mo-bar input[type=range]{flex:1}
 #motion .mo-time{font-variant-numeric:tabular-nums;font-size:13px;min-width:120px;text-align:right;white-space:nowrap}
+#motion .mo-tl{border-top:1px solid var(--line);background:var(--paper);max-height:30vh;min-height:92px;overflow:auto;flex:none;user-select:none;-webkit-user-select:none}
+#motion .mo-tl-in{position:relative;--f:0;padding-right:14px}
+#motion .mo-tr{display:grid;grid-template-columns:170px minmax(0,1fr);align-items:center;min-height:28px;border-bottom:1px solid var(--cream)}
+#motion .mo-tr.head{position:sticky;top:0;z-index:3;background:var(--paper);min-height:24px;border-bottom:1px solid var(--line)}
+#motion .mo-tr .lb{font-size:12px;padding:0 10px 0 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--ink)}
+#motion .mo-tr .lb small{color:var(--muted)}
+#motion .mo-tr.on .lb{font-weight:600}
+#motion .mo-lane{position:relative;height:28px;touch-action:none}
+#motion .mo-tr.head .mo-lane{height:24px;cursor:ew-resize}
+#motion .mo-tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+#motion .mo-tick span{position:absolute;top:5px;left:3px;white-space:nowrap;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+#motion .mo-bar2{position:absolute;top:6px;height:16px;border-radius:5px;background:var(--c,#4F5BD5);opacity:.85;cursor:grab;min-width:6px}
+#motion .mo-tr.on .mo-bar2{opacity:1;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--c,#4F5BD5)}
+#motion .mo-bar2 .hl,#motion .mo-bar2 .hr{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize}
+#motion .mo-bar2 .hl{left:-3px} #motion .mo-bar2 .hr{right:-3px}
+#motion .mo-bar2 i{position:absolute;top:3px;bottom:3px;width:1px;background:rgba(255,255,255,.7);pointer-events:none}
+#motion .mo-kline{position:absolute;top:13px;height:2px;background:#4F5BD5;opacity:.5;cursor:grab}
+#motion .mo-kf{position:absolute;top:7px;width:13px;height:13px;margin-left:-6.5px;background:#fff;border:2px solid #4F5BD5;transform:rotate(45deg);border-radius:2px;cursor:ew-resize;box-sizing:border-box}
+#motion .mo-kf.on{background:#4F5BD5}
+#motion .mo-ph{position:absolute;top:0;bottom:0;left:calc(170px + (100% - 184px) * var(--f));width:2px;margin-left:-1px;background:#E0703A;pointer-events:none;z-index:4}
+#motion .mo-tl-empty{font-size:12px;color:var(--muted);padding:6px 14px}
+#motion .mo-keys{display:flex;flex-wrap:wrap;gap:4px}
+#motion .mo-keys button{font-size:11px;padding:3px 7px}
+#motion .mo-keys button[aria-pressed=true]{background:#4F5BD5;color:#fff;border-color:#4F5BD5}
+#motion .mo-bzwrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+#motion .mo-bz{width:100%;max-width:240px;touch-action:none}
+#motion .mo-bz circle[data-h]{cursor:grab}
+#motion .mo-bzwrap code{font-size:11px;color:var(--muted)}
 #motion .mo-note{color:var(--muted);font-size:12px;text-align:center;padding:0 16px 10px}
 #motion .mo-side{border-left:1px solid var(--line);background:var(--paper);overflow:auto;padding:14px 16px 24px;display:flex;flex-direction:column;gap:16px}
 #motion .mo-side h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
@@ -5366,11 +5432,12 @@ body.motion-open .toast{z-index:1000}
 @media (max-width:900px){
   #motion .mo-top{flex-wrap:wrap;gap:8px} #motion .mo-dur{width:100%} #motion .mo-dur input{flex:1;width:auto} #motion .mo-top .sub{display:none}
   #motion .mo-body{display:flex;flex-direction:column;overflow:auto}
-  #motion .mo-main{flex:none} #motion .mo-stage{padding:10px;flex:none} #motion .mo-frame{width:100%}
+  #motion .mo-main{flex:none} #motion .mo-stage{padding:10px;flex:none;container-type:normal} #motion .mo-frame{width:100%}
   #motion .mo-side{border-left:0;border-top:1px solid var(--line);overflow:visible;flex:none}
   #motion .mo-time{min-width:0} #motion .mo-bar{position:sticky;bottom:0;z-index:2} #motion .mo-bar .chk{display:none}
   #motion .mo-p{grid-template-columns:92px minmax(0,1fr) 48px} #motion .mo-time{white-space:nowrap;font-size:12px} #motion .mo-bar{gap:6px;padding-left:10px;padding-right:10px} #motion .mo-bar button{min-width:32px}
 }
+@media (max-width:600px){ #motion .mo-tl{display:none} }
 @media (prefers-reduced-motion:reduce){ #motion *{transition:none!important} }`;
   document.head.appendChild(css);
   const root = document.createElement("div");
@@ -5387,6 +5454,7 @@ body.motion-open .toast{z-index:1000}
 <div class="mo-body">
   <div class="mo-main">
     <div class="mo-stage"><div class="mo-frame" id="moFrame"><svg id="moSvg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg></div></div>
+    <div class="mo-tl" id="moTl" aria-label="Frise chronologique"><div class="mo-tl-in" id="moTlIn"></div></div>
     <div class="mo-note" id="moNote"></div>
     <div class="mo-bar">
       <button id="moStart" title="Début (Origine)" aria-label="Revenir au début">⏮</button>
@@ -5432,22 +5500,58 @@ body.motion-open .toast{z-index:1000}
     else if (act) { const a = motion.anims.find(x => x.id === act.dataset.id); if (!a) return;
       if (act.dataset.act === "del") { moPush(); motion.anims = motion.anims.filter(x => x !== a); moBuild(); moPanel(); moSave(); }
       else if (act.dataset.act === "play") { moSeek(Math.max(0, a.at - .2)); moPlay(true); }
+      else if (act.dataset.act === "selkey") { MO.key = { a: a.id, i: +act.dataset.i }; MO.focus = a.id; moPlay(false); moSeek(a.keys[+act.dataset.i].t); moPanel(); }
+      else if (act.dataset.act === "addkey") { const v = moKeyAt(a, MO.t), t = r2(MO.t), same = a.keys.findIndex(k => Math.abs(k.t - t) < 1 / MOTION_FPS);
+        if (same >= 0) MO.key = { a: a.id, i: same };
+        else if (a.keys.length >= 40) toast("40 clés au plus par animation.");
+        else { moPush(); const K = { t, e: "douce" }; for (const f in MO_KF) K[f] = Math.round(v[f] * 100) / 100; a.keys.push(K); moKeySync(a); MO.key = { a: a.id, i: a.keys.indexOf(K) }; moSave(); }
+        moPanel(); moSeek(MO.t); }
+      else if (act.dataset.act === "delkey") { if (a.keys.length <= 2) return; moPush(); a.keys.splice(+act.dataset.i, 1); moKeySync(a); MO.key = { a: a.id, i: 0 }; moPanel(); moSeek(MO.t); moSave(); }
       else if (act.dataset.act === "sel") { MO.sel = new Set(a.ids.filter(id => MO.info[id])); moPanel(); moSelBoxes(); } }
   });
   side.addEventListener("change", e => {
     const lc = e.target.closest("[data-layer]");
     if (lc) { if (lc.checked) MO.sel.add(lc.dataset.layer); else MO.sel.delete(lc.dataset.layer); moPanel(); moSelBoxes(); return; }
+    const kf = e.target.closest("[data-kk]");
+    if (kf) { const a = motion.anims.find(x => x.id === kf.dataset.a); if (!a) return;
+      if (kf.tagName === "SELECT") { moPush(); const K = a.keys[+kf.dataset.i]; if (K && MO_EASES[kf.value]) K.e = kf.value; moSeek(MO.t); moSave(); }
+      else { if (MO.pend) { MO.undo.push(MO.pend); MO.redo = []; MO.pend = null; moUndoBtns(); } moPanel(); moSave(); }
+      return; }
     const f = e.target.closest("[data-k]"); if (!f) return;
     const a = motion.anims.find(x => x.id === f.dataset.a); if (!a) return;
     if (f.tagName === "SELECT") { moPush(); moSet(a, f.dataset.k, f.value); moAfterEdit(a, true); }
     else { if (MO.pend) { MO.undo.push(MO.pend); MO.redo = []; MO.pend = null; moUndoBtns(); } moPanelTimes(); moSave(); }
   });
   side.addEventListener("input", e => {
+    const kf = e.target.closest("input[type=range][data-kk]");
+    if (kf) { const a = motion.anims.find(x => x.id === kf.dataset.a), K = a && a.keys[+kf.dataset.i]; if (!K) return;
+      if (!MO.pend) MO.pend = JSON.stringify(motion.anims);
+      const f = kf.dataset.kk, d = f === "t" ? { min: 0, max: motion.dur } : MO_KF[f]; K[f] = moC(+kf.value, d.min, d.max);
+      if (f === "t") { moKeySync(a); MO.key = { a: a.id, i: a.keys.indexOf(K) }; kf.closest(".bd").querySelectorAll("[data-kk]").forEach(el => { el.dataset.i = MO.key.i; }); }
+      const out = kf.parentNode.querySelector("output"); if (out) out.textContent = f === "t" ? moNum(K.t) + " s" : moNum(K[f]) + MO_KF[f].u;
+      moTl(); if (!MO.playing) moSeek(f === "t" ? K.t : MO.t); return; }
     const f = e.target.closest("input[type=range][data-k]"); if (!f) return;
     const a = motion.anims.find(x => x.id === f.dataset.a); if (!a) return;
     if (!MO.pend) MO.pend = JSON.stringify(motion.anims);
     moSet(a, f.dataset.k, +f.value); const out = f.parentNode.querySelector("output"); if (out) out.textContent = moShow(f.dataset.k, +f.value);
     moAfterEdit(a, false);
+  });
+  // custom curve: drag the two handles
+  side.addEventListener("pointerdown", e => {
+    const h = e.target.closest && e.target.closest("circle[data-h]"); if (!h) return;
+    const svg = h.ownerSVGElement, a = motion.anims.find(x => x.id === svg.dataset.bz); if (!a || !a.bz) return;
+    e.preventDefault(); const k = h.dataset.h === "1" ? 0 : 2, before = JSON.stringify(motion.anims);
+    const move = ev => { const m = svg.getScreenCTM().inverse(), pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(m);
+      a.bz[k] = Math.round(moC((pt.x - 20) / 160, 0, 1) * 100) / 100; a.bz[k + 1] = Math.round(moC((120 - pt.y) / 90, -1, 2) * 100) / 100;
+      const b = a.bz, X = moBzX, Y = moBzY;
+      h.setAttribute("cx", X(b[k])); h.setAttribute("cy", Y(b[k + 1]));
+      const l = svg.querySelector(`[data-l="${k ? 2 : 1}"]`); l.setAttribute("x2", X(b[k])); l.setAttribute("y2", Y(b[k + 1]));
+      svg.querySelector("[data-c]").setAttribute("d", `M${X(0)} ${Y(0)}C${X(b[0])} ${Y(b[1])} ${X(b[2])} ${Y(b[3])} ${X(1)} ${Y(1)}`);
+      const c = side.querySelector(`[data-bzv="${a.id}"]`); if (c) c.textContent = moBzTxt(b);
+      if (!MO.playing) moSeek(MO.t); };
+    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+      if (JSON.stringify(motion.anims) !== before) { MO.undo.push(before); MO.redo = []; moUndoBtns(); moSave(); } };
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); move(e);
   });
   side.addEventListener("toggle", e => { const d = e.target; if (d.classList && d.classList.contains("mo-anim") && d.open) MO.focus = d.dataset.id; }, true);
   // while the module is open its keys never reach the workshop's shortcuts
@@ -5478,13 +5582,13 @@ function moUndoBtns() { moEl("moUndo").disabled = !MO.undo.length; moEl("moRedo"
 function moShow(k, v) { if (k === "at" || k === "len" || k === "stg") return moNum(v) + " s"; const d = MO_PARAMS[k]; return d ? moNum(v) + d.u : moNum(v); }
 function moSet(a, k, v) {
   if (k === "at") a.at = moC(v, 0, MOTION_MAX); else if (k === "len") a.len = moC(v, .01, MOTION_MAX); else if (k === "stg") a.stg = moC(v, 0, 2);
-  else if (k === "ease") { if (MO_EASES[v]) a.ease = v; } else if (k === "ord") { if (MO_ORDERS[v]) a.ord = v; }
+  else if (k === "ease") { if (v === "perso") { if (!Array.isArray(a.bz)) a.bz = (MO_BZ[a.ease || MO_PRESETS[a.p].ease] || [.25, .1, .25, 1]).slice(); a.ease = "perso"; } else if (MO_EASES[v]) a.ease = v; } else if (k === "ord") { if (MO_ORDERS[v]) a.ord = v; }
   else if (MO_PARAMS[k]) { const d = MO_PARAMS[k]; a.o[k] = d.opts ? (d.opts[v] ? v : a.o[k]) : moC(v, d.min, d.max); }
 }
 function moAfterEdit(a, save) {
   if (MO_PRESETS[a.p].feat === "clip" && a.o.bands) moBuild(); else { MO.ranks[a.id] = a.k === "cam" ? null : moRanks(a); }
   if (!MO.playing) moSeek(MO.t);
-  if (save) { moPanel(); moSave(); }
+  if (save) { moPanel(); moSave(); } else moTl();
 }
 
 /* add a preset to the selected layers (or to the scene for the camera) */
@@ -5503,6 +5607,9 @@ function moAdd(p) {
   let id; do id = "a" + Math.random().toString(36).slice(2, 8); while (motion.anims.some(a => a.id === id));
   const a = { id, p, k, ids, at: r2(at), len: r2(len), stg: r2(stg), ease: k === "out" && P.cat === "in" ? "entree" : P.ease, o: clone(P.o) };
   if (P.ord || n > 1) a.ord = P.ord || "calques";
+  if (k === "key") { const t0 = r2(Math.min(MO.t, motion.dur - .5));
+    a.keys = [{ t: t0, o: 0, x: 0, y: 6, s: 100, r: 0, e: "sortie" }, { t: r2(Math.min(motion.dur, t0 + 1)), o: 100, x: 0, y: 0, s: 100, r: 0, e: "douce" }];
+    moKeySync(a); MO.key = { a: id, i: 0 }; }
   moPush(); motion.anims.push(a); MO.focus = id;
   moBuild(); moPanel(); moSave(); moSeek(Math.max(0, a.at - .15)); moPlay(true);
 }
@@ -5581,8 +5688,10 @@ function moRender(t) {
 function moSelBoxes() {
   const g = moEl("moSvg").querySelector("g[data-selbox]"); if (!g) return;
   if (MO.playing) { g.innerHTML = ""; return; }
-  const m = MO.S * .008;
-  g.innerHTML = [...MO.sel].filter(id => MO.info[id]).map(id => { const i = MO.info[id];
+  const m = MO.S * .008, ids = [...MO.sel].filter(id => MO.info[id]);
+  // many layers: one frame around all of them
+  const boxes = ids.length > 8 ? [ids.reduce((u, id) => { const i = MO.info[id]; return { x0: Math.min(u.x0, i.x0), y0: Math.min(u.y0, i.y0), x1: Math.max(u.x1, i.x1), y1: Math.max(u.y1, i.y1) }; }, { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity })] : ids.map(id => MO.info[id]);
+  g.innerHTML = boxes.map(i => {
     return `<rect x="${r2(i.x0 - m)}" y="${r2(i.y0 - m)}" width="${r2(i.x1 - i.x0 + 2 * m)}" height="${r2(i.y1 - i.y0 + 2 * m)}" fill="none" stroke="#4F5BD5" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`; }).join("");
 }
 function moSelect(id, add) {
@@ -5592,19 +5701,51 @@ function moSelect(id, add) {
 }
 
 /* ---------- Side panel ---------- */
-const moTitle = a => (a.k === "out" ? "Disparition" : a.k === "mo" ? "Mouvement" : a.k === "cam" ? "Caméra" : MO_PRESETS[a.p].cat === "texte" ? "Texte" : "Apparition");
+const moTitle = a => (a.k === "key" ? "Clés" : a.k === "out" ? "Disparition" : a.k === "mo" ? "Mouvement" : a.k === "cam" ? "Caméra" : MO_PRESETS[a.p].cat === "texte" ? "Texte" : "Apparition");
 function moSlider(a, k, v, min, max, step) {
   return `<label class="mo-p"><span>${k === "at" ? "Début" : k === "len" ? "Durée" : k === "stg" ? "Décalage entre calques" : esc(MO_PARAMS[k].n)}</span><input type="range" data-a="${a.id}" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${v}"><output>${moShow(k, v)}</output></label>`;
 }
 function moSelect2(a, k, label, opts, v) {
   return `<label class="mo-p"><span>${label}</span><select data-a="${a.id}" data-k="${k}">${Object.entries(opts).map(([key, n]) => `<option value="${key}"${key === v ? " selected" : ""}>${esc(typeof n === "string" ? n : n.n)}</option>`).join("")}</select></label>`;
 }
+function moKSlider(a, i, f, v) {
+  const d = f === "t" ? { n: "Temps", min: 0, max: motion.dur, step: 1 / MOTION_FPS } : MO_KF[f];
+  return `<label class="mo-p"><span>${d.n}</span><input type="range" data-a="${a.id}" data-kk="${f}" data-i="${i}" min="${d.min}" max="${d.max}" step="${d.step}" value="${v}"><output>${f === "t" ? moNum(v) + " s" : moNum(v) + d.u}</output></label>`;
+}
+function moKeyCard(a, n) {
+  const i = MO.key && MO.key.a === a.id ? Math.min(MO.key.i, a.keys.length - 1) : 0, K = a.keys[i];
+  let h = `<div class="mo-keys" role="group" aria-label="Clés">${a.keys.map((k, j) => `<button data-act="selkey" data-id="${a.id}" data-i="${j}" aria-pressed="${j === i}">◆ ${moNum(k.t)} s</button>`).join("")}</div>`;
+  h += moKSlider(a, i, "t", K.t);
+  for (const f in MO_KF) h += moKSlider(a, i, f, K[f]);
+  if (i < a.keys.length - 1) h += `<label class="mo-p"><span>Courbe vers la clé suivante</span><select data-a="${a.id}" data-kk="e" data-i="${i}">${Object.entries(MO_EASES).map(([k, e]) => `<option value="${k}"${k === (K.e || "douce") ? " selected" : ""}>${esc(e.n)}</option>`).join("")}</select></label>`;
+  if (n > 1) h += moSlider(a, "stg", a.stg || 0, 0, 1, .01) + moSelect2(a, "ord", "Ordre", MO_ORDERS, a.ord || "calques");
+  h += `<div class="acts"><button data-act="addkey" data-id="${a.id}" title="Ajoute une clé à la position de la tête de lecture">+ Clé ici</button>${a.keys.length > 2 ? `<button data-act="delkey" data-id="${a.id}" data-i="${i}">Supprimer la clé</button>` : ""}</div>`;
+  return h;
+}
+const moBzX = x => 20 + x * 160, moBzY = y => 120 - y * 90;
+function moBzEditor(a) {
+  const b = a.bz, X = moBzX, Y = moBzY;
+  return `<div class="mo-bzwrap"><svg class="mo-bz" data-bz="${a.id}" viewBox="0 0 200 165" role="img" aria-label="Courbe de vitesse personnalisée : glissez les deux poignées">
+<rect x="20" y="30" width="160" height="90" fill="#F7F7F5" stroke="#E3E3E0"/><path d="M20 75H180M100 30V120" stroke="#ECECE9"/>
+<line data-l="1" x1="${X(0)}" y1="${Y(0)}" x2="${X(b[0])}" y2="${Y(b[1])}" stroke="#4F5BD5" stroke-width="1"/><line data-l="2" x1="${X(1)}" y1="${Y(1)}" x2="${X(b[2])}" y2="${Y(b[3])}" stroke="#4F5BD5" stroke-width="1"/>
+<path data-c d="M${X(0)} ${Y(0)}C${X(b[0])} ${Y(b[1])} ${X(b[2])} ${Y(b[3])} ${X(1)} ${Y(1)}" fill="none" stroke="#1D1D1F" stroke-width="2.2"/>
+<circle cx="${X(0)}" cy="${Y(0)}" r="3" fill="#1D1D1F"/><circle cx="${X(1)}" cy="${Y(1)}" r="3" fill="#1D1D1F"/>
+<circle data-h="1" cx="${X(b[0])}" cy="${Y(b[1])}" r="7" fill="#fff" stroke="#4F5BD5" stroke-width="2"/><circle data-h="2" cx="${X(b[2])}" cy="${Y(b[3])}" r="7" fill="#fff" stroke="#4F5BD5" stroke-width="2"/>
+<text x="20" y="160" font-size="9" fill="#6B6B70">début</text><text x="180" y="160" font-size="9" fill="#6B6B70" text-anchor="end">fin</text></svg>
+<code data-bzv="${a.id}">${moBzTxt(b)}</code></div>`;
+}
+const moBzTxt = b => "cubic-bezier(" + b.map(v => Math.round(v * 100) / 100).join(", ") + ")";
 function moCard(a) {
   const P = MO_PRESETS[a.p], o = Object.assign({}, P.o, a.o), n = a.k === "cam" ? 1 : a.ids.filter(id => MO.info[id]).length;
+  if (a.k === "key") return moCardWrap(a, P, n, moKeyCard(a, n));
   let h = moSlider(a, "at", a.at, 0, Math.max(.5, motion.dur - .1), .05) + moSlider(a, "len", a.len, a.p === "machine" ? .01 : .1, Math.max(.2, motion.dur), .05);
   if (n > 1) h += moSlider(a, "stg", a.stg || 0, 0, 1, .01) + moSelect2(a, "ord", "Ordre", MO_ORDERS, a.ord || P.ord || "calques");
-  h += moSelect2(a, "ease", "Courbe", MO_EASES, a.ease || P.ease);
+  h += moSelect2(a, "ease", "Courbe", MO_EASE_OPTS, a.ease || P.ease);
+  if (a.ease === "perso" && Array.isArray(a.bz)) h += moBzEditor(a);
   for (const k of Object.keys(P.o)) { const d = MO_PARAMS[k]; h += d.opts ? moSelect2(a, k, esc(d.n), d.opts, o[k]) : moSlider(a, k, o[k], d.min, d.max, d.step); }
+  return moCardWrap(a, P, n, h);
+}
+function moCardWrap(a, P, n, h) {
   const who = a.k === "cam" ? "toute la scène" : n + " calque" + (n > 1 ? "s" : "");
   return `<details class="mo-anim" data-id="${a.id}"${MO.focus === a.id ? " open" : ""}><summary><span><span class="k">${moTitle(a)}</span><br>${esc(P.n)} <small style="color:var(--muted)">· ${who}</small></span><span class="t" data-time="${a.id}">${moNum(a.at)}–${moNum(moEnd(a))} s</span></summary>
 <div class="bd">${h}<div class="acts">${a.k !== "cam" ? `<button data-act="sel" data-id="${a.id}">Sélectionner ses calques</button>` : ""}<button data-act="play" data-id="${a.id}">▶ Voir</button><button data-act="del" data-id="${a.id}">Retirer</button></div></div></details>`;
@@ -5621,12 +5762,84 @@ function moPanel() {
   const list = ns ? motion.anims.filter(a => a.k === "cam" || a.ids.some(id => MO.sel.has(id))) : motion.anims;
   moEl("moListTitle").textContent = ns ? "Animations de la sélection" : "Toutes les animations";
   moEl("moList").innerHTML = list.length ? list.map(moCard).join("") : `<p class="mo-hint">Aucune animation${ns ? " sur ces calques" : ""} pour l'instant.</p>`;
-  moUndoBtns();
+  moUndoBtns(); moTl();
 }
+
+/* ---------- Timeline: one row per animation; drag a bar to move it, its ends to change its timing, a key to
+   move it in time; click or drag the ruler to move the playhead ---------- */
+const MO_TL_COL = { in: "#4F5BD5", out: "#E0703A", mo: "#2E2E33", cam: "#7A7A80", key: "#4F5BD5" };
+function moTl() {
+  const box = moEl("moTlIn"); if (!box) return;
+  const D = motion.dur, f = t => r2(moC(t / D, 0, 1) * 100) + "%";
+  let ticks = ""; const step = D > 8 ? 1 : .5;
+  for (let t = 0; t <= D + 1e-6; t += step) ticks += `<div class="mo-tick" style="left:${f(t)}">${Math.abs(t - Math.round(t)) < 1e-6 ? `<span>${Math.round(t)} s</span>` : ""}</div>`;
+  let rows = "";
+  for (const a of motion.anims) {
+    const P = MO_PRESETS[a.p], n = a.k === "cam" ? 1 : a.ids.filter(id => MO.info[id]).length, on = MO.focus === a.id ? " on" : "";
+    let lane = "";
+    if (a.k === "key") {
+      const s0 = a.keys[0].t, s1 = a.keys[a.keys.length - 1].t + (a.stg || 0) * Math.max(0, (MO.ranks[a.id] ? MO.ranks[a.id].n : 1) - 1);
+      lane = `<div class="mo-kline" data-drag="move" style="left:${f(s0)};width:calc(${f(s1)} - ${f(s0)})"></div>` + a.keys.map((k, i) => `<div class="mo-kf${MO.key && MO.key.a === a.id && MO.key.i === i ? " on" : ""}" data-drag="key" data-i="${i}" style="left:${f(k.t)}" title="Clé à ${moNum(k.t)} s"></div>`).join("");
+    } else {
+      const e = moEnd(a), w = Math.max(0, e - a.at), ns = MO.ranks[a.id] ? MO.ranks[a.id].n : 1;
+      let marks = ""; if (a.stg && ns > 1 && w > 0) for (let i = 1; i < Math.min(ns, 60); i++) marks += `<i style="left:${r2(i * a.stg / w * 100)}%"></i>`;
+      lane = `<div class="mo-bar2" data-drag="move" style="--c:${MO_TL_COL[a.k]};left:${f(a.at)};width:calc(${f(e)} - ${f(a.at)})" title="${esc(P.n)} : ${moNum(a.at)}–${moNum(e)} s">${marks}<div class="hl" data-drag="start"></div><div class="hr" data-drag="end"></div></div>`;
+    }
+    rows += `<div class="mo-tr${on}" data-a="${a.id}"><div class="lb" data-focus="${a.id}" title="${esc(moTitle(a) + " · " + P.n)}">${esc(P.n)} <small>· ${a.k === "cam" ? "scène" : n}</small></div><div class="mo-lane">${lane}</div></div>`;
+  }
+  box.innerHTML = `<div class="mo-tr head"><div class="lb"><small>Frise · ${moNum(D)} s</small></div><div class="mo-lane" data-ruler>${ticks}</div></div>${rows || `<div class="mo-tl-empty">Ajoutez une animation : elle apparaît ici, et se règle à la souris (déplacer, étirer).</div>`}<div class="mo-ph"></div>`;
+  box.style.setProperty("--f", moC(MO.t / D, 0, 1));
+}
+/* show an animation's card: its layers become the selection if none of them is selected */
+function moFocus(a) {
+  MO.focus = a.id;
+  if (a.k !== "cam" && !a.ids.some(id => MO.sel.has(id))) MO.sel = new Set(a.ids.filter(id => MO.info[id]));
+  moPanel(); moSelBoxes();
+  const card = moEl("moList").querySelector(`.mo-anim[data-id="${a.id}"]`); if (card) card.scrollIntoView({ block: "nearest" });
+}
+(function moTlInit() {
+  const tl = moEl("moTl");
+  const timeAt = (lane, x, free, R) => { const r = R || lane.getBoundingClientRect(), t = moC((x - r.left) / r.width, 0, 1) * motion.dur; return free ? t : Math.round(t * MOTION_FPS) / MOTION_FPS; };
+  tl.addEventListener("click", e => { const lb = e.target.closest("[data-focus]"); if (!lb) return;
+    const a = motion.anims.find(x => x.id === lb.dataset.focus); if (!a) return; moFocus(a);
+  });
+  tl.addEventListener("pointerdown", e => {
+    const lane = e.target.closest(".mo-lane"); if (!lane || e.button > 0) return;
+    e.preventDefault();
+    if (lane.hasAttribute("data-ruler") || !e.target.closest("[data-drag]")) {   // ruler or empty lane: move the playhead
+      moPlay(false); const go = ev => moSeek(timeAt(lane, ev.clientX, ev.altKey)); go(e);
+      const up = () => { window.removeEventListener("pointermove", go); window.removeEventListener("pointerup", up); };
+      window.addEventListener("pointermove", go); window.addEventListener("pointerup", up); return; }
+    const row = lane.closest(".mo-tr"), a = motion.anims.find(x => x.id === row.dataset.a); if (!a) return;
+    const kind = e.target.closest("[data-drag]").dataset.drag, ki = +(e.target.closest("[data-drag]").dataset.i || 0);
+    const R = lane.getBoundingClientRect(), before = JSON.stringify(motion.anims), t0 = timeAt(lane, e.clientX, true, R), at0 = a.at, len0 = a.len, end0 = moEnd(a), span = end0 - at0 - a.len;
+    const keys0 = a.keys ? a.keys.map(k => k.t) : null; let moved = false;
+    if (MO.focus !== a.id) { MO.focus = a.id; }
+    if (a.k === "key" && kind === "key") MO.key = { a: a.id, i: ki };
+    moPlay(false);
+    const move = ev => {
+      const snap = v => ev.altKey ? v : Math.round(v * MOTION_FPS) / MOTION_FPS, d = timeAt(lane, ev.clientX, true, R) - t0;
+      if (Math.abs(d) * R.width / motion.dur > 2) moved = true; if (!moved) return;
+      if (a.k === "key") {
+        if (kind === "key") { const K = a.keys[ki]; K.t = r2(moC(snap(keys0[ki] + d), 0, motion.dur)); moKeySync(a); MO.key = { a: a.id, i: a.keys.indexOf(K) }; moSeek(K.t); }
+        else { const lo = -Math.min(...keys0), hi = motion.dur - Math.max(...keys0), dd = moC(snap(d), lo, hi); a.keys.forEach((k, i) => { k.t = r2(keys0[i] + dd); }); moKeySync(a); moSeek(MO.t); }
+      } else if (kind === "start") { const nat = moC(snap(at0 + d), 0, at0 + len0 - .05); a.len = r2(len0 + at0 - nat); a.at = r2(nat); moSeek(a.at); }
+      else if (kind === "end") { a.len = r2(moC(snap(end0 + d) - at0 - span, .05, MOTION_MAX)); moSeek(Math.min(motion.dur, moEnd(a))); }
+      else { a.at = r2(moC(snap(at0 + d), 0, Math.max(0, MOTION_MAX - len0))); moSeek(MO.t); }
+      moTl(); moPanelTimes();
+    };
+    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+      if (moved && JSON.stringify(motion.anims) !== before) { MO.undo.push(before); if (MO.undo.length > 60) MO.undo.shift(); MO.redo = []; moSave(); }
+      else { if (a.k === "key" && kind === "key") moSeek(a.keys[ki].t); moFocus(a); return; }
+      moPanel(); };
+    window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+  });
+})();
 
 /* ---------- Player ---------- */
 function moSeek(t) {
   MO.t = moC(t, 0, motion.dur); moRender(MO.t);
+  const ti = moEl("moTlIn"); if (ti) ti.style.setProperty("--f", moC(MO.t / motion.dur, 0, 1));
   moEl("moScrub").value = MO.t; moEl("moTime").textContent = moFmt(MO.t) + " / " + moFmt(motion.dur);
 }
 function moStep(k) { moPlay(false); moSeek((Math.round(MO.t * MOTION_FPS) + k) / MOTION_FPS); }
