@@ -68,7 +68,9 @@ Le bouton **Animer** ouvre Motion, sur le logo du projet ouvert.
 - **Recettes en un clic** : « Du croquis au rendu », « Révélation élégante », « Tracé d'architecte », « Rebond joyeux »… Chaque recette compose une animation complète, que vous réglez ensuite.
 - **Animations par calque** : choisissez des calques, puis une animation (apparition, disparition, texte, mouvement, caméra). Chaque animation a ses curseurs : début, durée, décalage entre les calques, courbe de vitesse.
 - **Frise** : glissez une barre pour la déplacer, ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres ; « Courbe personnalisée » dessine votre propre accélération.
-- **Exporter** : MP4 ou WebM (vidéo), GIF (boucle légère) ou SVG animé (pour un site), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil.
+- **Son** : « Générer la bande son » choisit une ambiance (cinématique, élégante, dynamique, minimale, technologique) et place les sons sur les temps forts de l'animation, le moment fort de chaque son tombant pile sur l'apparition ou la révélation du logo. Chaque son se règle (début, volume, hauteur, fondus, coupe) et se déplace sur la frise ; « Effets sur tout le son » ajoute réverbération, écho, filtre, égaliseur et compresseur.
+- **Banque de sons** : les sons de l'atelier, créés dans le navigateur, et « Mes sons » : importez vos fichiers (MP3, WAV, OGG, M4A, FLAC) ou un dossier zippé, à condition d'en détenir les droits. Ils restent sur votre appareil.
+- **Exporter** : MP4 ou WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site) ou WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil.
 
 La durée va de 1 à 12 secondes. Sur téléphone : recettes, réglages simples et export ; la frise est réservée à la tablette et à l'ordinateur.
 

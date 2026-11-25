@@ -38,7 +38,7 @@ function gifInfo(buf) {
   const trGif = await p.evaluate(() => document.querySelector('#moExBg option[value=""]').disabled);
   await p.check("input[name=moexf][value=svg]");
   const trSvg = await p.evaluate(() => document.querySelector('#moExBg option[value=""]').disabled);
-  check("export dialog: MP4, WebM, GIF, SVG animé; transparent background only for SVG", () => { assert.deepStrictEqual(dlg.fmts, ["mp4", "webm", "gif", "svg"]); assert.ok(trGif && !trSvg); });
+  check("export dialog: MP4, WebM, GIF, SVG animé, WAV; transparent background only for SVG", () => { assert.deepStrictEqual(dlg.fmts, ["mp4", "webm", "gif", "svg", "wav"]); assert.ok(trGif && !trSvg); });
 
   const run = async (fmt, size, fps, asp) => {
     await p.check(`input[name=moexf][value=${fmt}]`); if (size) await p.selectOption("#moExSize", size); if (fps) await p.selectOption("#moExFps", fps); if (asp) await p.selectOption("#moExAsp", asp);
