@@ -1,0 +1,18 @@
+<!--meta {"title":"Mon compte — Atelier du Logo","desc":"Profil, offre, projets et données de votre compte.","nav":""} -->
+<div class="wrap"><div class="dash">
+  <nav aria-label="Mon compte"><a class="on" href="#profil">Profil</a><a href="#offre">Offre</a><a href="#projets">Projets</a><a href="#donnees">Données</a></nav>
+  <div class="panel">
+    <h1 style="font-size:44px">Mon compte</h1>
+    <div class="notice" role="note"><b>Les comptes ouvrent bientôt.</b> L'atelier est déjà utilisable sans compte : vos projets restent sur votre appareil.</div>
+    <div class="card" id="profil"><h3>Profil</h3><dl class="kv"><dt>Nom</dt><dd class="muted">—</dd><dt>E-mail</dt><dd class="muted">—</dd></dl></div>
+    <div class="card" id="offre"><h3>Offre</h3><dl class="kv"><dt>Offre actuelle</dt><dd>Atelier · gratuit pendant la bêta</dd><dt>Options</dt><dd><a href="/tarifs/">Voir les offres à venir</a></dd></dl></div>
+    <div class="card" id="projets"><h3>Projets</h3><p>Vos projets sont enregistrés sur cet appareil, dans l'atelier : <span id="nproj">ouvrez « Projets » pour les voir</span>.</p><p style="margin-top:14px"><a class="btn primary" href="/atelier/">Ouvrir l'atelier</a></p></div>
+    <div class="card" id="donnees"><h3>Données</h3><p>Pour sauvegarder ou déplacer vos projets : dans l'atelier, Projets › Tout enregistrer dans un fichier. Pour tout effacer : supprimez les données du site dans les réglages de votre navigateur.</p></div>
+  </div>
+</div></div>
+<script>
+// counts the projects saved on this device by the workshop (same origin, IndexedDB "atelier-logo"); reads only
+(function(){ try{ const r=indexedDB.open("atelier-logo"); r.onsuccess=()=>{ const db=r.result; const st=[...db.objectStoreNames]; if(!st.includes("projects")){ db.close(); return; }
+  const c=db.transaction("projects").objectStore("projects").count(); c.onsuccess=()=>{ const n=c.result; document.getElementById("nproj").textContent=n+" projet"+(n>1?"s":"")+" sur cet appareil"; db.close(); }; };
+  r.onupgradeneeded=()=>{ r.transaction.abort(); }; }catch(_){} })();
+</script>

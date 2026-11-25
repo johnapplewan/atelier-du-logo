@@ -1,4 +1,4 @@
-// Cloudflare Worker that serves the standalone workshop (app/, built by `node build.js`) as static assets.
+// Cloudflare Worker that serves site/ (built by `node build.js`): public pages at the root, the workshop under /atelier/.
 // No server code yet: the SaaS routes (accounts, sync to D1 / R2) will be added later as "main".
 // Setup and deployment steps: docs/CLOUDFLARE.md
 {
@@ -6,6 +6,7 @@
   "name": "atelier-du-logo",
   "compatibility_date": "2026-11-01",
   "assets": {
-    "directory": "./app"
+    "directory": "./site",
+    "not_found_handling": "404-page"
   }
 }
