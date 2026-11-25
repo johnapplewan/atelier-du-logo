@@ -61,11 +61,22 @@ Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des c
 - **Exporter** : SVG, PNG ou JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP.
 - **Charte** : un questionnaire (style, couleurs, typographies, ton), puis les pages de la charte. Vous l'exportez en PDF (A4 portrait, paysage ou slides) ou en pack de dépôt.
 
-## 6. Tablette et téléphone
+## 6. Animer votre logo (Motion)
+
+Le bouton **Animer** ouvre Motion, sur le logo du projet ouvert.
+
+- **Recettes en un clic** : « Du croquis au rendu », « Révélation élégante », « Tracé d'architecte », « Rebond joyeux »… Chaque recette compose une animation complète, que vous réglez ensuite.
+- **Animations par calque** : choisissez des calques, puis une animation (apparition, disparition, texte, mouvement, caméra). Chaque animation a ses curseurs : début, durée, décalage entre les calques, courbe de vitesse.
+- **Frise** : glissez une barre pour la déplacer, ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres ; « Courbe personnalisée » dessine votre propre accélération.
+- **Exporter** : MP4 ou WebM (vidéo), GIF (boucle légère) ou SVG animé (pour un site), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil.
+
+La durée va de 1 à 12 secondes. Sur téléphone : recettes, réglages simples et export ; la frise est réservée à la tablette et à l'ordinateur.
+
+## 7. Tablette et téléphone
 
 Le dessin occupe tout l'écran. La barre du bas ouvre les panneaux (Outils, Calques, Sélection, Palette, Bulles) ; touchez le dessin pour les refermer. Le menu ☰ donne accès à À propos, Projets, Charte et Marque et départ. Zoomez à deux doigts. Le Crayon tient compte de la pression du stylet.
 
-## 7. Plusieurs écrans
+## 8. Plusieurs écrans
 
 Dans l'appli autonome, le bouton **« Fenêtres »** détache les panneaux (Outils, Calques, Sélection, Palette, Bulles) dans des fenêtres séparées. Fermez une fenêtre pour remettre son panneau en place.
 
