@@ -9,7 +9,7 @@
    camera), each with its own sliders, applied to one or several layers with a stagger.
    ========================================================================== */
 const MOTION_MIN = 1, MOTION_MAX = 12, MOTION_FPS = 30, MO_SCENE = "__scene", MO_MAX_ANIMS = 120;
-const motionDefault = () => ({ v: 1, dur: 5, loop: true, anims: [] });
+const motionDefault = () => ({ v: 1, dur: 5, loop: true, anims: [], audio: moAudioDefault() });
 var motion = motionDefault();   // var: the workshop's save hooks may run before this point
 
 /* ---------- Easing curves (custom Bézier curves come with the timeline, step 3) ---------- */
@@ -140,11 +140,12 @@ function validAnim(a) {
 function validMotion(m) {
   return !!m && typeof m === "object" && m.v === 1 && moFin(m.dur, MOTION_MIN, MOTION_MAX)
     && (m.loop === undefined || typeof m.loop === "boolean")
-    && (m.anims === undefined || (Array.isArray(m.anims) && m.anims.length <= MO_MAX_ANIMS && m.anims.every(validAnim)));
+    && (m.anims === undefined || (Array.isArray(m.anims) && m.anims.length <= MO_MAX_ANIMS && m.anims.every(validAnim)))
+    && (m.audio === undefined || validAudio(m.audio));
 }
 function motionNow() { return motion ? clone(motion) : motionDefault(); }
 function motionLoad(m) {
-  motion = validMotion(m) ? { v: 1, dur: m.dur, loop: m.loop !== false, anims: clone(m.anims || []) } : motionDefault();
+  motion = validMotion(m) ? { v: 1, dur: m.dur, loop: m.loop !== false, anims: clone(m.anims || []), audio: m.audio ? clone(m.audio) : moAudioDefault() } : motionDefault();
   if (MO && MO.open) { MO.undo = []; MO.redo = []; moBuild(); moPanel(); }
 }
 
@@ -282,6 +283,11 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-recipes button{text-align:left;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-height:56px}
 #motion .mo-recipes b{font-size:13px;font-weight:600}
 #motion .mo-recipes small{font-size:11px;color:var(--muted);line-height:1.3}
+#motion .mo-sndgen{display:flex;gap:6px;margin:8px 0}
+#motion .mo-sndgen select{flex:1;min-width:0;font-size:13px}
+#motion .mo-sndgen button{font-size:12.5px;padding:6px 10px}
+#motion .mo-bar2.snd{opacity:.8}
+#motion .mo-tr.off .mo-bar2.snd{opacity:.3}
 #motion .mo-hint{color:var(--muted);font-size:12px;margin:6px 0 0}
 #motion .mo-anim{border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:8px}
 #motion .mo-anim[open]{box-shadow:0 2px 10px rgba(0,0,0,.05)}
@@ -336,6 +342,13 @@ body.motion-open .toast{z-index:1000}
   </div>
   <div class="mo-side" id="moSide" role="region" aria-label="Animations">
     <section><h3>Recettes en un clic</h3><div class="mo-recipes" id="moRecipes"></div></section>
+    <section id="moSndSec"><h3>Son</h3>
+      <label class="chk"><input type="checkbox" id="moSndOn"> Son activé</label>
+      <label class="mo-p" style="margin-top:6px"><span>Volume général</span><input type="range" id="moSndVol" min="0" max="150" step="1"><output id="moSndVolOut"></output></label>
+      <div class="mo-sndgen"><select id="moAmb" aria-label="Ambiance de la bande son"></select><button id="moGen" class="primary">Générer la bande son</button></div>
+      <div class="mo-sndgen"><button id="moGen2" title="Même ambiance, d'autres sons">Autre proposition</button><button id="moBankBtn">Banque de sons…</button></div>
+      <details class="mo-anim" id="moFxBox"><summary><span>Effets sur tout le son</span></summary><div class="bd" id="moFx"></div></details>
+      <div id="moClips"></div></section>
     <section><h3>Calques</h3>
       <div class="mo-quick"><button data-q="all">Tout</button><button data-q="mark">Symbole</button><button data-q="word">Texte</button><button data-q="none">Aucun</button></div>
       <div class="mo-layers" id="moLayers"></div></section>
@@ -396,14 +409,14 @@ body.motion-open .toast{z-index:1000}
   side.addEventListener("input", e => {
     const kf = e.target.closest("input[type=range][data-kk]");
     if (kf) { const a = motion.anims.find(x => x.id === kf.dataset.a), K = a && a.keys[+kf.dataset.i]; if (!K) return;
-      if (!MO.pend) MO.pend = JSON.stringify(motion.anims);
+      if (!MO.pend) MO.pend = moSnap();
       const f = kf.dataset.kk, d = f === "t" ? { min: 0, max: motion.dur } : MO_KF[f]; K[f] = moC(+kf.value, d.min, d.max);
       if (f === "t") { moKeySync(a); MO.key = { a: a.id, i: a.keys.indexOf(K) }; kf.closest(".bd").querySelectorAll("[data-kk]").forEach(el => { el.dataset.i = MO.key.i; }); }
       const out = kf.parentNode.querySelector("output"); if (out) out.textContent = f === "t" ? moNum(K.t) + " s" : moNum(K[f]) + MO_KF[f].u;
       moTl(); if (!MO.playing) moSeek(f === "t" ? K.t : MO.t); return; }
     const f = e.target.closest("input[type=range][data-k]"); if (!f) return;
     const a = motion.anims.find(x => x.id === f.dataset.a); if (!a) return;
-    if (!MO.pend) MO.pend = JSON.stringify(motion.anims);
+    if (!MO.pend) MO.pend = moSnap();
     moSet(a, f.dataset.k, +f.value); const out = f.parentNode.querySelector("output"); if (out) out.textContent = moShow(f.dataset.k, +f.value);
     moAfterEdit(a, false);
   });
@@ -411,7 +424,7 @@ body.motion-open .toast{z-index:1000}
   side.addEventListener("pointerdown", e => {
     const h = e.target.closest && e.target.closest("circle[data-h]"); if (!h) return;
     const svg = h.ownerSVGElement, a = motion.anims.find(x => x.id === svg.dataset.bz); if (!a || !a.bz) return;
-    e.preventDefault(); const k = h.dataset.h === "1" ? 0 : 2, before = JSON.stringify(motion.anims);
+    e.preventDefault(); const k = h.dataset.h === "1" ? 0 : 2, before = moSnap();
     const move = ev => { const m = svg.getScreenCTM().inverse(), pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(m);
       a.bz[k] = Math.round(moC((pt.x - 20) / 160, 0, 1) * 100) / 100; a.bz[k + 1] = Math.round(moC((120 - pt.y) / 90, -1, 2) * 100) / 100;
       const b = a.bz, X = moBzX, Y = moBzY;
@@ -421,7 +434,7 @@ body.motion-open .toast{z-index:1000}
       const c = side.querySelector(`[data-bzv="${a.id}"]`); if (c) c.textContent = moBzTxt(b);
       if (!MO.playing) moSeek(MO.t); };
     const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
-      if (JSON.stringify(motion.anims) !== before) { MO.undo.push(before); MO.redo = []; moUndoBtns(); moSave(); } };
+      if (moSnap() !== before) { MO.undo.push(before); MO.redo = []; moUndoBtns(); moSave(); } };
     window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); move(e);
   });
   side.addEventListener("toggle", e => { const d = e.target; if (d.classList && d.classList.contains("mo-anim") && d.open) MO.focus = d.dataset.id; }, true);
@@ -444,10 +457,12 @@ body.motion-open .toast{z-index:1000}
 })();
 
 function moSave() { try { localSave(); } catch (_) {} }
-function moPush() { MO.undo.push(JSON.stringify(motion.anims)); if (MO.undo.length > 60) MO.undo.shift(); MO.redo = []; MO.pend = null; moUndoBtns(); }
+const moSnap = () => JSON.stringify({ a: motion.anims, s: motion.audio });
+function moRestore(str) { const v = JSON.parse(str); if (Array.isArray(v)) motion.anims = v; else { motion.anims = v.a; motion.audio = v.s; } }
+function moPush() { MO.undo.push(moSnap()); if (MO.undo.length > 60) MO.undo.shift(); MO.redo = []; MO.pend = null; moUndoBtns(); }
 function moUndo(redo) {
   const from = redo ? MO.redo : MO.undo, to = redo ? MO.undo : MO.redo; if (!from.length) return;
-  to.push(JSON.stringify(motion.anims)); motion.anims = JSON.parse(from.pop()); moBuild(); moPanel(); moSave(); moUndoBtns();
+  to.push(moSnap()); moRestore(from.pop()); moBuild(); moPanel(); moSave(); moUndoBtns(); if (MO.playing) moAudioStart(MO.t);
 }
 function moUndoBtns() { moEl("moUndo").disabled = !MO.undo.length; moEl("moRedo").disabled = !MO.redo.length; }
 function moShow(k, v) { if (k === "at" || k === "len" || k === "stg") return moNum(v) + " s"; const d = MO_PARAMS[k]; return d ? moNum(v) + d.u : moNum(v); }
@@ -722,7 +737,7 @@ function moPanel() {
   const list = ns ? motion.anims.filter(a => a.k === "cam" || a.ids.some(id => MO.sel.has(id))) : motion.anims;
   moEl("moListTitle").textContent = ns ? "Animations de la sélection" : "Toutes les animations";
   moEl("moList").innerHTML = list.length ? list.map(moCard).join("") : `<p class="mo-hint">Aucune animation${ns ? " sur ces calques" : ""} pour l'instant.</p>`;
-  moUndoBtns(); moTl();
+  moUndoBtns(); moSndPanel(); moTl();
 }
 
 /* ---------- Timeline: one row per animation; drag a bar to move it, its ends to change its timing, a key to
@@ -747,6 +762,10 @@ function moTl() {
     }
     rows += `<div class="mo-tr${on}" data-a="${a.id}"><div class="lb" data-focus="${a.id}" title="${esc(moTitle(a) + " · " + P.n)}">${esc(P.n)} <small>· ${a.k === "cam" ? "scène" : n}</small></div><div class="mo-lane">${lane}</div></div>`;
   }
+  for (const c of motion.audio.clips) {
+    const sp = moClipSpan(c), on = MO.focusClip === c.id ? " on" : "";
+    rows += `<div class="mo-tr${on}${motion.audio.on ? "" : " off"}" data-clip="${c.id}"><div class="lb" data-cfocus="${c.id}" title="${esc(moSndName(c.s))}">♪ ${esc(moSndName(c.s))}</div><div class="mo-lane"><div class="mo-bar2 snd" data-drag="move" style="--c:#2F8F6B;left:${f(c.at)};width:calc(${f(Math.min(D, c.at + sp.L))} - ${f(c.at)})" title="${esc(moSndName(c.s))} : ${moNum(c.at)}–${moNum(c.at + sp.L)} s"><div class="hl" data-drag="start"></div><div class="hr" data-drag="end"></div></div></div></div>`;
+  }
   box.innerHTML = `<div class="mo-tr head"><div class="lb"><small>Frise · ${moNum(D)} s</small></div><div class="mo-lane" data-ruler>${ticks}</div></div>${rows || `<div class="mo-tl-empty">Ajoutez une animation : elle apparaît ici, et se règle à la souris (déplacer, étirer).</div>`}<div class="mo-ph"></div>`;
   box.style.setProperty("--f", moC(MO.t / D, 0, 1));
 }
@@ -760,7 +779,9 @@ function moFocus(a) {
 (function moTlInit() {
   const tl = moEl("moTl");
   const timeAt = (lane, x, free, R) => { const r = R || lane.getBoundingClientRect(), t = moC((x - r.left) / r.width, 0, 1) * motion.dur; return free ? t : Math.round(t * MOTION_FPS) / MOTION_FPS; };
-  tl.addEventListener("click", e => { const lb = e.target.closest("[data-focus]"); if (!lb) return;
+  tl.addEventListener("click", e => { const cf = e.target.closest("[data-cfocus]");
+    if (cf) { MO.focusClip = cf.dataset.cfocus; moPanel(); const card = moEl("moClips").querySelector(`[data-clip="${cf.dataset.cfocus}"]`); if (card) card.scrollIntoView({ block: "nearest" }); return; }
+    const lb = e.target.closest("[data-focus]"); if (!lb) return;
     const a = motion.anims.find(x => x.id === lb.dataset.focus); if (!a) return; moFocus(a);
   });
   tl.addEventListener("pointerdown", e => {
@@ -770,9 +791,25 @@ function moFocus(a) {
       moPlay(false); const go = ev => moSeek(timeAt(lane, ev.clientX, ev.altKey)); go(e);
       const up = () => { window.removeEventListener("pointermove", go); window.removeEventListener("pointerup", up); };
       window.addEventListener("pointermove", go); window.addEventListener("pointerup", up); return; }
-    const row = lane.closest(".mo-tr"), a = motion.anims.find(x => x.id === row.dataset.a); if (!a) return;
+    const row = lane.closest(".mo-tr");
+    if (row.dataset.clip) {   // a sound: drag = move, right end = length, left end = trim the start
+      const c = motion.audio.clips.find(x => x.id === row.dataset.clip); if (!c) return;
+      const kind = e.target.closest("[data-drag]").dataset.drag, R = lane.getBoundingClientRect(), before = moSnap(), t0 = timeAt(lane, e.clientX, true, R), at0 = c.at, cut0 = c.cut || 0, sp0 = moClipSpan(c); let moved = false;
+      moPlay(false);
+      const move = ev => { const snap = v => ev.altKey ? v : Math.round(v * MOTION_FPS) / MOTION_FPS, d = timeAt(lane, ev.clientX, true, R) - t0;
+        if (Math.abs(d) * R.width / motion.dur > 2) moved = true; if (!moved) return;
+        if (kind === "move") c.at = r2(moC(snap(at0 + d), 0, MOTION_MAX));
+        else if (kind === "end") c.len = r2(moC(snap(at0 + sp0.L + d) - at0, .05, sp0.max));
+        else { const nd = moC(snap(d), -Math.min(at0, cut0 / sp0.rate), sp0.L - .05); c.at = r2(at0 + nd); c.cut = r2(cut0 + nd * sp0.rate); c.len = r2(Math.max(.05, sp0.L - nd)); }
+        moTl(); };
+      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
+        if (moved && moSnap() !== before) { MO.undo.push(before); if (MO.undo.length > 60) MO.undo.shift(); MO.redo = []; moSave(); }
+        MO.focusClip = c.id; moPanel(); const card = moEl("moClips").querySelector(`[data-clip="${c.id}"]`); if (card) card.scrollIntoView({ block: "nearest" }); };
+      window.addEventListener("pointermove", move); window.addEventListener("pointerup", up); return;
+    }
+    const a = motion.anims.find(x => x.id === row.dataset.a); if (!a) return;
     const kind = e.target.closest("[data-drag]").dataset.drag, ki = +(e.target.closest("[data-drag]").dataset.i || 0);
-    const R = lane.getBoundingClientRect(), before = JSON.stringify(motion.anims), t0 = timeAt(lane, e.clientX, true, R), at0 = a.at, len0 = a.len, end0 = moEnd(a), span = end0 - at0 - a.len;
+    const R = lane.getBoundingClientRect(), before = moSnap(), t0 = timeAt(lane, e.clientX, true, R), at0 = a.at, len0 = a.len, end0 = moEnd(a), span = end0 - at0 - a.len;
     const keys0 = a.keys ? a.keys.map(k => k.t) : null; let moved = false;
     if (MO.focus !== a.id) { MO.focus = a.id; }
     if (a.k === "key" && kind === "key") MO.key = { a: a.id, i: ki };
@@ -789,7 +826,7 @@ function moFocus(a) {
       moTl(); moPanelTimes();
     };
     const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up);
-      if (moved && JSON.stringify(motion.anims) !== before) { MO.undo.push(before); if (MO.undo.length > 60) MO.undo.shift(); MO.redo = []; moSave(); }
+      if (moved && moSnap() !== before) { MO.undo.push(before); if (MO.undo.length > 60) MO.undo.shift(); MO.redo = []; moSave(); }
       else { if (a.k === "key" && kind === "key") moSeek(a.keys[ki].t); moFocus(a); return; }
       moPanel(); };
     window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
@@ -807,12 +844,12 @@ function moPlay(on) {
   MO.playing = !!on; cancelAnimationFrame(MO.raf);
   const b = moEl("moPlay"); b.textContent = MO.playing ? "❚❚" : "▶"; b.setAttribute("aria-label", MO.playing ? "Pause" : "Lecture");
   moSelBoxes();
-  if (!MO.playing) return;
+  if (!MO.playing) { moAudioStop(); return; }
   if (MO.t >= motion.dur) MO.t = 0;
-  MO.last = performance.now();
+  MO.last = performance.now(); moAudioStart(MO.t);
   const tick = now => {
     let t = MO.t + (now - MO.last) / 1000; MO.last = now;
-    if (t >= motion.dur) { if (motion.loop) t %= motion.dur; else { moSeek(motion.dur); moPlay(false); return; } }
+    if (t >= motion.dur) { if (motion.loop) { t %= motion.dur; moAudioStart(t); } else { moSeek(motion.dur); moPlay(false); return; } }
     moSeek(t); MO.raf = requestAnimationFrame(tick);
   };
   MO.raf = requestAnimationFrame(tick);
@@ -820,9 +857,10 @@ function moPlay(on) {
 function openMotion() {
   MO.open = true; MO.t = 0; MO.undo = []; MO.redo = []; MO.pend = null; moEl("motion").hidden = false; document.body.classList.add("motion-open");
   moBuild(); moPanel(); moEl("moPlay").focus(); moPlay(!matchMedia("(prefers-reduced-motion: reduce)").matches);
+  moSndLoadUser().then(moSndPreload).then(() => { if (!MO.open) return; moPanel(); if (MO.playing) moAudioStart(MO.t); });
 }
 function closeMotion() {
-  moPlay(false); MO.open = false; moEl("motion").hidden = true; document.body.classList.remove("motion-open");
+  moPlay(false); moAudioStop(); MO.open = false; moEl("motion").hidden = true; document.body.classList.remove("motion-open");
   moEl("moSvg").innerHTML = ""; const b = document.getElementById("motionBtn"); if (b) b.focus();
 }
 
@@ -835,6 +873,7 @@ const MO_FORMATS = {
   webm: { n: "WebM", d: "Vidéo légère pour le web", ext: "webm" },
   gif: { n: "GIF", d: "Boucle légère, lue partout (256 couleurs)", ext: "gif" },
   svg: { n: "SVG animé", d: "Pour un site : net à toute taille, très léger", ext: "svg" },
+  wav: { n: "WAV (son seul)", d: "La bande son, pour un montage", ext: "wav" },
 };
 function moDims(aspect, short) { const [a, b] = MO_ASPECTS[aspect]; const even = v => Math.max(2, Math.round(v / 2) * 2);
   return a >= b ? { W: even(short * a / b), H: even(short) } : { W: even(short), H: even(short * b / a) }; }
@@ -881,11 +920,14 @@ async function moEncodeVideo(fmt, o, progress) {
   const { W, H, fps, bg, vb } = o, conf = await moVideoConfig(fmt, W, H, fps);
   if (!conf) throw new Error("codec");
   const lib = fmt === "mp4" ? await moLoadVendor("mp4-muxer.js", "Mp4Muxer") : await moLoadVendor("webm-muxer.js", "WebMMuxer");
-  const target = new lib.ArrayBufferTarget();
-  const muxer = fmt === "mp4" ? new lib.Muxer({ target, video: { codec: "avc", width: W, height: H, frameRate: fps }, fastStart: "in-memory" })
-    : new lib.Muxer({ target, video: { codec: conf.mux, width: W, height: H, frameRate: fps } });
-  let failed = null;
-  const enc = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failed = e; } });
+  const target = new lib.ArrayBufferTarget(), au = await moAudioForVideo(fmt); MO.exAudio = au ? au.mux : null;
+  const opts = fmt === "mp4" ? { target, video: { codec: "avc", width: W, height: H, frameRate: fps }, fastStart: "in-memory" } : { target, video: { codec: conf.mux, width: W, height: H, frameRate: fps } };
+  if (au) opts.audio = { codec: au.mux, numberOfChannels: 2, sampleRate: au.sampleRate };
+  const muxer = new lib.Muxer(opts);
+  let failed = null, ai = 0;
+  // sound chunks go in between the frames, in time order
+  const flushAudio = ts => { if (!au) return; while (ai < au.chunks.length && au.chunks[ai][0].timestamp <= ts) { muxer.addAudioChunk(au.chunks[ai][0], au.chunks[ai][1]); ai++; } };
+  const enc = new VideoEncoder({ output: (chunk, meta) => { flushAudio(chunk.timestamp); muxer.addVideoChunk(chunk, meta); }, error: e => { failed = e; } });
   enc.configure(conf.cfg);
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
   const n = moFrames(fps);
@@ -899,7 +941,7 @@ async function moEncodeVideo(fmt, o, progress) {
     progress((i + 1) / n);
   }
   await enc.flush(); enc.close(); if (failed) throw failed;
-  muxer.finalize();
+  flushAudio(Infinity); muxer.finalize();
   return new Blob([target.buffer], { type: fmt === "mp4" ? "video/mp4" : "video/webm" });
 }
 
@@ -1061,8 +1103,11 @@ function moExportSVG(o) {
     const tr = moEl("moExBg").querySelector('option[value=""]'); tr.disabled = f !== "svg"; if (tr.disabled && moEl("moExBg").value === "") moEl("moExBg").value = "#FFFFFF";
     moEl("moExCol").hidden = moEl("moExBg").value !== "custom";
     const { W, H } = moDims(moEl("moExAsp").value, +sz.value);
-    moEl("moExInfo").textContent = (f === "svg" ? "Animation SVG native (SMIL), sans son ; idéale pour un site. " : `${W} × ${H} px, ${moFrames(+fp.value)} images. `)
-      + (f === "gif" ? "Le GIF n'a pas de son." : f === "svg" ? "" : "Sans son pour l'instant (la signature sonore arrive à l'étape suivante).");
+    const hasSnd = motion.audio.on && motion.audio.clips.length;
+    for (const id of ["moExAsp", "moExSize", "moExFps", "moExBg"]) moEl(id).closest("label").hidden = f === "wav";
+    moEl("moExInfo").textContent = f === "wav" ? `La bande son seule, ${moNum(motion.dur)} s, 48 kHz stéréo.` + (hasSnd ? "" : " Il n'y a pas encore de son.")
+      : (f === "svg" ? "Animation SVG native (SMIL), sans son ; idéale pour un site. " : `${W} × ${H} px, ${moFrames(+fp.value)} images. `)
+      + (f === "gif" ? "Le GIF n'a pas de son." : f === "svg" ? "" : hasSnd ? "Avec la bande son." : "Sans son (aucun son dans l'animation).");
   };
   d.addEventListener("change", e => { if (e.target.id === "moExBg") moEl("moExCol").hidden = e.target.value !== "custom"; refresh(); });
   moEl("moExCancel").onclick = () => { if (MO.exBusy) { MO.exCancel = true; return; } d.close(); };
@@ -1077,14 +1122,15 @@ function moExportSVG(o) {
     try {
       let blob;
       const step = p => { prog.value = p; const el = (performance.now() - started) / 1000, left = p > .05 ? el / p - el : 0; msg.textContent = `Image ${Math.round(p * moFrames(fps))} / ${moFrames(fps)}` + (left > 2 ? ` · environ ${Math.ceil(left)} s` : ""); };
-      if (f === "svg") { msg.textContent = "Calcul des images…"; await new Promise(r => setTimeout(r, 20)); blob = new Blob([moExportSVG({ W, H, bg, vb, fps })], { type: "image/svg+xml" }); prog.value = 1; }
+      if (f === "wav") { msg.textContent = "Calcul du son…"; const buf = await moRenderAudio(); if (!buf) throw new Error("nosound"); blob = moWav(buf); prog.value = 1; }
+      else if (f === "svg") { msg.textContent = "Calcul des images…"; await new Promise(r => setTimeout(r, 20)); blob = new Blob([moExportSVG({ W, H, bg, vb, fps })], { type: "image/svg+xml" }); prog.value = 1; }
       else if (f === "gif") blob = await moEncodeGif({ W, H, fps, bg, vb }, step);
       else blob = await moEncodeVideo(f, { W, H, fps, bg, vb }, step);
       const name = filePfx() + "-animation" + (asp === "16:9" ? "" : "-" + asp.replace(":", "x")) + "." + MO_FORMATS[f].ext;
       await saveBlob(name, blob);
-      msg.textContent = `Enregistré : ${name} (${blob.size > 1048576 ? (Math.round(blob.size / 104857.6) / 10).toString().replace(".", ",") + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko"})`;
+      msg.textContent = (f === "mp4" || f === "webm" ? (MO.exAudio ? (f === "mp4" && MO.exAudio === "opus" ? "Avec le son (en Opus : certains anciens lecteurs Apple ne le lisent pas ; WebM est une alternative). " : "Avec le son. ") : motion.audio.on && motion.audio.clips.length ? "Sans le son (ce navigateur ne sait pas l'encoder). " : "") : "") + `Enregistré : ${name} (${blob.size > 1048576 ? (Math.round(blob.size / 104857.6) / 10).toString().replace(".", ",") + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko"})`;
     } catch (err) {
-      msg.textContent = err && err.message === "cancel" ? "Export annulé." : err && err.message === "codec" ? `Ce navigateur ne sait pas encoder en ${MO_FORMATS[f].n}. Essayez ${f === "mp4" ? "WebM" : "MP4"}, le GIF ou le SVG animé, ou un navigateur récent (Chrome, Edge, Safari, Firefox).`
+      msg.textContent = err && err.message === "nosound" ? "Aucun son à exporter : générez la bande son ou ajoutez des sons." : err && err.message === "cancel" ? "Export annulé." : err && err.message === "codec" ? `Ce navigateur ne sait pas encoder en ${MO_FORMATS[f].n}. Essayez ${f === "mp4" ? "WebM" : "MP4"}, le GIF ou le SVG animé, ou un navigateur récent (Chrome, Edge, Safari, Firefox).`
         : "Export impossible : " + ((err && err.message) || err);
     } finally {
       MO.exBusy = false; MO.exporting = false; go.disabled = false; moEl("moExCancel").textContent = "Fermer"; prog.hidden = true; moBuild(); moSeek(t0);
@@ -1099,9 +1145,412 @@ function moExportSVG(o) {
 })();
 function openMotionExport() { if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; } moPlay(false); moEl("moExMsg").textContent = ""; moEl("moExDlg").showModal(); MO.exRefresh(); }
 
+
+/* ---------- Sound (step 6) ----------
+   Two banks: the workshop's own sounds, synthesised in the browser (no rights issue), and « Mes sons », imported by the
+   user and kept on this device only (IndexedDB "atelier-sons", never sent anywhere). A generator places sounds on the
+   animation's key moments, aligning each sound's loudest instant (its peak) on the moment. The track is edited on the
+   timeline and in cards; master effects run on Web Audio. The same graph renders offline for the exports. */
+const MO_SR = 48000;
+function moAudioDefault() { return { on: true, vol: .9, fx: { rev: 15, echo: 0, filt: 0, lo: 0, mid: 0, hi: 0, comp: true }, clips: [] }; }
+const MO_SND_CATS = { whoosh: "Souffles", impact: "Impacts", riser: "Montées", reverse: "Inversés", chime: "Carillons", pop: "Clics et pops", ambient: "Nappes", autre: "Autres" };
+function moSndGuess(path) {
+  const p = String(path).toLowerCase();
+  if (/riser|build ?up|wildfire|tremolo|mont[ée]e/.test(p)) return "riser";
+  if (/reverse|invers/.test(p)) return "reverse";
+  if (/whoosh|swoosh|swish|swipe|transition|whip|souffle/.test(p)) return "whoosh";
+  if (/impact|hit|boom|bang|thump|drop|crash|slam|punch|coup/.test(p)) return "impact";
+  if (/chime|success|bell|ding|sparkle|shimmer|notification|achievement|carillon|cloche/.test(p)) return "chime";
+  if (/click|pop|button|\bui\b|shutter|camera|tap|type|clic/.test(p)) return "pop";
+  if (/ambien|pad|drone|atmos|nappe/.test(p)) return "ambient";
+  return "autre";
+}
+function moNoise(ctx, dur, seed) {
+  const n = Math.max(1, Math.ceil(dur * ctx.sampleRate)), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); let h = seed >>> 0 || 1;
+  for (let i = 0; i < n; i++) { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; d[i] = ((h >>> 0) / 4294967296) * 2 - 1; }
+  const s = ctx.createBufferSource(); s.buffer = b; return s;
+}
+const moEnv = (ctx, pts) => { const g = ctx.createGain(); g.gain.setValueAtTime(pts[0][1], 0); for (let i = 1; i < pts.length; i++) { const [t, v, k] = pts[i]; if (k === "x") g.gain.exponentialRampToValueAtTime(Math.max(v, 1e-4), t); else g.gain.linearRampToValueAtTime(v, t); } return g; };
+const moOsc = (ctx, type, f0, f1, t1) => { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, 0); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t1); return o; };
+/* the workshop's own sounds: each one is a small Web Audio patch rendered once (d duration, pk peak, s) */
+const MO_SYNTH = {
+  souffle: { n: "Souffle", cat: "whoosh", d: 1, pk: .5, make(c) { const s = moNoise(c, 1, 7), f = c.createBiquadFilter(), p = c.createStereoPanner(); f.type = "bandpass"; f.Q.value = 1.1;
+    f.frequency.setValueAtTime(300, 0); f.frequency.exponentialRampToValueAtTime(3200, .5); f.frequency.exponentialRampToValueAtTime(500, 1);
+    p.pan.setValueAtTime(-.6, 0); p.pan.linearRampToValueAtTime(.6, 1);
+    s.connect(f).connect(moEnv(c, [[0, 0], [.5, .9], [1, .001, "x"]])).connect(p).connect(c.destination); s.start(0); } },
+  "souffle-grave": { n: "Souffle grave", cat: "whoosh", d: 1.5, pk: .8, make(c) { const s = moNoise(c, 1.5, 11), f = c.createBiquadFilter(); f.type = "lowpass"; f.Q.value = 4;
+    f.frequency.setValueAtTime(150, 0); f.frequency.exponentialRampToValueAtTime(1400, .8); f.frequency.exponentialRampToValueAtTime(200, 1.5);
+    s.connect(f).connect(moEnv(c, [[0, 0], [.8, 1], [1.5, .001, "x"]])).connect(c.destination); s.start(0); } },
+  impact: { n: "Impact", cat: "impact", d: 1.8, pk: .02, make(c) { const o = moOsc(c, "sine", 140, 40, .6); o.connect(moEnv(c, [[0, 1], [1.8, .001, "x"]])).connect(c.destination); o.start(0);
+    const s = moNoise(c, .3, 3), f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 900; s.connect(f).connect(moEnv(c, [[0, .8], [.25, .001, "x"]])).connect(c.destination); s.start(0); } },
+  "impact-doux": { n: "Impact doux", cat: "impact", d: .9, pk: .01, make(c) { const o = moOsc(c, "triangle", 320, 150, .3); o.connect(moEnv(c, [[0, .6], [.9, .001, "x"]])).connect(c.destination); o.start(0); } },
+  basse: { n: "Basse qui tombe", cat: "impact", d: 2.2, pk: .05, make(c) { const o = moOsc(c, "sine", 110, 32, 1.8); o.connect(moEnv(c, [[0, 0], [.05, 1], [2.2, .001, "x"]])).connect(c.destination); o.start(0); } },
+  montee: { n: "Montée", cat: "riser", d: 2.5, pk: 2.35, make(c) { const s = moNoise(c, 2.5, 5), f = c.createBiquadFilter(); f.type = "highpass";
+    f.frequency.setValueAtTime(400, 0); f.frequency.exponentialRampToValueAtTime(6000, 2.35); s.connect(f).connect(moEnv(c, [[0, .001], [2.35, .7, "x"], [2.45, .001, "x"]])).connect(c.destination); s.start(0);
+    const o = moOsc(c, "sawtooth", 160, 900, 2.35), lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2200; o.connect(lp).connect(moEnv(c, [[0, .001], [2.35, .25, "x"], [2.45, .001, "x"]])).connect(c.destination); o.start(0); } },
+  inverse: { n: "Souffle inversé", cat: "reverse", d: 1.3, pk: 1.2, make(c) { const s = moNoise(c, 1.3, 9), f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(500, 0); f.frequency.exponentialRampToValueAtTime(5000, 1.2);
+    s.connect(f).connect(moEnv(c, [[0, .001], [1.2, .8, "x"], [1.28, .001, "x"]])).connect(c.destination); s.start(0); } },
+  carillon: { n: "Carillon", cat: "chime", d: 2.4, pk: .02, make(c) { [[1046.5, .35, 2.2], [1568, .22, 1.6], [2093, .16, 1.2], [3136, .08, .8]].forEach(([fq, a, dd]) => {
+    const o = moOsc(c, "sine", fq); o.connect(moEnv(c, [[0, 0], [.01, a], [dd, .001, "x"]])).connect(c.destination); o.start(0); }); } },
+  scintillement: { n: "Scintillement", cat: "chime", d: 1.6, pk: .32, make(c) { [[0, 2349], [.12, 2794], [.22, 3136], [.32, 3520], [.45, 4186], [.6, 3520]].forEach(([t, fq], i) => {
+    const o = moOsc(c, "sine", fq), g = c.createGain(); g.gain.setValueAtTime(0, 0); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.18 - i * .015, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + .9);
+    o.connect(g).connect(c.destination); o.start(0); }); } },
+  pop: { n: "Pop", cat: "pop", d: .2, pk: .005, make(c) { const o = moOsc(c, "sine", 720, 260, .08); o.connect(moEnv(c, [[0, .7], [.18, .001, "x"]])).connect(c.destination); o.start(0); } },
+  clic: { n: "Clic", cat: "pop", d: .06, pk: .002, make(c) { const s = moNoise(c, .06, 13), f = c.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 2500; s.connect(f).connect(moEnv(c, [[0, .6], [.02, .001, "x"]])).connect(c.destination); s.start(0); } },
+  touche: { n: "Touche de machine", cat: "pop", d: .12, pk: .003, make(c) { const s = moNoise(c, .12, 17), f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1800; f.Q.value = 2;
+    s.connect(f).connect(moEnv(c, [[0, .8], [.03, .001, "x"]])).connect(c.destination); s.start(0); const o = moOsc(c, "sine", 180, 90, .06); o.connect(moEnv(c, [[0, .4], [.1, .001, "x"]])).connect(c.destination); o.start(0); } },
+  nappe: { n: "Nappe douce", cat: "ambient", d: 4, pk: 2, make(c) { [220, 277.2, 329.6].forEach((fq, i) => { const o = moOsc(c, "triangle", fq), lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 900;
+    o.connect(lp).connect(moEnv(c, [[0, 0], [2, .12 - i * .02], [4, 0]])).connect(c.destination); o.start(0); }); } },
+};
+var MO_SND = { bufs: new Map(), meta: new Map(), user: [], live: [], chain: null, ctx: null, loading: new Map() };
+Object.entries(MO_SYNTH).forEach(([k, s]) => MO_SND.meta.set("syn:" + k, { id: "syn:" + k, n: s.n, cat: s.cat, d: s.d, pk: s.pk, g: 0, syn: true }));
+const moSndMeta = id => MO_SND.meta.get(id);
+const moSndName = id => { const m = moSndMeta(id); return m ? m.n : "Son introuvable sur cet appareil"; };
+
+/* « Mes sons »: meta and data in two stores, so listing never loads the sounds themselves */
+function moSdb() { return new Promise((ok, ko) => { try { const r = indexedDB.open("atelier-sons", 1);
+  r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains("meta")) d.createObjectStore("meta", { keyPath: "id" }); if (!d.objectStoreNames.contains("data")) d.createObjectStore("data"); };
+  r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); } catch (e) { ko(e); } }); }
+const moReq = q => new Promise((ok, ko) => { q.onsuccess = () => ok(q.result); q.onerror = () => ko(q.error); });
+async function moSndLoadUser() {
+  try { const db = await moSdb(); const list = await moReq(db.transaction("meta").objectStore("meta").getAll()); db.close();
+    MO_SND.user = list.filter(m => m && /^u:[0-9a-f]{8,40}$/.test(m.id)).sort((a, b) => a.n.localeCompare(b.n, "fr"));
+    MO_SND.user.forEach(m => MO_SND.meta.set(m.id, m)); } catch (_) { MO_SND.user = []; }
+}
+async function moSndBuffer(id) {
+  if (MO_SND.bufs.has(id)) return MO_SND.bufs.get(id);
+  if (MO_SND.loading.has(id)) return MO_SND.loading.get(id);
+  const job = (async () => {
+    let buf = null;
+    if (id.startsWith("syn:")) { const s = MO_SYNTH[id.slice(4)]; if (!s) return null; const c = new OfflineAudioContext(2, Math.ceil(s.d * MO_SR), MO_SR); s.make(c); buf = await c.startRendering(); }
+    else { const db = await moSdb(); const data = await moReq(db.transaction("data").objectStore("data").get(id)); db.close(); if (!data) return null;
+      buf = await new OfflineAudioContext(2, 1, MO_SR).decodeAudioData(data.slice(0)); }
+    MO_SND.bufs.set(id, buf); return buf;
+  })().catch(() => null).finally(() => MO_SND.loading.delete(id));
+  MO_SND.loading.set(id, job); return job;
+}
+const moSndPreload = () => Promise.all([...new Set(motion.audio.clips.map(c => c.s))].map(moSndBuffer));
+/* loudest 50 ms window: its time is the peak, its level sets a gain that brings every sound to about -14 dBFS */
+function moAnalyse(buf) {
+  const n = buf.length, w = Math.max(1, Math.round(buf.sampleRate * .05)), a = buf.getChannelData(0), b = buf.numberOfChannels > 1 ? buf.getChannelData(1) : a; let best = 0, bi = 0;
+  for (let i = 0; i < n; i += w) { let s = 0; const e = Math.min(n, i + w); for (let j = i; j < e; j++) { const v = (a[j] + b[j]) / 2; s += v * v; } const r = Math.sqrt(s / (e - i)); if (r > best) { best = r; bi = i; } }
+  const db = 20 * Math.log10(best || 1e-6);
+  return { d: r2(buf.duration), pk: r2(Math.min(buf.duration, (bi + w / 2) / buf.sampleRate)), g: r2(moC(-14 - db, -12, 12)) };
+}
+const MO_SND_EXT = /\.(mp3|wav|wave|ogg|oga|opus|m4a|aac|flac|webm)$/i, MO_SND_MAX = 15 * 1048576, MO_SND_TOTAL = 150 * 1048576, MO_SND_COUNT = 300;
+/* secure import: audio extensions only, size limits, zip entries checked before they are read, every file must decode
+   as audio (it is never run or shown as anything else), 60 s at most; stored on this device only */
+async function moImportSounds(files, report) {
+  const items = []; let skipped = 0, total = 0;
+  for (const f of files) {
+    if (/\.zip$/i.test(f.name)) {
+      if (f.size > MO_SND_TOTAL) { skipped++; continue; }
+      const JSZip = await loadJSZip(), z = await JSZip.loadAsync(f);
+      const entries = Object.values(z.files).filter(e => !e.dir && !/(^|\/)(__MACOSX|\.)/.test(e.name));
+      for (const e of entries.slice(0, MO_SND_COUNT)) {
+        const size = e._data && e._data.uncompressedSize;
+        if (!MO_SND_EXT.test(e.name) || (size && size > MO_SND_MAX) || total > MO_SND_TOTAL) { skipped++; continue; }
+        const data = await e.async("arraybuffer"); if (data.byteLength > MO_SND_MAX) { skipped++; continue; }
+        total += data.byteLength; items.push({ path: e.name, data });
+      }
+      skipped += Math.max(0, entries.length - MO_SND_COUNT);
+    } else if (MO_SND_EXT.test(f.name) && f.size <= MO_SND_MAX) { total += f.size; items.push({ path: f.name, data: await f.arrayBuffer() }); }
+    else skipped++;
+  }
+  let added = 0; const db = await moSdb();
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i]; report && report(i + 1, items.length);
+    let buf; try { buf = await new OfflineAudioContext(2, 1, MO_SR).decodeAudioData(it.data.slice(0)); } catch (_) { skipped++; continue; }
+    if (!buf || buf.duration > 60 || buf.duration < .01) { skipped++; continue; }
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-1", it.data))).slice(0, 8).map(b => b.toString(16).padStart(2, "0")).join("");
+    const base = it.path.split("/").pop().replace(/\.[^.]+$/, "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 60) || "Son";
+    const meta = Object.assign({ id: "u:" + hash, n: base, cat: moSndGuess(it.path), at: Date.now() }, moAnalyse(buf));
+    const tx = db.transaction(["meta", "data"], "readwrite"); tx.objectStore("meta").put(meta); tx.objectStore("data").put(it.data, meta.id);
+    await new Promise((ok, ko) => { tx.oncomplete = ok; tx.onerror = () => ko(tx.error); });
+    MO_SND.bufs.set(meta.id, buf); added++;
+  }
+  db.close(); await moSndLoadUser();
+  return { added, skipped };
+}
+async function moDeleteSound(id) {
+  const db = await moSdb(), tx = db.transaction(["meta", "data"], "readwrite"); tx.objectStore("meta").delete(id); tx.objectStore("data").delete(id);
+  await new Promise(ok => { tx.oncomplete = ok; tx.onerror = ok; }); db.close(); MO_SND.bufs.delete(id); MO_SND.meta.delete(id); await moSndLoadUser();
+}
+
+/* ---- data ---- */
+function validClip(c) {
+  return !!c && typeof c === "object" && typeof c.id === "string" && /^[\w-]{1,24}$/.test(c.id) && typeof c.s === "string" && /^(syn:[a-z-]{1,24}|u:[0-9a-f]{8,40})$/.test(c.s)
+    && moFin(c.at, 0, MOTION_MAX) && moFin(c.gain, -40, 12) && moFin(c.pitch, -12, 12) && moFin(c.fi, 0, 5) && moFin(c.fo, 0, 5) && moFin(c.cut, 0, 120)
+    && (c.len === undefined || c.len === null || moFin(c.len, .02, MOTION_MAX));
+}
+function validAudio(a) {
+  return !!a && typeof a === "object" && typeof a.on === "boolean" && moFin(a.vol, 0, 1.5) && !!a.fx && typeof a.fx === "object"
+    && moFin(a.fx.rev, 0, 100) && moFin(a.fx.echo, 0, 100) && moFin(a.fx.filt, -100, 100) && ["lo", "mid", "hi"].every(k => moFin(a.fx[k], -12, 12)) && typeof a.fx.comp === "boolean"
+    && Array.isArray(a.clips) && a.clips.length <= 80 && a.clips.every(validClip);
+}
+/* how long a clip plays on the timeline, and at what rate */
+function moClipSpan(c) {
+  const m = moSndMeta(c.s), rate = Math.pow(2, (c.pitch || 0) / 12), left = Math.max(.02, ((m ? m.d : 1) - (c.cut || 0)) / rate);
+  return { rate, L: c.len ? Math.min(c.len, left) : left, max: left };
+}
+
+/* ---- playback graph: EQ (3 bands), filter, compressor, echo and reverb sends, master volume ---- */
+function moIR(ctx, sec) { const n = Math.round(sec * ctx.sampleRate), b = ctx.createBuffer(2, n, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); let h = (c + 1) * 99991; for (let i = 0; i < n; i++) { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; d[i] = (((h >>> 0) / 4294967296) * 2 - 1) * Math.pow(1 - i / n, 3); } }
+  return b; }
+function moChain(ctx) {
+  const A = motion.audio, F = A.fx, nodes = [], mk = n => { nodes.push(n); return n; };
+  const inp = mk(ctx.createGain());
+  const lo = mk(ctx.createBiquadFilter()); lo.type = "lowshelf"; lo.frequency.value = 220; lo.gain.value = F.lo;
+  const mid = mk(ctx.createBiquadFilter()); mid.type = "peaking"; mid.frequency.value = 1500; mid.Q.value = .8; mid.gain.value = F.mid;
+  const hi = mk(ctx.createBiquadFilter()); hi.type = "highshelf"; hi.frequency.value = 5000; hi.gain.value = F.hi;
+  const flt = mk(ctx.createBiquadFilter());
+  if (F.filt < 0) { flt.type = "lowpass"; flt.frequency.value = 20000 * Math.pow(300 / 20000, -F.filt / 100); } else { flt.type = "highpass"; flt.frequency.value = 20 * Math.pow(100, F.filt / 100); }
+  inp.connect(lo); lo.connect(mid); mid.connect(hi); hi.connect(flt);
+  let last = flt;
+  if (F.comp) { const k = mk(ctx.createDynamicsCompressor()); k.threshold.value = -20; k.ratio.value = 4; k.attack.value = .005; k.release.value = .2; last.connect(k); last = k; }
+  const out = mk(ctx.createGain()); out.gain.value = A.vol; last.connect(out);
+  if (F.echo > 0) { const dl = mk(ctx.createDelay(1)), fb = mk(ctx.createGain()), wet = mk(ctx.createGain()); dl.delayTime.value = .28; fb.gain.value = .35; wet.gain.value = F.echo / 100 * .6;
+    last.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(out); }
+  if (F.rev > 0) { const cv = mk(ctx.createConvolver()), wet = mk(ctx.createGain()); cv.buffer = moIR(ctx, 2.4); wet.gain.value = F.rev / 100 * .8; last.connect(cv); cv.connect(wet); wet.connect(out); }
+  out.connect(ctx.destination);
+  return { inp, nodes };
+}
+/* schedules every clip that is still to be heard from timeline time `from`, played at context time `when0` */
+function moSchedule(ctx, dest, from, when0, live) {
+  for (const c of motion.audio.clips) {
+    const buf = MO_SND.bufs.get(c.s); if (!buf) continue;
+    const { rate, L } = moClipSpan(c), end = c.at + L; if (end <= from + .005) continue;
+    const m = moSndMeta(c.s), v = Math.pow(10, ((c.gain || 0) + (m ? m.g : 0)) / 20), a = when0 + (c.at - from);
+    const startTL = Math.max(c.at, from), off = startTL - c.at, when = when0 + (startTL - from), fi = c.fi || 0, fo = Math.min(c.fo || 0, L);
+    const src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = buf; src.playbackRate.value = rate;
+    g.gain.setValueAtTime(fi > 0 && off < fi ? v * off / fi : v, when);
+    if (fi > 0 && off < fi) g.gain.linearRampToValueAtTime(v, a + fi);
+    if (fo > 0) { const fs = a + L - fo; if (fs > when) g.gain.setValueAtTime(v, fs); g.gain.linearRampToValueAtTime(0, a + L); }
+    src.connect(g); g.connect(dest);
+    src.start(when, (c.cut || 0) + off * rate, Math.max(.001, (L - off) * rate));
+    if (live) live.push(src, g);
+  }
+}
+function moAudioStop() {
+  for (const n of MO_SND.live) { try { if (n.stop) n.stop(); n.disconnect(); } catch (_) {} }
+  MO_SND.live = [];
+  if (MO_SND.chain) { MO_SND.chain.nodes.forEach(n => { try { n.disconnect(); } catch (_) {} }); MO_SND.chain = null; }
+}
+function moAudioStart(t) {
+  moAudioStop();
+  if (!motion.audio.on || !motion.audio.clips.length || typeof AudioContext === "undefined") return;
+  if (!MO_SND.ctx) { try { MO_SND.ctx = new AudioContext({ sampleRate: MO_SR }); } catch (_) { try { MO_SND.ctx = new AudioContext(); } catch (e) { return; } } }
+  const ctx = MO_SND.ctx; if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  MO_SND.chain = moChain(ctx); moSchedule(ctx, MO_SND.chain.inp, t, ctx.currentTime + .03, MO_SND.live);
+}
+/* the soundtrack of the whole animation, rendered offline (exports) */
+async function moRenderAudio() {
+  if (!motion.audio.on || !motion.audio.clips.length || typeof OfflineAudioContext === "undefined") return null;
+  await moSndPreload(); if (!motion.audio.clips.some(c => MO_SND.bufs.get(c.s))) return null;
+  const ctx = new OfflineAudioContext(2, Math.ceil(motion.dur * MO_SR), MO_SR), ch = moChain(ctx);
+  moSchedule(ctx, ch.inp, 0, 0, null);
+  return ctx.startRendering();
+}
+function moWav(buf) {
+  const ch = buf.numberOfChannels, n = buf.length, sr = buf.sampleRate, size = 44 + n * ch * 2, dv = new DataView(new ArrayBuffer(size));
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, "RIFF"); dv.setUint32(4, size - 8, true); ws(8, "WAVE"); ws(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, ch, true);
+  dv.setUint32(24, sr, true); dv.setUint32(28, sr * ch * 2, true); dv.setUint16(32, ch * 2, true); dv.setUint16(34, 16, true); ws(36, "data"); dv.setUint32(40, n * ch * 2, true);
+  const cs = [...Array(ch)].map((_, c) => buf.getChannelData(c)); let o = 44;
+  for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { const v = Math.max(-1, Math.min(1, cs[c][i])); dv.setInt16(o, v < 0 ? v * 32768 : v * 32767, true); o += 2; }
+  return new Blob([dv.buffer], { type: "audio/wav" });
+}
+/* the soundtrack encoded for a video: AAC (or Opus) in MP4, Opus in WebM */
+async function moAudioForVideo(fmt) {
+  if (typeof AudioEncoder === "undefined") return null;
+  const buf = await moRenderAudio(); if (!buf) return null;
+  const tries = fmt === "mp4" ? [["mp4a.40.2", "aac"], ["opus", "opus"]] : [["opus", "A_OPUS"]];
+  for (const [codec, mux] of tries) {
+    const cfg = { codec, sampleRate: buf.sampleRate, numberOfChannels: 2, bitrate: 160000 };
+    try { const s = await AudioEncoder.isConfigSupported(cfg); if (!s || !s.supported) continue; } catch (_) { continue; }
+    const chunks = []; let err = null;
+    const enc = new AudioEncoder({ output: (c, m) => chunks.push([c, m]), error: e => { err = e; } }); enc.configure(cfg);
+    const N = buf.length, F = 960, L = buf.getChannelData(0), R = buf.getChannelData(1);
+    for (let i = 0; i < N; i += F) { const k = Math.min(F, N - i), d = new Float32Array(k * 2); d.set(L.subarray(i, i + k), 0); d.set(R.subarray(i, i + k), k);
+      const ad = new AudioData({ format: "f32-planar", sampleRate: buf.sampleRate, numberOfFrames: k, numberOfChannels: 2, timestamp: Math.round(i / buf.sampleRate * 1e6), data: d }); enc.encode(ad); ad.close(); }
+    try { await enc.flush(); enc.close(); } catch (e) { err = e; }
+    if (!err && chunks.length) return { mux, chunks, sampleRate: buf.sampleRate };
+  }
+  return null;
+}
+
+/* ---- generator: sounds on the animation's key moments ---- */
+const MO_AMB = {
+  cinema: { n: "Cinématique", fx: { rev: 25, echo: 0, comp: true } },
+  elegant: { n: "Élégante", fx: { rev: 35, echo: 10, comp: true } },
+  dynamic: { n: "Dynamique", fx: { rev: 12, echo: 0, comp: true } },
+  minimal: { n: "Minimale", fx: { rev: 20, echo: 0, comp: false } },
+  tech: { n: "Technologique", fx: { rev: 10, echo: 25, comp: true } },
+};
+function moMoments() {
+  const A = motion.anims, D = motion.dur;
+  if (!A.length) { const ends = Object.values(MO.auto).map(p => p.start + p.len), starts = Object.values(MO.auto).map(p => p.start);
+    return { first: starts.length ? Math.min(...starts) : 0, climax: ends.length ? Math.min(D, Math.max(...ends)) : D * .7, mark: starts.slice(0, 1), letters: [], outs: [], typing: false }; }
+  const ins = A.filter(a => a.k === "in" || a.k === "key"), sweeps = A.filter(a => a.p === "balayage");
+  const isText = a => a.k !== "cam" && a.ids.some(id => { const l = layerById(id); return l && l.group === "word"; });
+  const climax = sweeps.length ? Math.max(...sweeps.map(moEnd)) : ins.length ? Math.max(...ins.map(moEnd)) : D * .6;
+  const letters = []; ins.filter(isText).forEach(a => { const n = MO.ranks[a.id] ? MO.ranks[a.id].n : 1; for (let i = 0; i < n; i++) letters.push(a.at + i * (a.stg || 0)); });
+  return { first: ins.length ? Math.min(...ins.map(a => a.at)) : 0, climax: Math.min(D, climax), mark: ins.filter(a => !isText(a)).map(a => a.at).sort((p, q) => p - q),
+    letters: letters.sort((p, q) => p - q), outs: A.filter(a => a.k === "out").map(a => a.at), typing: A.some(a => a.p === "machine") };
+}
+function moGenerate(amb, seed) {
+  const M = moMoments(), D = motion.dur, out = [], pool = cat => { const u = MO_SND.user.filter(m => m.cat === cat), s = [...MO_SND.meta.values()].filter(m => m.syn && m.cat === cat); return u.length ? u : s; };
+  let k = seed | 0;
+  // pref: names to prefer; fit: a condition to prefer (both fall back to the whole category)
+  const pick = (cat, pref, fit) => { let p = pool(cat); if (pref) { const q = p.filter(m => pref.test(m.n)); if (q.length) p = q; } if (fit) { const q = p.filter(fit); if (q.length) p = q; } return p.length ? p[(k++) % p.length] : null; };
+  const short = m => m.d <= .6, used = {};
+  const at = t => m => m.pk <= t + .05;   // the sound fits before the moment, without cutting its start
+  // the sound's peak lands on the moment t; two sounds of a kind stay `gap` seconds apart
+  const place = (m, t, gain, x = {}, gap = .5) => { if (!m || t < 0 || t > D) return;
+    const u = used[m.cat] || (used[m.cat] = []); if (u.some(v => Math.abs(v - t) < gap)) return; u.push(t);
+    const at = t - m.pk, cut = at < 0 ? -at : 0;
+    out.push(Object.assign({ id: "c" + Math.random().toString(36).slice(2, 8), s: m.id, at: r2(Math.max(0, at)), gain: gain || 0, pitch: 0, fi: 0, fo: 0, cut: r2(cut) }, x)); };
+  const every = (list, max) => { if (list.length <= max) return list; const st = list.length / max; return [...Array(max)].map((_, i) => list[Math.floor(i * st)]); };
+  const c = M.climax, f = M.first;
+  if (amb === "cinema") { const r = pick("riser", null, m => m.pk <= c + .1) || pick("reverse"); if (r) place(r, c, -3, { fi: .3 }); place(pick("impact", /deep|grave|basse|boom|heavy/i), c, 0); place(pick("whoosh", /deep|grave/i, at(Math.max(.15, f + .1))), Math.max(.15, f + .1), -6); M.outs.forEach(t => place(pick("whoosh", null, at(t + .2)), t + .2, -6)); }
+  else if (amb === "elegant") { place(pick("whoosh", null, at(Math.max(.15, f + .15))), Math.max(.15, f + .15), -8, { fi: .1 }); place(pick("chime"), c, -4); M.outs.forEach(t => place(pick("whoosh", null, at(t + .2)), t + .2, -9)); }
+  else if (amb === "dynamic") { M.mark.slice(0, 3).forEach((t, i) => place(pick("whoosh", null, at(t + .15)), t + .15, -5 - i)); every(M.letters, 8).forEach(t => place(pick("pop", null, short), t + .05, -10, {}, .15)); place(pick("impact"), c, -2); M.outs.forEach(t => place(pick("whoosh", null, at(t + .15)), t + .15, -6)); }
+  else if (amb === "minimal") { place(pick("whoosh", null, at(Math.max(.15, f + .15))), Math.max(.15, f + .15), -9); place(pick("impact", /doux|soft|pop/i) || pick("pop"), c, -6); }
+  else if (amb === "tech") { const r = pick("riser", /cyber|futur|stutter|mont/i); if (r) place(r, c, -4); place(pick("pop", /ui|clic|click|game/i, short), Math.max(.05, f), -8); every(M.letters, 10).forEach(t => place(pick("pop", /clic|click|ui|touche/i, short), t + .03, -12, {}, .12)); place(pick("impact"), c, -3); }
+  if (M.typing && amb !== "minimal") every(M.letters, 16).forEach(t => place(pick("pop", /touche|camera|click|clic|type/i, short), t, -10, {}, .06));
+  // nothing may run past the end: fade out what would
+  out.forEach(cl => { const { L } = moClipSpan(cl); if (cl.at + L > D) { cl.len = r2(Math.max(.05, D - cl.at)); cl.fo = r2(Math.min(.4, cl.len)); } });
+  return out.slice(0, 80);
+}
+function moApplyGenerated(seed) {
+  const amb = moEl("moAmb").value, list = moGenerate(amb, seed);
+  if (!list.length) { toast("Aucun son disponible pour cette ambiance."); return; }
+  moPush(); motion.audio.clips = list; motion.audio.on = true; Object.assign(motion.audio.fx, MO_AMB[amb].fx); MO.focusClip = null;
+  moSndPreload().then(() => { moPanel(); moSave(); moSeek(0); moPlay(true); });
+  toast("Bande son « " + MO_AMB[amb].n + " » : " + list.length + " son" + (list.length > 1 ? "s" : "") + " placé" + (list.length > 1 ? "s" : "") + " sur les temps forts.");
+}
+
+/* ---- side panel: sound section, clip cards, master effects ---- */
+const MO_FX = { rev: ["Réverbération", 0, 100, 1, " %"], echo: ["Écho", 0, 100, 1, " %"], filt: ["Filtre (sourd ← → léger)", -100, 100, 1, ""], lo: ["Graves", -12, 12, .5, " dB"], mid: ["Médiums", -12, 12, .5, " dB"], hi: ["Aigus", -12, 12, .5, " dB"] };
+const MO_CLIPF = { at: ["Début", 0, 12, .01, " s"], gain: ["Volume", -24, 6, .5, " dB"], pitch: ["Hauteur (demi-tons)", -12, 12, 1, ""], fi: ["Fondu d'entrée", 0, 2, .05, " s"], fo: ["Fondu de sortie", 0, 2, .05, " s"], cut: ["Coupe au début", 0, 10, .01, " s"], len: ["Durée", .05, 12, .01, " s"] };
+function moSndPanel() {
+  const A = motion.audio, sec = moEl("moSndSec"); if (!sec) return;
+  moEl("moSndOn").checked = A.on; moEl("moSndVol").value = Math.round(A.vol * 100); moEl("moSndVolOut").textContent = Math.round(A.vol * 100) + " %";
+  moEl("moFx").innerHTML = Object.entries(MO_FX).map(([k, [n, mi, ma, st, u]]) => `<label class="mo-p"><span>${n}</span><input type="range" data-fx="${k}" min="${mi}" max="${ma}" step="${st}" value="${A.fx[k]}"><output>${moNum(A.fx[k])}${u}</output></label>`).join("")
+    + `<label class="chk" style="font-size:12px"><input type="checkbox" data-fx="comp"${A.fx.comp ? " checked" : ""}> Compresseur (son plus homogène)</label>`;
+  moEl("moClips").innerHTML = A.clips.length ? A.clips.map(c => { const sp = moClipSpan(c), m = moSndMeta(c.s), v = { at: c.at, gain: c.gain, pitch: c.pitch, fi: c.fi, fo: c.fo, cut: c.cut, len: r2(sp.L) };
+    const lim = { at: [0, motion.dur], cut: [0, Math.max(.05, (m ? m.d : 1) - .05)], len: [.05, Math.max(.06, r2(sp.max))] };
+    return `<details class="mo-anim mo-clip" data-clip="${c.id}"${MO.focusClip === c.id ? " open" : ""}><summary><span><span class="k">Son</span><br>${esc(moSndName(c.s))}${m ? "" : ` <small style="color:var(--danger)">· manquant</small>`}</span><span class="t">${moNum(c.at)}–${moNum(c.at + sp.L)} s</span></summary><div class="bd">`
+      + Object.entries(MO_CLIPF).map(([k, [n, mi, ma, st, u]]) => { const [a0, a1] = lim[k] || [mi, ma]; return `<label class="mo-p"><span>${n}</span><input type="range" data-cl="${c.id}" data-ck="${k}" min="${a0}" max="${a1}" step="${st}" value="${v[k]}"><output>${moNum(v[k])}${u}</output></label>`; }).join("")
+      + `<div class="acts"><button data-cact="play" data-cl="${c.id}">▶ Écouter</button><button data-cact="del" data-cl="${c.id}">Retirer</button></div></div></details>`; }).join("")
+    : `<p class="mo-hint">Pas encore de son : « Générer la bande son » place des sons sur les temps forts de l'animation, ou ajoutez-en depuis la banque.</p>`;
+}
+function moClipSet(c, k, v) {
+  const m = moSndMeta(c.s);
+  if (k === "at") c.at = r2(moC(v, 0, MOTION_MAX)); else if (k === "gain") c.gain = moC(v, -40, 12); else if (k === "pitch") c.pitch = Math.round(moC(v, -12, 12));
+  else if (k === "fi") c.fi = moC(v, 0, 5); else if (k === "fo") c.fo = moC(v, 0, 5); else if (k === "cut") c.cut = r2(moC(v, 0, Math.max(0, (m ? m.d : 1) - .05)));
+  else if (k === "len") c.len = r2(moC(v, .05, MOTION_MAX));
+}
+function moPreviewSound(id, from) {
+  moSndBuffer(id).then(buf => { if (!buf) { toast("Son illisible sur cet appareil."); return; }
+    if (!MO_SND.ctx) { try { MO_SND.ctx = new AudioContext({ sampleRate: MO_SR }); } catch (_) { MO_SND.ctx = new AudioContext(); } }
+    const ctx = MO_SND.ctx; ctx.resume().catch(() => {}); if (MO_SND.prev) { try { MO_SND.prev.stop(); } catch (_) {} }
+    const s = ctx.createBufferSource(), g = ctx.createGain(), m = moSndMeta(id); s.buffer = buf; g.gain.value = Math.pow(10, (m ? m.g : 0) / 20) * .9; s.connect(g); g.connect(ctx.destination); s.start(0, from || 0); MO_SND.prev = s; });
+}
+function moAddClip(id, at) {
+  const m = moSndMeta(id); if (!m) return; if (motion.audio.clips.length >= 80) { toast("80 sons au plus par animation."); return; }
+  moPush(); const c = { id: "c" + Math.random().toString(36).slice(2, 8), s: id, at: r2(moC(at, 0, Math.max(0, motion.dur - .05))), gain: 0, pitch: 0, fi: 0, fo: 0, cut: 0 };
+  motion.audio.clips.push(c); motion.audio.on = true; MO.focusClip = c.id; moSndBuffer(id).then(() => { moPanel(); moSave(); });
+}
+(function moSndInit() {
+  moEl("moAmb").innerHTML = Object.entries(MO_AMB).map(([k, m]) => `<option value="${k}">${m.n}</option>`).join("");
+  const side = moEl("moSide");
+  side.addEventListener("click", e => {
+    const t = e.target.closest("#moGen,#moGen2,#moBankBtn,[data-cact]"); if (!t) return;
+    if (t.id === "moGen") { MO.genSeed = 0; moApplyGenerated(0); }
+    else if (t.id === "moGen2") { MO.genSeed = (MO.genSeed || 0) + 1; moApplyGenerated(MO.genSeed); }
+    else if (t.id === "moBankBtn") openSoundBank();
+    else { const c = motion.audio.clips.find(x => x.id === t.dataset.cl); if (!c) return;
+      if (t.dataset.cact === "del") { moPush(); motion.audio.clips = motion.audio.clips.filter(x => x !== c); moPanel(); moSave(); }
+      else { moPlay(false); moSeek(Math.max(0, c.at - .1)); moPlay(true); } }
+  });
+  side.addEventListener("input", e => {
+    const f = e.target;
+    if (f.id === "moSndVol") { if (!MO.pend) MO.pend = moSnap(); motion.audio.vol = moC(+f.value / 100, 0, 1.5); moEl("moSndVolOut").textContent = f.value + " %"; return; }
+    if (f.dataset.fx && f.type === "range") { if (!MO.pend) MO.pend = moSnap(); motion.audio.fx[f.dataset.fx] = +f.value; const d = MO_FX[f.dataset.fx]; f.parentNode.querySelector("output").textContent = moNum(+f.value) + d[4]; return; }
+    if (f.dataset.cl && f.dataset.ck) { const c = motion.audio.clips.find(x => x.id === f.dataset.cl); if (!c) return; if (!MO.pend) MO.pend = moSnap();
+      moClipSet(c, f.dataset.ck, +f.value); f.parentNode.querySelector("output").textContent = moNum(+f.value) + MO_CLIPF[f.dataset.ck][4]; moTl(); }
+  });
+  side.addEventListener("change", e => {
+    const f = e.target;
+    if (f.id === "moSndOn") { moPush(); motion.audio.on = f.checked; if (!f.checked) moAudioStop(); moSave(); moTl(); return; }
+    if (f.dataset.fx === "comp") { moPush(); motion.audio.fx.comp = f.checked; moSave(); return; }
+    if (f.id === "moSndVol" || f.dataset.fx || f.dataset.cl) { if (MO.pend) { MO.undo.push(MO.pend); MO.redo = []; MO.pend = null; moUndoBtns(); } moSave(); if (f.dataset.cl) moSndPanel();
+      if (MO.playing) moAudioStart(MO.t); }
+  });
+  side.addEventListener("toggle", e => { const d = e.target; if (d.classList && d.classList.contains("mo-clip") && d.open) MO.focusClip = d.dataset.clip; }, true);
+
+  // bank dialog: the workshop's sounds and « Mes sons », preview, add at the playhead, import, delete
+  const d = document.createElement("dialog"); d.id = "moBankDlg"; d.className = "moexdlg mobank"; d.setAttribute("aria-labelledby", "moBankTitle");
+  d.innerHTML = `<h2 id="moBankTitle">Banque de sons</h2>
+<div class="mo-tabs" id="moBankTabs" role="group" aria-label="Catégories"></div>
+<div class="mobank-list" id="moBankList"></div>
+<div class="mobank-imp"><h3>Importer mes sons</h3>
+<p>Fichiers MP3, WAV, OGG, M4A, FLAC ou un dossier zippé (.zip). 15 Mo par son, 60 secondes au plus. Ils restent sur cet appareil : ils ne sont envoyés nulle part et ne sont pas partagés.</p>
+<label class="mobank-rights"><input type="checkbox" id="moRights"><span>Je détiens les droits sur ces sons, ou leur licence m'autorise à les utiliser dans mes créations. Je n'importe pas d'œuvre protégée sans l'autorisation de ses ayants droit (<a href="https://atelier-du-logo.johnapplewan.workers.dev/cgu/" target="_blank" rel="noopener">conditions d'utilisation</a>).</span></label>
+<div class="row"><button id="moImpBtn" class="primary" disabled>Choisir des fichiers…</button><input type="file" id="moImpIn" accept="audio/*,.mp3,.wav,.ogg,.oga,.opus,.m4a,.aac,.flac,.webm,.zip" multiple hidden></div>
+<p class="moex-msg" id="moImpMsg" role="status"></p></div>
+<div class="moex-btns"><button id="moBankClose">Fermer</button></div>`;
+  document.body.appendChild(d);
+  const css = document.createElement("style");
+  css.textContent = `.mobank{width:min(640px,96vw)} .mobank-list{max-height:min(44vh,380px);overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.mobank-list .it{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--cream);font-size:13px}
+.mobank-list .it:last-child{border-bottom:0} .mobank-list .it .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mobank-list .it small{color:var(--muted);font-variant-numeric:tabular-nums} .mobank-list .it button{font-size:12px;padding:3px 8px}
+.mobank-list h4{margin:0;padding:8px 10px 4px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);background:var(--paper)}
+.mobank-imp{margin-top:14px;font-size:12.5px} .mobank-imp h3{font-size:14px;margin:0 0 4px} .mobank-imp p{margin:0 0 8px;color:var(--muted)}
+.mobank-rights{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4;margin-bottom:8px;cursor:pointer} .mobank-rights input{margin-top:3px;flex:none}
+#moBankTabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px} #moBankTabs button{font-size:12px;padding:4px 9px} #moBankTabs button[aria-pressed=true]{background:var(--night);color:#fff;border-color:var(--night)}`;
+  document.head.appendChild(css);
+  try { moEl("moRights").checked = localStorage.getItem("atelier-logo-sons-droits") === "1"; } catch (_) {}
+  moEl("moImpBtn").disabled = !moEl("moRights").checked;
+  moEl("moRights").onchange = e => { moEl("moImpBtn").disabled = !e.target.checked; try { localStorage.setItem("atelier-logo-sons-droits", e.target.checked ? "1" : "0"); } catch (_) {} };
+  moEl("moImpBtn").onclick = () => moEl("moImpIn").click();
+  moEl("moImpIn").onchange = async e => {
+    const files = [...e.target.files]; e.target.value = ""; if (!files.length) return;
+    if (!moEl("moRights").checked) { moEl("moImpMsg").textContent = "Cochez d'abord la case sur les droits."; return; }
+    moEl("moImpMsg").textContent = "Lecture des fichiers…";
+    try { const r = await moImportSounds(files, (i, n) => { moEl("moImpMsg").textContent = `Analyse ${i} / ${n}…`; });
+      moEl("moImpMsg").textContent = `${r.added} son${r.added > 1 ? "s" : ""} ajouté${r.added > 1 ? "s" : ""} à « Mes sons »` + (r.skipped ? `, ${r.skipped} fichier${r.skipped > 1 ? "s" : ""} ignoré${r.skipped > 1 ? "s" : ""} (format, taille, durée ou fichier illisible).` : ".");
+      MO.bankTab = "mes"; moBankRender(); }
+    catch (err) { moEl("moImpMsg").textContent = "Import impossible : " + ((err && err.message) || err); }
+  };
+  moEl("moBankClose").onclick = () => d.close();
+  d.addEventListener("click", e => {
+    const tab = e.target.closest("[data-btab]"), b = e.target.closest("[data-bact]");
+    if (tab) { MO.bankTab = tab.dataset.btab; moBankRender(); return; }
+    if (!b) return; const id = b.dataset.id;
+    if (b.dataset.bact === "play") moPreviewSound(id);
+    else if (b.dataset.bact === "add") { moAddClip(id, MO.t); moEl("moImpMsg").textContent = "« " + moSndName(id) + " » ajouté à " + moNum(MO.t) + " s."; }
+    else if (b.dataset.bact === "del") confirmBox("Supprimer ce son de l'appareil ?", "« " + moSndName(id) + " » sera retiré de « Mes sons ». Les animations qui l'utilisent le marqueront comme manquant.", "Supprimer").then(ok => { if (ok) moDeleteSound(id).then(moBankRender); });
+  });
+})();
+function moBankRender() {
+  const tab = MO.bankTab || "tous", tabs = [["tous", "Tous"], ["mes", "Mes sons"], ...Object.entries(MO_SND_CATS)];
+  moEl("moBankTabs").innerHTML = tabs.map(([k, n]) => `<button data-btab="${k}" aria-pressed="${k === tab}">${n}</button>`).join("");
+  const all = [...MO_SND.user, ...[...MO_SND.meta.values()].filter(m => m.syn)], list = tab === "tous" ? all : tab === "mes" ? MO_SND.user : all.filter(m => m.cat === tab);
+  const row = m => `<div class="it"><button data-bact="play" data-id="${esc(m.id)}" aria-label="Écouter ${esc(m.n)}">▶</button><span class="n">${esc(m.n)}</span><small>${moNum(m.d)} s</small><button data-bact="add" data-id="${esc(m.id)}">+ Ajouter</button>${m.syn ? "" : `<button data-bact="del" data-id="${esc(m.id)}" aria-label="Supprimer ${esc(m.n)}">✕</button>`}</div>`;
+  const mine = list.filter(m => !m.syn), ours = list.filter(m => m.syn);
+  moEl("moBankList").innerHTML = (mine.length ? `<h4>Mes sons (sur cet appareil)</h4>${mine.map(row).join("")}` : tab === "mes" ? `<p class="mo-hint" style="padding:10px">Aucun son importé pour l'instant.</p>` : "")
+    + (ours.length ? `<h4>Sons de l'atelier (générés)</h4>${ours.map(row).join("")}` : "");
+}
+async function openSoundBank() { await moSndLoadUser(); moBankRender(); moEl("moImpMsg").textContent = ""; moEl("moBankDlg").showModal(); }
+
 window.__motion = {
   get state() { return { open: MO.open, t: MO.t, playing: MO.playing, motion: clone(motion), sel: [...MO.sel] }; },
   seek: t => { moPlay(false); moSeek(t); }, open: openMotion, close: closeMotion, presets: Object.keys(MO_PRESETS), valid: validMotion,
+  renderAudio: () => moRenderAudio(), soundMeta: id => moSndMeta(id), userSounds: () => MO_SND.user.slice(),
   exportSVG: o => moExportSVG(Object.assign({ W: 1600, H: 900, bg: "", vb: moViewBox(16 / 9), fps: 24 }, o || {})),
   stateAt: t => { const s = moState(t); return JSON.parse(JSON.stringify(s)); },
 };
