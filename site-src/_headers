@@ -1,13 +1,15 @@
-# Security headers for the Cloudflare Worker (static assets). Same policy as the page's own meta tag, plus
-# frame-ancestors, which only a header can set. Not used by GitHub Pages, the artifact or the Desktop extension.
+# Security headers for the Cloudflare Worker (site/ = public pages + the workshop under /atelier/). Same policy as the
+# workshop's own meta tag, plus frame-ancestors, which only a header can set.
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Permissions-Policy: camera=(), microphone=(self), geolocation=(), payment=()
 
 # the service worker and its file list must always be fresh, so a new build reaches everyone
-/sw.js
+/atelier/sw.js
   Cache-Control: no-cache
-/files.json
+/atelier/files.json
+  Cache-Control: no-cache
+/sw.js
   Cache-Control: no-cache

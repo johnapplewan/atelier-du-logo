@@ -3,3 +3,4 @@ tests/*.png
 tests/*.json
 .DS_Store
 about.local.json
+site/

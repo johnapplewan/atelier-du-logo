@@ -116,7 +116,7 @@ function listApp(dir, base = "") {
   });
 }
 const appDir = path.join(root, "app");
-const files = listApp(appDir).filter(f => !["sw.js", "files.json", "_headers"].includes(f) && !f.startsWith("downloads/")).sort();
+const files = listApp(appDir).filter(f => !["sw.js", "files.json"].includes(f) && !f.startsWith("downloads/")).sort();
 const hash = crypto.createHash("sha1");
 for (const f of files) hash.update(f).update(fs.readFileSync(path.join(appDir, f)));
 const version = hash.digest("hex").slice(0, 12);
@@ -124,3 +124,6 @@ fs.writeFileSync(path.join(appDir, "files.json"), JSON.stringify({ version, file
 fs.writeFileSync(path.join(appDir, "sw.js"), fs.readFileSync(path.join(root, "src/sw.js"), "utf8")
   .replace("__VERSION__", version).replace("__FILES__", JSON.stringify(["./", "sw.js", "files.json", ...files])));
 console.log("sw.js + files.json written (" + files.length + " files, version " + version + ")");
+
+// Public site for the Cloudflare Worker (landing, account and legal pages + the workshop under /atelier/)
+require("./build-site").buildSite();

@@ -35,10 +35,13 @@ const { chromium, assert, open, check, done } = require("./helpers");
   await p.click("#moPlay");
   const sym = await p.evaluate(() => { const an = __motion.state.motion.anims, tr = an.find(a => a.p === "trace"), ms = an.find(a => a.p === "masque");
     __motion.seek(tr.at + tr.len * .4);
-    const paths = [...document.querySelectorAll("#moSvg [data-tr]")].filter(e => e.style.display !== "none");
+    const drawing = () => [...document.querySelectorAll("#moSvg [data-tr]")].filter(e => e.getAttribute("opacity") === "1");
+    const vbw = document.querySelector("#moSvg").viewBox.baseVal.width;
+    const clippedNow = () => [...document.querySelectorAll("#moSvg clipPath")].filter(cp => +cp.children[0].getAttribute("width") < vbw * 2).length;
+    const paths = drawing();
     const off = paths.length ? +paths[0].getAttribute("stroke-dashoffset") : -1;
-    __motion.seek(ms.at + ms.len * .5); const clipped = document.querySelectorAll("#moSvg g[data-c][clip-path]").length;
-    __motion.seek(__motion.state.motion.dur); const left = document.querySelectorAll("#moSvg g[data-c][clip-path]").length + [...document.querySelectorAll("#moSvg [data-tr]")].filter(e => e.style.display !== "none").length;
+    __motion.seek(ms.at + ms.len * .5); const clipped = clippedNow();
+    __motion.seek(__motion.state.motion.dur); const left = clippedNow() + drawing().length;
     return { drawn: paths.length, off, clipped, left }; });
   check("« Tracé du contour » draws the outlines, « Révélation par masque » clips, nothing left at the end", () => {
     assert.ok(sym.drawn > 0 && sym.off > 0 && sym.off < 1, JSON.stringify(sym)); assert.ok(sym.clipped > 0); assert.strictEqual(sym.left, 0); });
@@ -47,7 +50,7 @@ const { chromium, assert, open, check, done } = require("./helpers");
   await p.click('[data-preset="liquide"]'); await p.click("#moPlay");
   await p.click('[data-tab="out"]'); await p.click('[data-preset="fondu"]'); await p.click("#moPlay");
   const fx = await p.evaluate(() => { const an = __motion.state.motion.anims, lq = an.find(a => a.p === "liquide"), out = an.find(a => a.k === "out");
-    __motion.seek(lq.at + lq.len * .3); const filt = document.querySelectorAll("#moSvg g[data-mo][filter]").length;
+    __motion.seek(lq.at + lq.len * .3); const filt = [...document.querySelectorAll("#moSvg feDisplacementMap")].filter(f => +f.getAttribute("scale") > 0).length;
     const end = __motion.stateAt(__motion.state.motion.dur);
     return { filt, ease: out.ease, endO: out.ids.map(id => end[id].o), at: out.at, dur: __motion.state.motion.dur }; });
   check("« Liquide » runs through a filter; a disappearance hides its layers at the end", () => {

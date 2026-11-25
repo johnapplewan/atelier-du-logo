@@ -5454,6 +5454,7 @@ body.motion-open .toast{z-index:1000}
   <button id="moBack" title="Revenir à l'atelier (Échap)">‹ Atelier</button>
   <div><h2>Motion</h2><div class="sub">Animer le logo du projet ouvert</div></div>
   <div class="spacer"></div>
+  <button id="moExport" class="primary" title="Exporter en MP4, WebM, GIF ou SVG animé">Exporter</button>
   <button id="moUndo" title="Annuler (Ctrl+Z)" disabled>Annuler</button>
   <button id="moRedo" title="Rétablir (Ctrl+Maj+Z)" disabled>Rétablir</button>
   <label class="mo-dur">Durée <input type="range" id="moDur" min="${MOTION_MIN}" max="${MOTION_MAX}" step="0.5"> <output id="moDurOut"></output></label>
@@ -5488,6 +5489,7 @@ body.motion-open .toast{z-index:1000}
   const mb = document.getElementById("motionBtn"); if (mb) mb.onclick = openMotion;
 
   moEl("moBack").onclick = closeMotion;
+  moEl("moExport").onclick = () => openMotionExport();
   moEl("moUndo").onclick = () => moUndo(false);
   moEl("moRedo").onclick = () => moUndo(true);
   moEl("moPlay").onclick = () => moPlay(!MO.playing);
@@ -5637,10 +5639,9 @@ function moBuild() {
     a.ids.forEach(id => { const n = need[id] || (need[id] = {}); if (f === "clip") n.clip = Math.max(n.clip || 1, a.o.bands || MO_PRESETS[a.p].o.bands || 1); else n[f] = true; }); }
   let defs = "", body = "";
   if (vis.length) {
-    const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, pad = Math.max(w, h) * 0.12;
+    const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, vb = moViewBox(16 / 9);
     MO.S = Math.max(w, h) || 1; MO.c = { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 };
-    let vw = w + 2 * pad, vh = h + 2 * pad; if (vw / vh < 16 / 9) vw = vh * 16 / 9; else vh = vw * 9 / 16;
-    svg.setAttribute("viewBox", `${r2((b.x0 + b.x1 - vw) / 2)} ${r2((b.y0 + b.y1 - vh) / 2)} ${r2(vw)} ${r2(vh)}`);
+    svg.setAttribute("viewBox", `${r2(vb.x)} ${r2(vb.y)} ${r2(vb.w)} ${r2(vb.h)}`);
     vis.forEach((L, k) => {
       const r = layerSVG(L, { pfx: "mo" }), lb = bounds([L]), nd = need[L.id] || {}, S = Math.max(lb.x1 - lb.x0, lb.y1 - lb.y0) || 1;
       MO.info[L.id] = { k, x0: lb.x0, x1: lb.x1, y0: lb.y0, y1: lb.y1, cx: (lb.x0 + lb.x1) / 2, cy: (lb.y0 + lb.y1) / 2, S, clip: nd.clip || 0, trace: !!nd.trace, filter: !!nd.filter };
@@ -5649,8 +5650,8 @@ function moBuild() {
       if (nd.clip) defs += `<clipPath id="moc-${k}" clipPathUnits="userSpaceOnUse">${"<rect/>".repeat(nd.clip)}</clipPath>`;
       let tr = "";
       if (nd.trace) { const p = paintOf(L), col = typeof p === "string" ? p : (p.c ? p.c[0] : mixHex(p.p.map(q => q.c)));
-        tr = `<path data-tr d="${pathD(L.subs, !!L.open)}" pathLength="1" fill="none" stroke="${col}" stroke-width="${r2(L.open ? (L.sw || 4) : Math.max(.2, Math.min(S * .05, MO.S * .0025)))}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1" style="display:none"/>`; }
-      body += `<g data-mo="${esc(L.id)}"><g data-c><g data-b>${r.body}</g>${tr}</g></g>`;
+        tr = `<path data-tr d="${pathD(L.subs, !!L.open)}" pathLength="1" fill="none" stroke="${col}" stroke-width="${r2(L.open ? (L.sw || 4) : Math.max(.2, Math.min(S * .05, MO.S * .0025)))}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1" opacity="0"/>`; }
+      body += `<g data-mo="${esc(L.id)}"${nd.filter ? ` filter="url(#mof-${k})"` : ""}><g data-c${nd.clip ? ` clip-path="url(#moc-${k})"` : ""}><g data-b>${r.body}</g>${tr}</g></g>`;
     });
   } else { MO.S = 1; MO.c = { x: 80, y: 45 }; svg.setAttribute("viewBox", "0 0 160 90"); }
   svg.innerHTML = (defs ? `<defs>${defs}</defs>` : "") + (body ? `<g data-scene>${body}</g><g data-selbox pointer-events="none"></g>` : `<text x="80" y="47" text-anchor="middle" font-size="6" fill="#6B6B70" font-family="Inter,system-ui,sans-serif">Le projet ne contient encore aucun calque visible.</text>`);
@@ -5667,6 +5668,13 @@ function moBuild() {
   moEl("moNote").textContent = motion.anims.length ? "" : "Aperçu automatique : choisissez une recette en un clic, ou des calques puis une animation, pour composer la vôtre.";
   moSelBoxes(); moSeek(Math.min(MO.t, motion.dur));
 }
+/* the drawing framed with a margin in a given aspect ratio (width / height) */
+function moViewBox(aspect) {
+  const vis = moVisible(); if (!vis.length) return { x: 0, y: 0, w: 160, h: 90 };
+  const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, pad = Math.max(w, h) * 0.12;
+  let vw = w + 2 * pad, vh = h + 2 * pad; if (vw / vh < aspect) vw = vh * aspect; else vh = vw / aspect;
+  return { x: (b.x0 + b.x1 - vw) / 2, y: (b.y0 + b.y1 - vh) / 2, w: vw, h: vh };
+}
 function moTransform(s, c) {
   const t = (s.x || s.y ? `translate(${r2(s.x)} ${r2(s.y)}) ` : "") + (s.r || s.s !== 1 || s.sx !== 1 || s.ky
     ? `translate(${r2(c.x)} ${r2(c.y)})${s.r ? ` rotate(${r2(s.r)})` : ""}${s.ky ? ` skewY(${r2(s.ky)})` : ""} scale(${Math.round(s.s * s.sx * 1e4) / 1e4} ${Math.round(s.s * 1e4) / 1e4}) translate(${r2(-c.x)} ${r2(-c.y)})` : "");
@@ -5679,31 +5687,28 @@ function moRender(t) {
     G.g.setAttribute("opacity", r2(mo01(s.o)));
     const tr = moTransform(s, { x: inf.cx, y: inf.cy }); if (tr) G.g.setAttribute("transform", tr); else G.g.removeAttribute("transform");
     if (inf.filter) { const f = document.getElementById("mof-" + k);
-      if (s.blur > 0 || s.liq > 0) { f.children[1].setAttribute("scale", r2(s.liq / 100 * inf.S * .25)); f.children[2].setAttribute("stdDeviation", r2(s.blur / 100 * inf.S * .08)); G.g.setAttribute("filter", `url(#mof-${k})`); }
-      else G.g.removeAttribute("filter"); }
-    if (inf.clip) { const c = s.clip;
-      if (c && c.v < 1) { const cp = document.getElementById("moc-" + k), rs = cp.children, w = inf.x1 - inf.x0, h = inf.y1 - inf.y0, m = inf.S * .05;
-        const set = (el, x, y, ww, hh) => { el.setAttribute("x", r2(x)); el.setAttribute("y", r2(y)); el.setAttribute("width", r2(Math.max(0, ww))); el.setAttribute("height", r2(Math.max(0, hh))); };
-        for (const el of rs) set(el, 0, 0, 0, 0);
+      f.children[1].setAttribute("scale", r2(Math.max(0, s.liq) / 100 * inf.S * .25)); f.children[2].setAttribute("stdDeviation", r2(Math.max(0, s.blur) / 100 * inf.S * .08)); }
+    if (inf.clip) { const c = s.clip, cp = document.getElementById("moc-" + k), rs = cp.children, w = inf.x1 - inf.x0, h = inf.y1 - inf.y0, m = inf.S * .05;
+      const set = (el, x, y, ww, hh) => { el.setAttribute("x", r2(x)); el.setAttribute("y", r2(y)); el.setAttribute("width", r2(Math.max(0, ww))); el.setAttribute("height", r2(Math.max(0, hh))); };
+      for (const el of rs) set(el, 0, 0, 0, 0);
+      if (!c || c.v >= 1) { const M = MO.S * 4; set(rs[0], inf.cx - M, inf.cy - M, 2 * M, 2 * M); }   // idle: one rect covers everything
+      else {
         if (c.k === "wipe") { const v = c.v, X = inf.x0 - m, Y = inf.y0 - m, W = w + 2 * m, H = h + 2 * m;
           if (c.dir === "gauche") set(rs[0], X, Y, W * v, H); else if (c.dir === "droite") set(rs[0], X + W * (1 - v), Y, W * v, H);
           else if (c.dir === "haut") set(rs[0], X, Y, W, H * v); else set(rs[0], X, Y + H * (1 - v), W, H * v); }
-        else { const n = Math.min(c.n, rs.length), bh = (h + 2 * m) / n; for (let i = 0; i < n; i++) set(rs[i], inf.x0 - m, inf.y0 - m + i * bh + bh * (1 - c.v) / 2, w + 2 * m, bh * c.v + .01); }
-        G.c.setAttribute("clip-path", `url(#moc-${k})`); }
-      else G.c.removeAttribute("clip-path"); }
-    if (G.tr) { const d = s.draw;
-      if (d !== null && d < 1) { G.tr.style.display = ""; G.tr.setAttribute("stroke-dashoffset", r2(1 - d)); G.b.setAttribute("opacity", r2(mo01((d - .55) / .45))); }
-      else { G.tr.style.display = "none"; G.b.removeAttribute("opacity"); } }
+        else { const n = Math.min(c.n, rs.length), bh = (h + 2 * m) / n; for (let i = 0; i < n; i++) set(rs[i], inf.x0 - m, inf.y0 - m + i * bh + bh * (1 - c.v) / 2, w + 2 * m, bh * c.v + .01); } } }
+    if (G.tr) { const d = s.draw, on = d !== null && d < 1;   // not started yet (d = 0): nothing shows, not even the round line caps
+      G.tr.setAttribute("opacity", on && d > 0 ? 1 : 0); G.tr.setAttribute("stroke-dashoffset", on ? r2(1 - d) : 0); G.b.setAttribute("opacity", on ? r2(mo01((d - .55) / .45)) : 1); }
   }
   for (const id in MO.sweeps) { const sw = st[id] && st[id].sweep;
     for (const g of MO.sweeps[id]) { const pos = sw ? sw.de + (g.a - sw.de) * sw.u : g.a, cx = MO.all.x0 + MO.all.W * pos, h = MO.all.W * .06;
       g.el.setAttribute("x1", r2(cx - h)); g.el.setAttribute("x2", r2(cx + h)); } }
   if (MO.scene) { const s = st[MO_SCENE]; const tr = s ? moTransform(s, MO.c) : ""; if (tr) MO.scene.setAttribute("transform", tr); else MO.scene.removeAttribute("transform");
-    if (s && s.o < 1) MO.scene.setAttribute("opacity", r2(mo01(s.o))); else MO.scene.removeAttribute("opacity"); }
+    MO.scene.setAttribute("opacity", s ? r2(mo01(s.o)) : 1); }
 }
 function moSelBoxes() {
   const g = moEl("moSvg").querySelector("g[data-selbox]"); if (!g) return;
-  if (MO.playing) { g.innerHTML = ""; return; }
+  if (MO.playing || MO.exporting) { g.innerHTML = ""; return; }
   const m = MO.S * .008, ids = [...MO.sel].filter(id => MO.info[id]);
   // many layers: one frame around all of them
   const boxes = ids.length > 8 ? [ids.reduce((u, id) => { const i = MO.info[id]; return { x0: Math.min(u.x0, i.x0), y0: Math.min(u.y0, i.y0), x1: Math.max(u.x1, i.x1), y1: Math.max(u.y1, i.y1) }; }, { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity })] : ids.map(id => MO.info[id]);
@@ -5960,9 +5965,284 @@ function closeMotion() {
   moPlay(false); MO.open = false; moEl("motion").hidden = true; document.body.classList.remove("motion-open");
   moEl("moSvg").innerHTML = ""; const b = document.getElementById("motionBtn"); if (b) b.focus();
 }
+
+/* ---------- Export (step 5): MP4 / WebM (WebCodecs + bundled MIT muxers), GIF (own encoder), animated SVG (SMIL) ----------
+   Every format renders the same frames as the player: moRender(t) on the stage, then the stage SVG is either
+   rasterised (video, GIF) or sampled and written as native SVG animations. Nothing leaves the device. */
+const MO_ASPECTS = { "16:9": [16, 9, "Paysage 16:9"], "1:1": [1, 1, "Carré 1:1"], "9:16": [9, 16, "Vertical 9:16 (stories, reels)"], "4:5": [4, 5, "Portrait 4:5"] };
+const MO_FORMATS = {
+  mp4: { n: "MP4", d: "Vidéo pour les réseaux, les présentations et le montage", ext: "mp4" },
+  webm: { n: "WebM", d: "Vidéo légère pour le web", ext: "webm" },
+  gif: { n: "GIF", d: "Boucle légère, lue partout (256 couleurs)", ext: "gif" },
+  svg: { n: "SVG animé", d: "Pour un site : net à toute taille, très léger", ext: "svg" },
+};
+function moDims(aspect, short) { const [a, b] = MO_ASPECTS[aspect]; const even = v => Math.max(2, Math.round(v / 2) * 2);
+  return a >= b ? { W: even(short * a / b), H: even(short) } : { W: even(short), H: even(short * b / a) }; }
+function moLoadVendor(name, global) {
+  if (window[global]) return Promise.resolve(window[global]);
+  return new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "vendor/" + name;
+    sc.onload = () => window[global] ? ok(window[global]) : ko(new Error(name)); sc.onerror = () => ko(new Error(name)); document.head.appendChild(sc); });
+}
+/* one frame of the stage as a standalone SVG string, framed by vb, at W×H, on an optional background */
+function moFrameSVG(t, vb, W, H, bg) {
+  moRender(t);
+  const src = new XMLSerializer().serializeToString(moEl("moSvg"));
+  const head = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${r2(vb.x)} ${r2(vb.y)} ${r2(vb.w)} ${r2(vb.h)}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet">`
+    + (bg ? `<rect x="${r2(vb.x - vb.w)}" y="${r2(vb.y - vb.h)}" width="${r2(vb.w * 3)}" height="${r2(vb.h * 3)}" fill="${bg}"/>` : "");
+  return src.replace(/^<svg[^>]*>/, head);
+}
+function moSvgImage(svgText) {
+  return new Promise((ok, ko) => { const img = new Image(), url = URL.createObjectURL(new Blob([svgText], { type: "image/svg+xml" }));
+    img.onload = () => { URL.revokeObjectURL(url); ok(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); const im2 = new Image(); im2.onload = () => ok(im2); im2.onerror = () => ko(new Error("image")); im2.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText); };
+    img.src = url; });
+}
+async function moDrawFrame(ctx, t, vb, W, H, bg) {
+  const img = await moSvgImage(moFrameSVG(t, vb, W, H, bg));
+  ctx.clearRect(0, 0, W, H); if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); }
+  ctx.drawImage(img, 0, 0, W, H);
+}
+const moFrames = fps => Math.max(1, Math.round(motion.dur * fps));
+
+/* ---- video ---- */
+async function moVideoConfig(fmt, W, H, fps) {
+  if (typeof VideoEncoder === "undefined") return null;
+  const bitrate = Math.round(Math.min(40e6, Math.max(2e6, W * H * fps * .12)));
+  const list = fmt === "mp4" ? ["avc1.640034", "avc1.64002A", "avc1.640028", "avc1.4D4028", "avc1.42E01F"].map(c => ({ codec: c, mux: "avc" }))
+    : [["vp09.00.40.08", "V_VP9"], ["vp09.00.10.08", "V_VP9"], ["vp8", "V_VP8"]].map(([c, m]) => ({ codec: c, mux: m }));
+  for (const c of list) {
+    const cfg = { codec: c.codec, width: W, height: H, bitrate, framerate: fps, latencyMode: "quality" };
+    if (fmt === "mp4") cfg.avc = { format: "avc" };
+    try { const r = await VideoEncoder.isConfigSupported(cfg); if (r && r.supported) return { cfg, mux: c.mux }; } catch (_) {}
+  }
+  return null;
+}
+async function moEncodeVideo(fmt, o, progress) {
+  const { W, H, fps, bg, vb } = o, conf = await moVideoConfig(fmt, W, H, fps);
+  if (!conf) throw new Error("codec");
+  const lib = fmt === "mp4" ? await moLoadVendor("mp4-muxer.js", "Mp4Muxer") : await moLoadVendor("webm-muxer.js", "WebMMuxer");
+  const target = new lib.ArrayBufferTarget();
+  const muxer = fmt === "mp4" ? new lib.Muxer({ target, video: { codec: "avc", width: W, height: H, frameRate: fps }, fastStart: "in-memory" })
+    : new lib.Muxer({ target, video: { codec: conf.mux, width: W, height: H, frameRate: fps } });
+  let failed = null;
+  const enc = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failed = e; } });
+  enc.configure(conf.cfg);
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
+  const n = moFrames(fps);
+  for (let i = 0; i < n; i++) {
+    if (MO.exCancel) { try { enc.close(); } catch (_) {} throw new Error("cancel"); }
+    if (failed) throw failed;
+    await moDrawFrame(ctx, i / fps, vb, W, H, bg || "#FFFFFF");
+    const frame = new VideoFrame(cv, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
+    enc.encode(frame, { keyFrame: i % (fps * 2) === 0 }); frame.close();
+    while (enc.encodeQueueSize > 4) await new Promise(r => setTimeout(r, 4));
+    progress((i + 1) / n);
+  }
+  await enc.flush(); enc.close(); if (failed) throw failed;
+  muxer.finalize();
+  return new Blob([target.buffer], { type: fmt === "mp4" ? "video/mp4" : "video/webm" });
+}
+
+/* ---- GIF: per-frame palette (median cut, 255 colours + transparency), only the changed rectangle is stored ---- */
+function moMedianCut(px, n) {
+  let boxes = [px];
+  while (boxes.length < n) {
+    let bi = -1, best = -1, ch = 0;
+    boxes.forEach((b, i) => { if (b.length < 2) return; for (let c = 0; c < 3; c++) { let lo = 255, hi = 0; const sh = 16 - 8 * c;
+      for (const v of b) { const x = (v >> sh) & 255; if (x < lo) lo = x; if (x > hi) hi = x; } if (hi - lo > best) { best = hi - lo; bi = i; ch = sh; } } });
+    if (bi < 0 || best <= 0) break;
+    const b = boxes[bi].sort((p, q) => ((p >> ch) & 255) - ((q >> ch) & 255)), m = b.length >> 1;
+    boxes.splice(bi, 1, b.slice(0, m), b.slice(m));
+  }
+  return boxes.map(b => { let r = 0, g = 0, bl = 0; for (const v of b) { r += (v >> 16) & 255; g += (v >> 8) & 255; bl += v & 255; } const k = b.length || 1; return [Math.round(r / k), Math.round(g / k), Math.round(bl / k)]; });
+}
+function moLzw(idx, out) {
+  const min = 8, clear = 256, eoi = 257; let size = 9, next = 258, cur = 0, bits = 0; const dict = new Map(), bytes = [];
+  const emit = c => { cur |= c << bits; bits += size; while (bits >= 8) { bytes.push(cur & 255); cur >>>= 8; bits -= 8; } };
+  emit(clear); let w = idx[0];
+  for (let i = 1; i < idx.length; i++) { const k = idx[i], key = w * 256 + k, v = dict.get(key);
+    if (v !== undefined) { w = v; continue; }
+    emit(w);
+    if (next === 4096) { emit(clear); dict.clear(); size = 9; next = 258; }
+    else { if (next >= (1 << size)) size++; dict.set(key, next++); }
+    w = k; }
+  emit(w); emit(eoi); if (bits > 0) bytes.push(cur & 255);
+  out.push(min); for (let i = 0; i < bytes.length; i += 255) { const n = Math.min(255, bytes.length - i); out.push(n); for (let j = 0; j < n; j++) out.push(bytes[i + j]); } out.push(0);
+}
+async function moEncodeGif(o, progress) {
+  const { W, H, fps, bg, vb } = o, n = moFrames(fps), delay = Math.max(2, Math.round(100 / fps));
+  const out = [], push16 = v => out.push(v & 255, (v >> 8) & 255);
+  for (const c of "GIF89a") out.push(c.charCodeAt(0)); push16(W); push16(H); out.push(0, 0, 0);
+  if (motion.loop) { out.push(0x21, 0xFF, 11); for (const c of "NETSCAPE2.0") out.push(c.charCodeAt(0)); out.push(3, 1, 0, 0, 0); }
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d", { willReadFrequently: true });
+  let prev = null;
+  for (let f = 0; f < n; f++) {
+    if (MO.exCancel) throw new Error("cancel");
+    await moDrawFrame(ctx, f / fps, vb, W, H, bg || "#FFFFFF");
+    const d = ctx.getImageData(0, 0, W, H).data;
+    let x0 = 0, y0 = 0, x1 = W - 1, y1 = H - 1;
+    if (prev) { x0 = W; y0 = H; x1 = -1; y1 = -1;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const p = (y * W + x) * 4; if (d[p] !== prev[p] || d[p + 1] !== prev[p + 1] || d[p + 2] !== prev[p + 2]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
+      if (x1 < 0) { x0 = y0 = 0; x1 = y1 = 0; } }
+    const rw = x1 - x0 + 1, rh = y1 - y0 + 1, sample = [], step = Math.max(1, Math.floor(rw * rh / 40000));
+    for (let i = 0, c = 0; i < rw * rh; i++) { if (c++ % step) continue; const x = x0 + i % rw, y = y0 + (i / rw | 0), p = (y * W + x) * 4; sample.push((d[p] << 16) | (d[p + 1] << 8) | d[p + 2]); }
+    const pal = moMedianCut(sample, 255), cache = new Int16Array(32768).fill(-1), idx = new Uint8Array(rw * rh);
+    const near = (r, g, b) => { const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3); let v = cache[key];
+      if (v < 0) { let bd = Infinity; pal.forEach((c, i) => { const dd = (c[0] - r) ** 2 + (c[1] - g) ** 2 + (c[2] - b) ** 2; if (dd < bd) { bd = dd; v = i; } }); cache[key] = v; } return v; };
+    for (let y = 0; y < rh; y++) for (let x = 0; x < rw; x++) { const p = ((y0 + y) * W + x0 + x) * 4;
+      idx[y * rw + x] = prev && d[p] === prev[p] && d[p + 1] === prev[p + 1] && d[p + 2] === prev[p + 2] ? 255 : near(d[p], d[p + 1], d[p + 2]); }
+    out.push(0x21, 0xF9, 4, (1 << 2) | 1); push16(delay); out.push(255, 0);
+    out.push(0x2C); push16(x0); push16(y0); push16(rw); push16(rh); out.push(0x87);
+    for (let i = 0; i < 256; i++) { const c = pal[i] || [0, 0, 0]; out.push(c[0], c[1], c[2]); }
+    moLzw(idx, out);
+    prev = d; progress((f + 1) / n);
+    if (f % 4 === 3) await new Promise(r => setTimeout(r, 0));
+  }
+  out.push(0x3B);
+  return new Blob([new Uint8Array(out)], { type: "image/gif" });
+}
+
+/* ---- animated SVG: the stage is sampled frame by frame; every attribute that changes becomes a SMIL <animate>,
+   transforms become a chain of <animateTransform> (translate, rotate, skewY, scale), keys thinned where linear ---- */
+function moThin(vals, eps) {
+  const n = vals.length, keep = [0]; let a = 0;
+  for (let i = 1; i < n - 1; i++) { const b = i + 1; let ok = true;
+    for (let j = a + 1; j < b && ok; j++) { const u = (j - a) / (b - a); for (let c = 0; c < vals[j].length; c++) if (Math.abs(vals[a][c] + (vals[b][c] - vals[a][c]) * u - vals[j][c]) > eps) { ok = false; break; } }
+    if (!ok) { keep.push(i); a = i; } }
+  keep.push(n - 1); return keep;
+}
+function moExportSVG(o) {
+  const { W, H, bg, vb } = o, fps = o.fps || 24, D = motion.dur, n = Math.max(2, Math.round(D * fps) + 1), loop = motion.loop;
+  MO.exporting = true; moBuild();
+  const svg = moEl("moSvg"), SEL = "g[data-mo],g[data-b],path[data-tr],feDisplacementMap,feGaussianBlur,clipPath rect,linearGradient,g[data-scene]";
+  const ATTRS = ["opacity", "x", "y", "width", "height", "scale", "stdDeviation", "stroke-dashoffset", "x1", "x2"];
+  const els = [...svg.querySelectorAll(SEL)], rec = els.map(() => ({})), tr = {}, ids = Object.keys(MO.groups).concat(MO.scene ? [MO_SCENE] : []);
+  ids.forEach(id => { tr[id] = []; });
+  for (let i = 0; i < n; i++) {
+    const t = Math.min(D, i / (n - 1) * D); moRender(t); const st = moState(t);
+    els.forEach((el, k) => { for (const a of ATTRS) { const v = el.getAttribute(a); if (v === null || isNaN(+v)) continue; (rec[k][a] || (rec[k][a] = [])).push(+v); } });
+    ids.forEach(id => { const s = st[id] || moRest(), c = id === MO_SCENE ? MO.c : { x: MO.info[id].cx, y: MO.info[id].cy };
+      tr[id].push([[s.x + c.x, s.y + c.y], [s.r], [s.ky], [s.s * s.sx, s.s]]); });
+  }
+  moRender(0);
+  const doc = svg.cloneNode(true), cl = [...doc.querySelectorAll(SEL)], NS = "http://www.w3.org/2000/svg";
+  const timing = (keep) => `dur="${moNum(D).replace(",", ".")}s" ${loop ? 'repeatCount="indefinite"' : 'fill="freeze"'} keyTimes="${keep.map(i => Math.round(i / (n - 1) * 1e4) / 1e4).join(";")}"`;
+  const anim = (el, tag, attrs) => { const a = document.createElementNS(NS, tag); for (const k in attrs) a.setAttribute(k, attrs[k]); el.appendChild(a); };
+  const add = (el, name, vals, eps, extra) => {
+    const v = vals.map(x => Array.isArray(x) ? x : [x]); if (v.every(x => x.every((c, j) => Math.abs(c - v[0][j]) < 1e-6))) return false;
+    const keep = moThin(v, eps), m = /dur="([^"]+)" (\S+) keyTimes="([^"]+)"/.exec(timing(keep));
+    anim(el, extra ? "animateTransform" : "animate", Object.assign({ attributeName: name, values: keep.map(i => v[i].map(c => Math.round(c * 1000) / 1000).join(" ")).join(";"), keyTimes: m[3], dur: m[1] },
+      loop ? { repeatCount: "indefinite" } : { fill: "freeze" }, extra || {}));
+    return true;
+  };
+  cl.forEach((el, k) => { for (const a in rec[k]) { const v = rec[k][a]; if (v.length === n) add(el, a, v, a === "opacity" ? .004 : .02); } });
+  // transforms: the live transform attribute is replaced by animateTransform; the layer is first moved to its centre
+  const byId = {}; doc.querySelectorAll("g[data-mo]").forEach(g => { byId[g.getAttribute("data-mo")] = g; });
+  const sc = doc.querySelector("g[data-scene]"); if (sc) byId[MO_SCENE] = sc;
+  ids.forEach(id => { const g = byId[id], T = tr[id]; if (!g) return; g.removeAttribute("transform");
+    const idle = T.every(f => Math.abs(f[1][0]) < 1e-6 && Math.abs(f[2][0]) < 1e-6 && Math.abs(f[3][0] - 1) < 1e-6 && Math.abs(f[3][1] - 1) < 1e-6 && Math.abs(f[0][0] - T[0][0][0]) < 1e-6 && Math.abs(f[0][1] - T[0][0][1]) < 1e-6)
+      && Math.abs(T[0][0][0] - (id === MO_SCENE ? MO.c.x : MO.info[id].cx)) < 1e-6 && Math.abs(T[0][0][1] - (id === MO_SCENE ? MO.c.y : MO.info[id].cy)) < 1e-6;
+    if (idle) return;
+    const c = id === MO_SCENE ? MO.c : { x: MO.info[id].cx, y: MO.info[id].cy }, inner = document.createElementNS(NS, "g");
+    inner.setAttribute("transform", `translate(${r2(-c.x)} ${r2(-c.y)})`);
+    [...g.childNodes].filter(ch => !(ch.localName === "animate" || ch.localName === "animateTransform")).forEach(ch => inner.appendChild(ch));
+    g.insertBefore(inner, g.firstChild);
+    [["translate", 0, .02], ["rotate", 1, .05], ["skewY", 2, .02], ["scale", 3, .0005]].forEach(([type, j, eps]) => {
+      const vals = T.map(f => f[j]);
+      if (!add(g, "transform", vals, eps, { type, additive: "sum" })) anim(g, "animateTransform", { attributeName: "transform", type, additive: "sum", values: vals[0].map(v => Math.round(v * 1000) / 1000).join(" "), dur: moNum(D).replace(",", ".") + "s", fill: "freeze" }); });
+  });
+  doc.querySelectorAll("g[data-selbox]").forEach(e => e.remove());
+  doc.querySelectorAll("*").forEach(e => { for (const a of [...e.attributes]) if (a.name.startsWith("data-")) e.removeAttribute(a.name); });
+  doc.removeAttribute("id"); doc.removeAttribute("preserveAspectRatio");
+  doc.setAttribute("viewBox", `${r2(vb.x)} ${r2(vb.y)} ${r2(vb.w)} ${r2(vb.h)}`); doc.setAttribute("width", W); doc.setAttribute("height", H);
+  const title = document.createElementNS(NS, "title"); title.textContent = brandLabel() + " — animation"; doc.insertBefore(title, doc.firstChild);
+  if (bg) { const r = document.createElementNS(NS, "rect"); r.setAttribute("x", r2(vb.x - vb.w)); r.setAttribute("y", r2(vb.y - vb.h)); r.setAttribute("width", r2(vb.w * 3)); r.setAttribute("height", r2(vb.h * 3)); r.setAttribute("fill", bg); doc.insertBefore(r, title.nextSibling); }
+  MO.exporting = false; moBuild();
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(doc).replace(/ xmlns:xlink="[^"]*"/, "");
+}
+
+/* ---- export dialog ---- */
+(function moExInit() {
+  const d = document.createElement("dialog"); d.id = "moExDlg"; d.className = "moexdlg"; d.setAttribute("aria-labelledby", "moExTitle");
+  d.innerHTML = `<h2 id="moExTitle">Exporter l'animation</h2>
+<div class="moex-fmts" role="radiogroup" aria-label="Format">${Object.entries(MO_FORMATS).map(([k, f], i) => `<label><input type="radio" name="moexf" value="${k}"${i ? "" : " checked"}><span><b>${f.n}</b><small>${f.d}</small></span></label>`).join("")}</div>
+<div class="moex-row"><label>Cadre <select id="moExAsp">${Object.entries(MO_ASPECTS).map(([k, a]) => `<option value="${k}">${a[2]}</option>`).join("")}</select></label>
+<label>Taille <select id="moExSize"></select></label><label>Images/s <select id="moExFps"></select></label>
+<label>Fond <select id="moExBg"><option value="#FFFFFF">Blanc</option><option value="#F4F4F2">Crème</option><option value="#1D1D1F">Nuit</option><option value="custom">Couleur…</option><option value="">Transparent</option></select> <input type="color" id="moExCol" value="#FFFFFF" hidden aria-label="Couleur du fond"></label></div>
+<p class="moex-info" id="moExInfo"></p>
+<progress id="moExProg" max="1" value="0" hidden></progress>
+<p class="moex-msg" id="moExMsg" role="status"></p>
+<div class="moex-btns"><button id="moExCancel">Fermer</button><button id="moExGo" class="primary">Exporter</button></div>`;
+  document.body.appendChild(d);
+  const css = document.createElement("style");
+  css.textContent = `.moexdlg{width:min(560px,94vw);border:1px solid var(--line);border-radius:16px;padding:22px 24px;background:var(--paper);color:var(--ink)}
+.moexdlg::backdrop{background:rgba(20,20,25,.35)}
+.moexdlg h2{font-size:22px;margin:0 0 14px}
+.moex-fmts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.moex-fmts label{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;background:#fff}
+.moex-fmts label:has(input:checked){border-color:var(--night);box-shadow:0 0 0 1px var(--night)}
+.moex-fmts label:has(input:disabled){opacity:.45;cursor:not-allowed}
+.moex-fmts span{display:flex;flex-direction:column;gap:2px;font-size:13px}.moex-fmts small{color:var(--muted);font-size:11.5px;line-height:1.3}
+.moex-row{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;font-size:13px}
+.moex-row label{display:flex;flex-direction:column;gap:4px}.moex-row select{font-size:13px}
+.moex-info,.moex-msg{font-size:12.5px;color:var(--muted);margin:12px 0 0;min-height:1em}
+.moexdlg progress{width:100%;margin-top:10px}
+.moex-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media (max-width:520px){ .moex-fmts,.moex-row{grid-template-columns:1fr} }`;
+  document.head.appendChild(css);
+  const fmt = () => d.querySelector("input[name=moexf]:checked").value;
+  const refresh = () => {
+    const f = fmt(), sz = moEl("moExSize"), fp = moEl("moExFps"), keepS = sz.value, keepF = fp.value;
+    sz.innerHTML = (f === "gif" ? [[360, "Petit (360 px)"], [480, "Moyen (480 px)"], [600, "Grand (600 px)"]] : f === "svg" ? [[1080, "Vectoriel (net à toute taille)"]] : [[720, "720p"], [1080, "1080p (Full HD)"], [1440, "1440p"]])
+      .map(([v, n]) => `<option value="${v}">${n}</option>`).join("");
+    if ([...sz.options].some(o => o.value === keepS)) sz.value = keepS; else sz.value = f === "gif" ? "480" : "1080";
+    fp.innerHTML = (f === "gif" ? [10, 15, 20, 25] : f === "svg" ? [24, 30] : [24, 25, 30, 50, 60]).map(v => `<option>${v}</option>`).join("");
+    if ([...fp.options].some(o => o.value === keepF)) fp.value = keepF; else fp.value = f === "gif" ? "20" : f === "svg" ? "24" : "30";
+    const tr = moEl("moExBg").querySelector('option[value=""]'); tr.disabled = f !== "svg"; if (tr.disabled && moEl("moExBg").value === "") moEl("moExBg").value = "#FFFFFF";
+    moEl("moExCol").hidden = moEl("moExBg").value !== "custom";
+    const { W, H } = moDims(moEl("moExAsp").value, +sz.value);
+    moEl("moExInfo").textContent = (f === "svg" ? "Animation SVG native (SMIL), sans son ; idéale pour un site. " : `${W} × ${H} px, ${moFrames(+fp.value)} images. `)
+      + (f === "gif" ? "Le GIF n'a pas de son." : f === "svg" ? "" : "Sans son pour l'instant (la signature sonore arrive à l'étape suivante).");
+  };
+  d.addEventListener("change", e => { if (e.target.id === "moExBg") moEl("moExCol").hidden = e.target.value !== "custom"; refresh(); });
+  moEl("moExCancel").onclick = () => { if (MO.exBusy) { MO.exCancel = true; return; } d.close(); };
+  d.addEventListener("cancel", e => { if (MO.exBusy) { e.preventDefault(); MO.exCancel = true; } });
+  moEl("moExGo").onclick = async () => {
+    const f = fmt(), asp = moEl("moExAsp").value, short = +moEl("moExSize").value, fps = +moEl("moExFps").value;
+    const bgSel = moEl("moExBg").value, bg = bgSel === "custom" ? moEl("moExCol").value : bgSel;
+    const [a, b] = MO_ASPECTS[asp], vb = moViewBox(a / b), { W, H } = f === "svg" ? moDims(asp, 900) : moDims(asp, short);
+    const msg = moEl("moExMsg"), prog = moEl("moExProg"), go = moEl("moExGo");
+    MO.exBusy = true; MO.exCancel = false; go.disabled = true; moEl("moExCancel").textContent = "Annuler"; prog.hidden = false; prog.value = 0; msg.textContent = "Préparation…";
+    moPlay(false); MO.exporting = true; moSelBoxes(); const t0 = MO.t, started = performance.now();
+    try {
+      let blob;
+      const step = p => { prog.value = p; const el = (performance.now() - started) / 1000, left = p > .05 ? el / p - el : 0; msg.textContent = `Image ${Math.round(p * moFrames(fps))} / ${moFrames(fps)}` + (left > 2 ? ` · environ ${Math.ceil(left)} s` : ""); };
+      if (f === "svg") { msg.textContent = "Calcul des images…"; await new Promise(r => setTimeout(r, 20)); blob = new Blob([moExportSVG({ W, H, bg, vb, fps })], { type: "image/svg+xml" }); prog.value = 1; }
+      else if (f === "gif") blob = await moEncodeGif({ W, H, fps, bg, vb }, step);
+      else blob = await moEncodeVideo(f, { W, H, fps, bg, vb }, step);
+      const name = filePfx() + "-animation" + (asp === "16:9" ? "" : "-" + asp.replace(":", "x")) + "." + MO_FORMATS[f].ext;
+      await saveBlob(name, blob);
+      msg.textContent = `Enregistré : ${name} (${blob.size > 1048576 ? (Math.round(blob.size / 104857.6) / 10).toString().replace(".", ",") + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko"})`;
+    } catch (err) {
+      msg.textContent = err && err.message === "cancel" ? "Export annulé." : err && err.message === "codec" ? `Ce navigateur ne sait pas encoder en ${MO_FORMATS[f].n}. Essayez ${f === "mp4" ? "WebM" : "MP4"}, le GIF ou le SVG animé, ou un navigateur récent (Chrome, Edge, Safari, Firefox).`
+        : "Export impossible : " + ((err && err.message) || err);
+    } finally {
+      MO.exBusy = false; MO.exporting = false; go.disabled = false; moEl("moExCancel").textContent = "Fermer"; prog.hidden = true; moBuild(); moSeek(t0);
+    }
+  };
+  MO.exRefresh = async () => {
+    refresh();
+    const ok = typeof VideoEncoder !== "undefined";
+    for (const k of ["mp4", "webm"]) { const inp = d.querySelector(`input[value=${k}]`); inp.disabled = !ok || !(await moVideoConfig(k, 1280, 720, 30));
+      if (inp.disabled && inp.checked) { d.querySelector("input[value=gif]").checked = true; refresh(); } }
+  };
+})();
+function openMotionExport() { if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; } moPlay(false); moEl("moExMsg").textContent = ""; moEl("moExDlg").showModal(); MO.exRefresh(); }
+
 window.__motion = {
   get state() { return { open: MO.open, t: MO.t, playing: MO.playing, motion: clone(motion), sel: [...MO.sel] }; },
   seek: t => { moPlay(false); moSeek(t); }, open: openMotion, close: closeMotion, presets: Object.keys(MO_PRESETS), valid: validMotion,
+  exportSVG: o => moExportSVG(Object.assign({ W: 1600, H: 900, bg: "", vb: moViewBox(16 / 9), fps: 24 }, o || {})),
   stateAt: t => { const s = moState(t); return JSON.parse(JSON.stringify(s)); },
 };
 

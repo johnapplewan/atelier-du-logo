@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{desc}}">
+<link rel="canonical" href="{{url}}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{desc}}">
+<meta property="og:image" content="{{site}}/assets/og.png">
+<meta property="og:url" content="{{url}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FBFBFA">
+<link rel="icon" href="/atelier/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/atelier/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/atelier/vendor/fonts/ui.css">
+<link rel="stylesheet" href="/assets/site.css?v={{v}}">
+</head>
+<body class="{{bodyClass}}">
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="nav">
+  <div class="wrap navin">
+    <a class="brand" href="/" aria-label="Atelier du Logo, accueil">
+      <img src="/atelier/icons/icon.svg" width="32" height="32" alt="">
+      <span><b>Atelier du Logo</b><small>par John Apple</small></span>
+    </a>
+    <nav class="links" aria-label="Navigation principale">
+      {{nav}}
+    </nav>
+    <div class="actions">
+      <a class="lnk{{loginOn}}" href="/connexion/">Connexion</a>
+      <a class="btn primary" href="/atelier/">Ouvrir l'atelier</a>
+    </div>
+    <details class="burger">
+      <summary aria-label="Menu">Menu</summary>
+      <div class="sheet">{{nav}}<a href="/connexion/">Connexion</a><a class="btn primary" href="/atelier/">Ouvrir l'atelier</a></div>
+    </details>
+  </div>
+</header>
+<main id="contenu">
+{{body}}
+</main>
+<footer class="foot">
+  <div class="wrap footin">
+    <div class="fbrand">
+      <img src="/atelier/icons/icon.svg" width="28" height="28" alt="">
+      <p><b>Atelier du Logo</b><br><span>par John Apple · édition vectorielle</span></p>
+    </div>
+    <div class="fcols">
+      <div><h3>Produit</h3><a href="/fonctionnalites/">Fonctionnalités</a><a href="/exemples/">Exemples</a><a href="/tarifs/">Tarifs</a><a href="/nouveautes/">Nouveautés</a><a href="/atelier/">Ouvrir l'atelier</a></div>
+      <div><h3>Ressources</h3><a href="/aide/">Guide</a><a href="/aide/#avec-claude">Travailler avec Claude</a><a href="/a-propos/">À propos</a><a href="/contact/">Contact</a></div>
+      <div><h3>Compte</h3><a href="/connexion/">Connexion</a><a href="/inscription/">Créer un compte</a><a href="/compte/">Mon compte</a></div>
+      <div><h3>Légal</h3><a href="/mentions-legales/">Mentions légales</a><a href="/cgu/">Conditions d'utilisation</a><a href="/confidentialite/">Confidentialité</a></div>
+    </div>
+  </div>
+  <div class="wrap fbase"><span>© {{year}} John Apple</span><span>Vos projets restent sur votre appareil.</span></div>
+</footer>
+</body>
+</html>

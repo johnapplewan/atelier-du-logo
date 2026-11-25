@@ -1,5 +1,5 @@
 {
- "version": "a13c7f25d355",
+ "version": "7d6f5b9b2650",
  "files": [
   "sw.js",
   "files.json",
@@ -55,7 +55,9 @@
   "index.html",
   "manifest.webmanifest",
   "vendor/LICENSE-jszip.md",
+  "vendor/LICENSE-mp4-muxer.txt",
   "vendor/LICENSE-opentype.txt",
+  "vendor/LICENSE-webm-muxer.txt",
   "vendor/fonts/LICENSE-fonts.txt",
   "vendor/fonts/instrument-serif-latin-ext.woff2",
   "vendor/fonts/instrument-serif-latin.woff2",
@@ -63,6 +65,8 @@
   "vendor/fonts/inter-latin.woff2",
   "vendor/fonts/ui.css",
   "vendor/jszip.min.js",
-  "vendor/opentype.min.js"
+  "vendor/mp4-muxer.js",
+  "vendor/opentype.min.js",
+  "vendor/webm-muxer.js"
  ]
 }
