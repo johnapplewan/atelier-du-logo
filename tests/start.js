@@ -47,7 +47,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   check("brand saved, no welcome after reload", () => assert.deepStrictEqual(again, [false, 11]));
 
   // reopen: shape + name, then blank page
-  await p.click("#startBtn");
+  await p.click("#brandBtn");
   const pre = await p.evaluate(() => [document.querySelector("#stName").value, document.querySelector("#stKw").value, !document.querySelector("#stKeep").hidden]);
   check("dialog reopens with the brand, keywords and a 'keep' choice", () => assert.deepStrictEqual(pre, ["Atelier Nova", "bois, artisanal, minimal", true]));
   await p.click('[data-start="shape"]'); await p.click('[data-shape="arche"]'); await p.click("#stGo"); await p.waitForTimeout(600);
@@ -56,7 +56,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   const wx = await p.evaluate(() => Math.min(...__atelier.layers.filter(l => l.group === "word").flatMap(l => l.subs.flat().map(n => n.x))));
   check("name placed right of the shape", () => assert.ok(wx > 280, String(wx)));
   // logo concepts from keywords and key letters
-  await p.click("#startBtn"); await p.fill("#stKw", "bois, cerf, ébénisterie, menuiserie, artisanale"); await p.fill("#stLet", "an");
+  await p.click("#brandBtn"); await p.fill("#stKw", "bois, cerf, ébénisterie, menuiserie, artisanale"); await p.fill("#stLet", "an");
   await p.click('[data-start="proposal"]');
   await p.waitForSelector("#stProps [data-prop] svg", { timeout: 20000 });
   const props = await p.evaluate(() => ({ titles: [...document.querySelectorAll("#stProps [data-prop] b")].map(b => b.textContent), found: document.querySelector("#stProps p").textContent }));
@@ -75,7 +75,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
     deer: __atelier.layers.filter(l => l.grp).length, fills: [...new Set(__atelier.layers.map(l => l.fill))] }));
   check("concept applied: escutcheon, stylised deer in its own group, name", () => { assert.strictEqual(pr.ids[0], "ecusson"); assert.ok(pr.deer >= 3, String(pr.deer)); assert.strictEqual(pr.word.toLowerCase(), "ateliernova"); });
   check("concept colours from the material (wood)", () => assert.ok(pr.fills.includes("#8B5A2B"), pr.fills.join()));
-  await p.click("#startBtn"); await p.click('[data-start="proposal"]'); await p.waitForSelector("#stProps [data-prop] svg");
+  await p.click("#brandBtn"); await p.click('[data-start="proposal"]'); await p.waitForSelector("#stProps [data-prop] svg");
   const r0 = await p.evaluate(() => document.querySelector("#stProps").textContent); await p.click("#stMore"); await p.waitForTimeout(1500);
   const r1 = await p.evaluate(() => document.querySelector("#stProps").textContent);
   check("'Autres concepts' changes the set", () => assert.notStrictEqual(r0, r1));
@@ -89,7 +89,7 @@ const area = sub => { let a = 0; for (let i = 0; i < sub.length; i++) { const q 
   check("unknown subject: placeholder and a bubble brief for Claude (premium rules)", () => { assert.ok(brief.ph); assert.match(brief.note, /dessine le motif « loutre »/); });
 
   // blank page: a plain link next to "Plus tard"
-  await p.click("#startBtn");
+  await p.click("#brandBtn");
   const tag = await p.evaluate(() => document.querySelector("#stBlank").tagName);
   check("'Page vierge' is a link", () => assert.strictEqual(tag, "A"));
   await p.click("#stBlank"); await p.waitForTimeout(400);

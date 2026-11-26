@@ -20,7 +20,7 @@ const resolve = u => { let f = path.join(ROOT, decodeURIComponent(u.split(/[?#]/
   const ctx = await browser.newContext(); await ctx.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
   const p = await ctx.newPage(); p.on("pageerror", e => errors.push(e.message)); p.on("console", m => { if (m.type() === "error" && !/net::ERR_FAILED/.test(m.text()) && !/nexiste-pas/.test(p.url())) errors.push(p.url() + " " + m.text()); });
 
-  const pages = ["/", "/fonctionnalites/", "/exemples/", "/tarifs/", "/nouveautes/", "/aide/", "/a-propos/", "/contact/", "/connexion/", "/inscription/", "/mot-de-passe-oublie/", "/compte/", "/mentions-legales/", "/cgu/", "/confidentialite/"];
+  const pages = ["/", "/faq/", "/fonctionnalites/", "/exemples/", "/tarifs/", "/nouveautes/", "/aide/", "/a-propos/", "/contact/", "/connexion/", "/inscription/", "/mot-de-passe-oublie/", "/compte/", "/mentions-legales/", "/cgu/", "/confidentialite/"];
   const links = new Set(), bad = [];
   for (const u of pages) {
     const res = await p.goto(base + u);

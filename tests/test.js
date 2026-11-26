@@ -61,7 +61,7 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   check("neutral localStorage keys", () => { assert.ok(keys.includes("atelier-logo-v1"), keys.join()); assert.ok(!keys.some(k => /simulimmo/i.test(k)), keys.join()); });
 
   // back to the example through "Marque et départ"
-  await p.click("#startBtn"); await p.fill("#stName", "Atelier Nova"); await p.click('[data-start="example"]'); await p.click("#stGo"); await p.waitForTimeout(500);
+  await p.click("#brandBtn"); await p.fill("#stName", "Atelier Nova"); await p.click('[data-start="example"]'); await p.click("#stGo"); await p.waitForTimeout(500);
   const ex = await p.evaluate(() => ({ ids: __atelier.layers.map(l => l.id), word: wordText, fx: (__atelier.layers.find(l => l.id === "tranche") || {}).fx }));
   check("« Le logo d'exemple » loads the stylised workshop logo", () => { for (const id of ["construction", "cotes", "croquis-hachures", "tranche", "cadre", "courbe", "points", "lettre-1", "txt-origine-1"]) assert.ok(ex.ids.includes(id), id);
     assert.strictEqual(ex.word, "ATELIER"); assert.ok(ex.fx.some(f => f.t === "brosse") && ex.fx.some(f => f.t === "fondu")); });
@@ -107,7 +107,7 @@ const { chromium, assert, open, worldToScreen, layer, check, done } = require(".
   // "À propos": project, author, support buttons only when configured
   await p.click("#aboutBtn");
   const ab = await p.evaluate(() => [document.querySelector("#aboutDlg").open, /éditeur vectoriel/.test(document.querySelector("#aboutDlg").textContent), document.querySelector("#abSupport").innerHTML]);
-  check("about: presentation, contact link and PayPal button", () => { assert.ok(ab[0] && ab[1]); assert.match(ab[2], /paypal\.com\/donate/); });
+  check("about: presentation, contact link and PayPal button", () => { assert.ok(ab[0] && ab[1]); assert.match(ab[2], /paypal\.com\/cgi-bin\/webscr\?cmd=_s-xclick&amp;hosted_button_id=4JRW3NTALUR68/); });
   const mail = await p.getAttribute("#abBio a.contact", "href");
   check("about: contact e-mail as a mailto link", () => assert.strictEqual(mail, "mailto:contact.johnapple.fr@gmail.com"));
   // Wero as build.js encodes it: "~" + base64 of the reversed number, shown only after a click

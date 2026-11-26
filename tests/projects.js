@@ -17,7 +17,7 @@ const { chromium, assert, open, check, done } = require("./helpers");
   check("first launch: one project holding the drawing", () => { assert.strictEqual(list.length, 1); assert.strictEqual(list[0].n, 9); assert.strictEqual(list[0].name, "Sans titre"); });
 
   // naming the brand names the project
-  await p.click("#startBtn"); await p.fill("#stName", "Nova"); await p.click('[data-start="word"]'); await p.click("#stGo"); await p.waitForTimeout(400); await flush();
+  await p.click("#brandBtn"); await p.fill("#stName", "Nova"); await p.click('[data-start="word"]'); await p.click("#stGo"); await p.waitForTimeout(400); await flush();
   const pill = await p.textContent("#projName");
   check("project named after the brand, shown in the header", () => assert.strictEqual(pill, "Nova"));
   const id1 = await cur();

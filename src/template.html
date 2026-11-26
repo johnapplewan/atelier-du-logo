@@ -403,7 +403,70 @@ body.glyphing #fontSec,body.glyphing #inspector .stylebox{opacity:.45;pointer-ev
 .support a.paypal{background:#0070BA}.support .wero{display:flex;align-items:center;gap:8px;font-size:13px}.support .wero b{background:#FFE600;color:#1D1D1F;padding:3px 9px;border-radius:999px}
 body.nohelp .help{display:none!important}
 body.nohelp .hint{opacity:0;pointer-events:none;transition:opacity .4s}body.nohelp .hint.flash,body.nohelp .hint.live{opacity:1}
-.scdlg{max-width:min(980px,96vw);width:100%}.scdlg .sp{flex:1}
+.rotrow button{display:inline-flex;align-items:center;gap:3px}.rotrow button .i{width:14px;height:14px}
+.ib .i{width:15px;height:15px}
+.gr .i{width:11px;height:11px;display:inline-block;vertical-align:-1px}
+.recdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--danger);margin-right:5px;vertical-align:0}
+/* ---------- Menu bar, icons, settings center ---------- */
+.i{width:18px;height:18px;flex:none;display:block}
+.hb{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:34px;height:34px;padding:0 8px;border-radius:9px}
+.hb .i{width:18px;height:18px}
+header .brand{text-decoration:none;color:inherit;border-radius:10px;padding:2px 4px 2px 2px}
+header .wm{display:flex;flex-direction:column;margin:0;line-height:1;font:600 13px/1 Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+header .wm span+span{font-size:8.5px;letter-spacing:.46em;color:#C45E2C;margin-top:3px}
+.menubar{display:flex;gap:2px;margin-left:10px}
+.mm{position:relative}
+.mmb{border:0;background:none;padding:7px 11px;border-radius:9px;font-weight:500;font-size:14px;color:var(--ink)}
+.mmb:hover:not(:disabled),.mm.open .mmb{background:#EAEAE7;border-color:transparent}
+.mmenu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:300px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 6px rgba(20,20,25,.06),0 16px 40px rgba(20,20,25,.14);padding:6px;z-index:50}
+.mm.open .mmenu{display:block}
+.mmenu [role^=menuitem]{display:flex;align-items:center;gap:11px;width:100%;white-space:nowrap;border:0;background:none;padding:8px 10px;border-radius:9px;text-align:left;font-size:13.5px;color:var(--ink)}
+.mmenu [role^=menuitem]:hover:not(:disabled),.mmenu [role^=menuitem]:focus-visible{background:#EDEDEA;outline:none;border-color:transparent}
+.mmenu [role^=menuitem] .i{width:17px;height:17px;color:var(--muted)}
+.mmenu kbd{margin-left:auto;font:500 11.5px Inter,system-ui,sans-serif;color:var(--muted);background:none;border:0;padding:0 0 0 16px}
+.mmenu [role=menuitemcheckbox]::after{content:"";margin-left:auto;width:30px;height:18px;border-radius:9px;background:#D9D9D6;box-shadow:inset 0 0 0 2px #D9D9D6;flex:none;transition:background .15s}
+.mmenu [role=menuitemcheckbox][aria-checked=true]::after{background:var(--brass) radial-gradient(circle at 21px 9px,#fff 6px,transparent 6.5px);box-shadow:none}
+.mmenu [role=menuitemcheckbox][aria-checked=false]::after{background:#D9D9D6 radial-gradient(circle at 9px 9px,#fff 6px,transparent 6.5px)}
+.mmenu hr{border:0;border-top:1px solid var(--line);margin:6px 6px}
+.mmenu .mh{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:6px 10px 4px}
+.mtools{display:grid;grid-template-columns:1fr 1fr;gap:0 2px}
+.mtools [role^=menuitem]{padding:6px 10px}
+.setdlg{width:min(980px,96vw);height:min(720px,90vh);padding:0;display:none;flex-direction:column;overflow:hidden}
+.setdlg[open]{display:flex}
+.sethead{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.sethead h2{margin:0;font-size:22px;white-space:nowrap}
+.setq{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 10px}
+.setq .i{color:var(--muted)}
+.setq input{flex:1;border:0;outline:none;background:none;padding:9px 0;font-size:14px}
+.setq:focus-within{border-color:var(--brass);box-shadow:0 0 0 3px rgba(79,91,213,.15)}
+.setbody{flex:1;min-height:0;display:grid;grid-template-columns:220px 1fr}
+.setnav{display:flex;flex-direction:column;gap:2px;padding:12px;border-right:1px solid var(--line);background:var(--paper);overflow:auto}
+.setnav button{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:9px 10px;border-radius:9px;font-size:13.5px;color:var(--muted)}
+.setnav button .i{width:17px;height:17px}
+.setnav button[aria-current=true],.setnav button:hover:not(:disabled){background:#EDEDEA;color:var(--ink);border-color:transparent}
+.setmain{overflow:auto;padding:20px 26px 32px;outline:none}
+.setmain h3{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:22px 0 8px;font-weight:600}
+.setmain h3:first-child{margin-top:0}
+.setmain .guide h2{font:400 24px/1.15 "Instrument Serif",Georgia,serif;margin:26px 0 8px}
+.setmain .guide h2:first-child{margin-top:0}
+.setmain .guide table{border-collapse:collapse;font-size:13px}.setmain .guide td,.setmain .guide th{border-bottom:1px solid var(--line);padding:6px 12px 6px 0;text-align:left}
+.setmain .guide p,.setmain .guide li{font-size:13.5px;line-height:1.55}
+.setrow{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.setrow .t{flex:1}.setrow .t b{display:block;font-weight:600;font-size:14px}.setrow .t span{font-size:12.5px;color:var(--muted)}
+.setfaq details{border-bottom:1px solid var(--line)}
+.setfaq summary{cursor:pointer;list-style:none;padding:11px 26px 11px 0;font-weight:600;font-size:14px;position:relative}
+.setfaq summary::-webkit-details-marker{display:none}
+.setfaq summary::after{content:"";position:absolute;right:6px;top:15px;width:8px;height:8px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg);transition:transform .15s}
+.setfaq details[open] summary::after{transform:rotate(-135deg);top:19px}
+.setfaq p{margin:0 0 12px;font-size:13.5px;color:var(--muted);line-height:1.55}
+.setres{list-style:none;padding:0;margin:0}
+.setres li button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;padding:11px 4px}
+.setres li button:hover:not(:disabled){background:#F3F3F1;border-color:var(--line)}
+.setres small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px}
+.setres mark,.setmain mark{background:#FFE9A8;color:inherit;border-radius:3px;padding:0 1px}
+.setmain .flash{animation:setflash 1.6s ease}
+@keyframes setflash{0%,40%{background:#FFF3C4}100%{background:transparent}}
+@media (max-width:760px){ .setbody{grid-template-columns:1fr;grid-template-rows:auto 1fr} .setnav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px} .setnav button{white-space:nowrap} .sethead{flex-wrap:wrap} .sethead h2{font-size:19px} .setq{order:3;flex-basis:100%} .setmain{padding:16px} }
 .sclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px 24px;max-height:68vh;overflow:auto;margin:10px 0}
 .sclist dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0;font-size:13px}.sclist dt{white-space:nowrap}.sclist dd{margin:0;color:var(--muted)}
 kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
@@ -416,8 +479,13 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
 /* ---------- Phone and tablet (portrait): full canvas, bottom tab bar, panels as sheets ---------- */
 @media (max-width:900px){
   header{padding:8px 10px;gap:8px;flex-wrap:nowrap;padding-top:max(8px,env(safe-area-inset-top))}
-  header .brand h1{font-size:20px} header .sub,#projName,#status span{display:none}
-  .menubtn{display:inline-flex;align-items:center;gap:4px;order:5}
+  header .wm,#projName,#status span{display:none}
+  .menubtn{display:inline-flex;align-items:center;gap:6px;order:5}
+  .menubar{display:none}
+  header.menuopen .menubar{display:flex;flex-direction:column;gap:2px;order:7;width:100%;margin:6px 0 0;max-height:70vh;overflow:auto;border-top:1px solid var(--line);padding-top:6px}
+  header.menuopen .mmb{pointer-events:none;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:10px 8px 2px}
+  header.menuopen .mmenu{display:block;position:static;box-shadow:none;border:0;padding:0;min-width:0;background:none}
+  header.menuopen .mmenu [role^=menuitem]{min-height:44px}
   header .group{flex-wrap:nowrap;gap:5px}
   header .group [data-sec],header .group .sec{display:none}
   header.menuopen{flex-wrap:wrap}
@@ -448,31 +516,77 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   button,select,input[type=checkbox],input[type=radio]{touch-action:manipulation}
   dialog{padding:16px;max-height:calc(100vh - 24px);overflow:auto}
 }
-@media (max-width:420px){ header .brand h1{display:none} .menubtn span{display:none} #redo{display:none} }
+@media (max-width:420px){ .menubtn span{display:none} #redo{display:none} }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">
-    <svg width="30" height="30" viewBox="0 0 256 256" aria-hidden="true"><rect x="16" y="16" width="224" height="224" rx="60" fill="#E6E6E3"/><path d="M64 180C84 92 172 164 192 76" fill="none" stroke="#1D1D1F" stroke-width="18" stroke-linecap="round"/><path d="M64 180L84 104M192 76L172 152" stroke="#E0703A" stroke-width="8" stroke-linecap="round"/><circle cx="84" cy="104" r="14" fill="#E0703A"/><circle cx="172" cy="152" r="14" fill="#E0703A"/></svg>
-    <div><h1>Atelier du Logo</h1><div class="sub">par John Apple · édition vectorielle</div></div>
-  </div>
+  <a class="brand" href="#" id="brandHome" title="Atelier du Logo par John Apple · édition vectorielle" aria-label="Atelier du Logo, par John Apple">
+    <svg width="30" height="30" viewBox="0 0 256 256" aria-hidden="true"><path d="M76 16H180A60 60 0 0 1 240 76V180A60 60 0 0 1 180 240H76A60 60 0 0 1 16 180V76A60 60 0 0 1 76 16Z" fill="#E6E6E3"/><path d="M64 180C84 92 172 164 192 76" stroke="#1D1D1F" stroke-width="22" fill="none" stroke-linecap="round"/><path d="M64 180L84 104M192 76L172 152" stroke="#E0703A" stroke-width="10" stroke-linecap="round"/><circle cx="84" cy="104" r="17" fill="#E0703A"/><circle cx="172" cy="152" r="17" fill="#E0703A"/></svg>
+    <h1 class="wm"><span>Atelier</span><span>du logo</span></h1>
+  </a>
+  <nav class="menubar" id="menubar" role="menubar" aria-label="Menu principal">
+    <div class="mm"><button class="mmb" role="menuitem" aria-haspopup="menu" aria-expanded="false">Plan</button>
+      <div class="mmenu" role="menu" aria-label="Plan">
+        <button role="menuitem" id="startBtn" data-ico="newDoc">Nouveau projet…</button>
+        <button role="menuitem" id="projBtn" data-ico="folder">Projets et collections…</button>
+        <button role="menuitem" id="brandBtn" data-ico="tag">Marque et propositions…</button>
+        <hr>
+        <button role="menuitem" id="mOpenFile" data-ico="open">Ouvrir un fichier…</button>
+        <button role="menuitem" id="mSaveFile" data-ico="save">Enregistrer le projet dans un fichier</button>
+        <hr>
+        <button role="menuitem" id="mExport" data-ico="export" data-k="Ctrl+E">Exporter le logo…</button>
+        <button role="menuitem" id="bookBtn" data-ico="book">Charte graphique…</button>
+      </div></div>
+    <div class="mm"><button class="mmb" role="menuitem" aria-haspopup="menu" aria-expanded="false">Édition</button>
+      <div class="mmenu" role="menu" aria-label="Édition">
+        <button role="menuitem" id="mUndo" data-ico="undo" data-k="Ctrl+Z">Annuler</button>
+        <button role="menuitem" id="mRedo" data-ico="redo" data-k="Ctrl+Maj+Z">Rétablir</button>
+        <button role="menuitem" id="mHist" data-ico="history">Historique du projet…</button>
+        <hr><div class="mh">Outils</div>
+        <div class="mtools" id="mTools"></div>
+        <hr>
+        <button role="menuitem" id="mImport" data-ico="image">Importer une image…</button>
+        <button role="menuitem" id="mClaude" data-ico="chat">Travailler avec Claude…</button>
+        <hr>
+        <button role="menuitemcheckbox" id="mGrid" data-ico="grid" aria-checked="false">Grille</button>
+        <button role="menuitemcheckbox" id="mSnap" data-ico="magnet" aria-checked="false">Magnétisme</button>
+        <button role="menuitemcheckbox" id="mRulers" data-ico="ruler" aria-checked="false" data-k="Ctrl+R">Règles et guides</button>
+      </div></div>
+    <div class="mm"><button class="mmb" role="menuitem" aria-haspopup="menu" aria-expanded="false">Animation</button>
+      <div class="mmenu" role="menu" aria-label="Animation">
+        <button role="menuitem" id="motionBtn" data-ico="film">Animer le plan…</button>
+        <button role="menuitem" id="mRecipes" data-ico="wand">Recettes en un clic…</button>
+        <button role="menuitem" id="mSound" data-ico="note">Bande son…</button>
+        <hr>
+        <button role="menuitem" id="mMotionExport" data-ico="export">Exporter l'animation…</button>
+      </div></div>
+    <div class="mm"><button class="mmb" role="menuitem" aria-haspopup="menu" aria-expanded="false">Paramètres</button>
+      <div class="mmenu" role="menu" aria-label="Paramètres">
+        <button role="menuitem" id="setBtn" data-ico="gear">Préférences…</button>
+        <button role="menuitem" id="scBtn" data-ico="keyboard" data-k="?">Raccourcis clavier</button>
+        <button role="menuitemcheckbox" id="mHelpOn" data-ico="info" aria-checked="false">Aides à l'écran</button>
+        <hr>
+        <button role="menuitem" id="aboutBtn" data-ico="heart">À propos et soutien…</button>
+      </div></div>
+    <div class="mm"><button class="mmb" role="menuitem" aria-haspopup="menu" aria-expanded="false">Aide</button>
+      <div class="mmenu" role="menu" aria-label="Aide">
+        <button role="menuitem" id="mSearch" data-ico="search" data-k="Ctrl+K">Rechercher dans l'aide…</button>
+        <button role="menuitem" id="mGuide" data-ico="bookOpen">Guide</button>
+        <button role="menuitem" id="mFaq" data-ico="faq">Questions fréquentes</button>
+        <button role="menuitem" id="mKeys" data-ico="keyboard">Raccourcis clavier</button>
+      </div></div>
+  </nav>
   <div class="spacer"></div>
   <span id="projName" class="projname"></span>
   <div id="status" role="status"><i></i><span>Chargement…</span></div>
-  <button id="menuBtn" class="menubtn" aria-expanded="false" aria-controls="hdrGroup" title="Menu">☰<span> Menu</span></button>
   <div class="group" id="hdrGroup">
-    <span class="split"><button id="undo" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet">Annuler</button><button id="histBtn" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog">▾</button></span>
-    <button id="redo" title="Rétablir (Ctrl+Maj+Z)">Rétablir</button>
-    <span class="winwrap sec"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
-    <button data-sec="1" id="scBtn" class="ib" title="Raccourcis clavier (?)" aria-label="Raccourcis clavier" style="width:30px;height:30px;font-weight:600">?</button>
-    <button data-sec="1" id="aboutBtn" title="À propos de l'atelier, de son auteur, et comment le soutenir">À propos</button>
-    <button data-sec="1" id="projBtn" title="Mes projets et collections, enregistrés sur cet appareil">Projets</button>
-    <button data-sec="1" id="bookBtn" title="Questionnaire puis charte graphique : variantes, couleurs, typographie, PDF">Charte</button>
-    <button data-sec="1" id="startBtn" title="Nom de la marque, slogan, mots-clés et point de départ (page vierge, forme, image…)">Marque et départ</button>
-    <button id="motionBtn" title="Motion : animer le logo du projet (apparition, texte, son, export vidéo)">Animer</button>
+    <span class="split"><button id="undo" class="hb" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet" aria-label="Annuler" data-ico="undo"></button><button id="histBtn" class="hb" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog" data-ico="caret"></button></span>
+    <button id="redo" class="hb" title="Rétablir (Ctrl+Maj+Z)" aria-label="Rétablir" data-ico="redo"></button>
+    <span class="winwrap"><button id="winBtn" hidden aria-haspopup="true" aria-expanded="false" title="Détacher des panneaux dans des fenêtres séparées (plusieurs écrans)">Fenêtres</button><div id="winMenu" class="winmenu" hidden></div></span>
     <button id="exportBtn" class="primary">Exporter</button>
   </div>
+  <button id="menuBtn" class="menubtn hb" aria-expanded="false" aria-controls="menubar" title="Menu" data-ico="menu"><span>Menu</span></button>
 </header>
 <main>
   <aside class="left">
@@ -507,7 +621,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     </section>
     <section id="palSec">
       <h2>Palette</h2>
-      <div class="row palbar"><select id="palSel" aria-label="Palette à modifier"></select><button class="ib" id="palName" title="Renommer la palette" aria-label="Renommer la palette">✎</button><button id="palNew" title="Nouvelle palette (copie de celle-ci)">Nouvelle</button><button class="ib" id="palDel" title="Supprimer cette palette" aria-label="Supprimer cette palette">×</button></div>
+      <div class="row palbar"><select id="palSel" aria-label="Palette à modifier"></select><button class="ib" id="palName" title="Renommer la palette" aria-label="Renommer la palette" data-ico="edit"></button><button id="palNew" title="Nouvelle palette (copie de celle-ci)">Nouvelle</button><button class="ib" id="palDel" title="Supprimer cette palette" aria-label="Supprimer cette palette">×</button></div>
       <p class="muted" id="palUse" style="margin:4px 0 8px"></p>
       <div class="pal" id="palette"></div>
       <p class="muted help" style="margin:6px 0 0">Clic : modifier la couleur · glisser : changer l'ordre (et donc la place des couleurs sur le logo)</p>
@@ -555,7 +669,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     <button class="collapse" id="hideRight" title="Rétracter le panneau (Tab : les deux)" aria-label="Rétracter le panneau droit">›</button>
     <section id="inspector"></section>
     <section id="fontSec">
-      <div class="txtrow"><label for="txtIn" id="txtLabel" class="muted">Texte du mot</label><div class="row inrow"><input id="txtIn" type="text" maxlength="120" spellcheck="false" dir="auto"><button id="kbBtn" class="ib" title="Clavier international (arabe, hindi, thaï, russe, coréen, japonais, chinois)" aria-label="Clavier international">⌨</button><button id="txtGo">OK</button></div>
+      <div class="txtrow"><label for="txtIn" id="txtLabel" class="muted">Texte du mot</label><div class="row inrow"><input id="txtIn" type="text" maxlength="120" spellcheck="false" dir="auto"><button id="kbBtn" class="ib" title="Clavier international (arabe, hindi, thaï, russe, coréen, japonais, chinois)" aria-label="Clavier international" data-ico="keyboard"></button><button id="txtGo">OK</button></div>
         <div class="row dirrow" id="dirRow"></div></div>
       <div class="row"><button id="fontBtn" class="fbtn" aria-haspopup="true" aria-expanded="false" title="Changer la police des lettres sélectionnées">F</button><span class="muted" id="fontHint">Police</span></div>
       <div class="fontmenu" id="fontMenu" hidden></div>
@@ -744,10 +858,16 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   </section>
   <section class="cdsec" id="cdMcpSec"></section>
 </dialog>
-<dialog id="scDlg" class="scdlg" aria-labelledby="scTitle">
-  <div class="row"><h2 id="scTitle">Raccourcis</h2><span class="sp"></span><label class="chk"><input type="checkbox" id="scHelp"> Afficher les aides à l'écran</label></div>
-  <div class="sclist" id="scList"></div>
-  <div class="row" style="justify-content:flex-end"><button id="scClose">Fermer</button></div>
+<dialog id="setDlg" class="setdlg" aria-labelledby="setTitle">
+  <div class="sethead"><h2 id="setTitle">Paramètres et aide</h2>
+    <label class="setq"><span data-ico="search"></span><input type="search" id="setQ" placeholder="Rechercher : un outil, un raccourci, une question…" aria-label="Rechercher dans l'aide et les paramètres" autocomplete="off"></label>
+    <button id="setClose" class="hb" aria-label="Fermer" data-ico="close"></button></div>
+  <div class="setbody">
+    <nav class="setnav" id="setNav" aria-label="Rubriques">
+      <button data-set="prefs" data-ico="gear">Préférences</button><button data-set="keys" data-ico="keyboard">Raccourcis clavier</button><button data-set="guide" data-ico="bookOpen">Guide</button><button data-set="faq" data-ico="faq">Questions fréquentes</button><button data-set="about" data-ico="heart">À propos et soutien</button>
+    </nav>
+    <div class="setmain" id="setMain" tabindex="-1"></div>
+  </div>
 </dialog>
 <div class="toast" id="toast"></div>
 
@@ -773,6 +893,53 @@ const $ = s => document.querySelector(s);
 const clone = o => JSON.parse(JSON.stringify(o));
 const r2 = n => Math.round(n*100)/100;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* line icons for the interface (never emoji) */
+const ICO={
+  newDoc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M12 11v6M9 14h6"/>',
+  folder:'<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
+  tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  open:'<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M12 16v-5M9.5 13.5L12 11l2.5 2.5"/>',
+  save:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/>',
+  export:'<path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 13v6a1 1 0 001 1h12a1 1 0 001-1v-6"/>',
+  book:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6M9 15h3"/>',
+  undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/>',
+  redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 000 11H13"/>',
+  history:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  image:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/>',
+  chat:'<path d="M4 5h16v11H10l-4 4v-4H4z"/><path d="M8.5 10.5h7"/>',
+  grid:'<rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16"/>',
+  magnet:'<path d="M6 4v7a6 6 0 0012 0V4"/><path d="M6 8h4M14 8h4"/>',
+  ruler:'<path d="M3.5 16.5L16.5 3.5l4 4-13 13z"/><path d="M8 12l2 2M11 9l2 2M14 6l2 2"/>',
+  film:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M3 15h18M8 5v4M16 5v4M8 15v4M16 15v4"/>',
+  wand:'<path d="M4 20L15 9"/><path d="M15 3v3M19.5 7.5h-3M18.2 4.8l-2 2M12 6.5h-2M17.5 12v-2"/>',
+  note:'<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M2.5 12h3M18.5 12h3M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/>',
+  keyboard:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7.5 14h9"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
+  heart:'<path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0112 7.4a4.2 4.2 0 017.5 2.4C19.5 15.4 12 20 12 20z"/>',
+  search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>',
+  bookOpen:'<path d="M3 5h6a3 3 0 013 3v12a3 3 0 00-3-3H3zM21 5h-6a3 3 0 00-3 3v12a3 3 0 013-3h6z"/>',
+  faq:'<path d="M4 5h16v11H10l-4 4v-4H4z"/><path d="M10 9a2 2 0 114 0c0 1.2-2 1.4-2 2.6M12 13.6h.01"/>',
+  caret:'<path d="M7 10l5 5 5-5"/>', caretR:'<path d="M10 7l5 5-5 5"/>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  edit:'<path d="M4 20l1-4L16 5l3 3L8 19z"/>',
+  duplicate:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
+  ungroup:'<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M15 4h5v5M4 15v5h5"/>',
+  rotL:'<path d="M4 4v5h5"/><path d="M5.3 9A7.5 7.5 0 1112 19.5"/>', rotR:'<path d="M20 4v5h-5"/><path d="M18.7 9A7.5 7.5 0 1012 19.5"/>',
+  play:'<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
+  pause:'<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" stroke="none"/>',
+  skipStart:'<path d="M6 5v14"/><path d="M18.5 5.5v13L9 12z" fill="currentColor" stroke="none"/>',
+  prev:'<path d="M14.5 6l-6 6 6 6"/>', next:'<path d="M9.5 6l6 6-6 6"/>',
+  diamond:'<path d="M12 4.5l7.5 7.5-7.5 7.5L4.5 12z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', trash:'<path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13"/>',
+  gradient:'<circle cx="12" cy="12" r="7"/><path d="M12 5a7 7 0 000 14z" fill="currentColor" stroke="none"/>',
+};
+const ico=(n,cls)=>`<svg class="i${cls?" "+cls:""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[n]||""}</svg>`;
+/* icons and shortcut hints for every element marked data-ico / data-k (menus, header, dialogs) */
+function decorate(root){ (root||document).querySelectorAll("[data-ico]:not([data-icod])").forEach(el=>{ el.dataset.icod="1"; el.insertAdjacentHTML("afterbegin",ico(el.dataset.ico)); });
+  (root||document).querySelectorAll(".mmenu [data-k]:not([data-kd])").forEach(el=>{ el.dataset.kd="1"; el.insertAdjacentHTML("beforeend",`<kbd>${esc(el.dataset.k)}</kbd>`); }); }
+
 
 /* ---------- Example logo ---------- */
 function roundRect(x,y,w,h,r){
@@ -1198,12 +1365,12 @@ function renderLayers(){
         const G=groupById(L.grp), mem=layers.filter(l=>l.grp===G.id), ids=mem.map(l=>l.id), allSel=ids.every(id=>selLayers().includes(id));
         const vis=mem.some(l=>l.visible), lock=mem.every(l=>l.locked);
         h += `<li class="ghead${allSel?" sel":""}" data-g="${esc(G.id)}">
-          <button class="ib" data-gact="open" aria-label="${G.open===false?"Déplier":"Replier"} le groupe" title="${G.open===false?"Déplier":"Replier"}">${G.open===false?"▸":"▾"}</button>
+          <button class="ib" data-gact="open" aria-label="${G.open===false?"Déplier":"Replier"} le groupe" title="${G.open===false?"Déplier":"Replier"}">${ico(G.open===false?"caretR":"caret")}</button>
           <button class="nm" data-gact="select" title="Sélectionner le groupe · double-clic : renommer">${esc(G.name)}</button>
           <button class="ib${vis?"":" act"}" data-gact="vis" title="${vis?"Masquer":"Afficher"} le groupe" aria-label="${vis?"Masquer":"Afficher"} le groupe">${vis?ICON.eye:ICON.eyeOff}</button>
           <button class="ib${lock?" act":""}" data-gact="lock" title="${lock?"Déverrouiller":"Verrouiller"} le groupe" aria-label="${lock?"Déverrouiller":"Verrouiller"} le groupe">${lock?ICON.lock:ICON.unlock}</button>
-          <button class="ib" data-gact="dup" title="Dupliquer le groupe" aria-label="Dupliquer le groupe">⧉</button>
-          <button class="ib" data-gact="ungroup" title="Dégrouper" aria-label="Dégrouper">⤫</button>
+          <button class="ib" data-gact="dup" title="Dupliquer le groupe" aria-label="Dupliquer le groupe">${ico("duplicate")}</button>
+          <button class="ib" data-gact="ungroup" title="Dégrouper" aria-label="Dégrouper">${ico("ungroup")}</button>
           <label class="gpal">Palette <select data-gact="pal" title="Palette du groupe" aria-label="Palette du groupe">${pals.map(P=>`<option value="${esc(P.id)}" ${(G.pal||"main")===P.id?"selected":""}>${esc(P.name)}</option>`).join("")}<option value="__new">+ Nouvelle palette</option></select></label></li>`;
         if(G.open!==false) for(let k=layers.length-1;k>=0;k--){ if(layers[k].grp===G.id) h+=layerRow(layers[k],k,true); }
         continue;
@@ -1294,7 +1461,7 @@ function renderInspector(){
   const SL=ids.map(layerById), sb=bounds(SL.filter(M=>M.subs.length));
   const op=Math.round(100*(Number.isFinite(L.opacity)?L.opacity:1)), bl=L.blend||"normal", sameBl=SL.every(M=>(M.blend||"normal")===bl);
   const allHid=SL.every(M=>!M.visible), allLock=SL.every(M=>M.locked);
-  let h=`<h2 class="insp-title"><span id="inspName">${multiL?ids.length+" calques sélectionnés":esc(L.name)}</span>${multiL?"":`<button class="ib" id="renBtn" title="Renommer (F2 ou double-clic dans les calques)" aria-label="Renommer">✎</button>`}</h2>
+  let h=`<h2 class="insp-title"><span id="inspName">${multiL?ids.length+" calques sélectionnés":esc(L.name)}</span>${multiL?"":`<button class="ib" id="renBtn" title="Renommer (F2 ou double-clic dans les calques)" aria-label="Renommer">${ico("edit")}</button>`}</h2>
     <div class="row" style="margin-bottom:8px"><button id="selHide">${allHid?"Afficher":"Masquer"}${multiL?" la sélection":""}</button><button id="selLock">${allLock?"Déverrouiller":"Verrouiller"}${multiL?" la sélection":""}</button></div>
     <div class="sizerow"><label>L <input type="number" id="szW" step="1" value="${r2(sb.x1-sb.x0)}"></label><button class="ib${sizeLock?" act":""}" id="szLock" title="${sizeLock?"Proportions verrouillées":"Proportions libres"}" aria-pressed="${sizeLock}">${sizeLock?ICON.lock:ICON.unlock}</button><label>H <input type="number" id="szH" step="1" value="${r2(sb.y1-sb.y0)}"></label></div>
     <label class="geo">Opacité <input type="range" id="opR" min="0" max="100" value="${op}"><span id="opV">${op} %</span></label>
@@ -1302,7 +1469,7 @@ function renderInspector(){
     ${styleSection(SL)}
     <div><div class="muted" style="margin-bottom:5px">Zone de couleur (clic pour changer)</div><div class="zones">${LP.colors.map((c,i)=>`<button class="zone-btn${same&&zoneOf[0]===i?" cur":""}" data-zone="${i}" data-hex="${primary(c)}" style="background:${paintCss(c)}" title="Zone ${i+1}${typeof c==="string"?" · "+c:" · dégradé"}" aria-label="Zone ${i+1}"><span>${i+1}</span></button>`).join("")}</div>
       <p class="muted" style="margin:4px 0 0">Palette : ${esc(LP.name)}${G?" (groupe « "+esc(G.name)+" »)":""}</p></div>
-    <div class="rotrow"><span class="muted">Rotation</span><button data-rot="-90" title="−90°">↺ 90°</button><button data-rot="-15" title="−15° ( [ )">↺ 15°</button><button data-rot="15" title="+15° ( ] )">↻ 15°</button><button data-rot="90" title="+90°">↻ 90°</button>
+    <div class="rotrow"><span class="muted">Rotation</span><button data-rot="-90" title="−90°" aria-label="Pivoter de −90°">${ico("rotL")}90°</button><button data-rot="-15" title="−15° ( [ )" aria-label="Pivoter de −15°">${ico("rotL")}15°</button><button data-rot="15" title="+15° ( ] )" aria-label="Pivoter de +15°">${ico("rotR")}15°</button><button data-rot="90" title="+90°" aria-label="Pivoter de +90°">${ico("rotR")}90°</button>
       <input type="number" id="rotDeg" value="0" step="1" aria-label="Angle en degrés"><button id="rotGo">OK</button></div>
     ${!multiL&&L.open?`<div class="stylebox"><label class="geo">Épaisseur du trait <input type="range" id="swR" min="0.5" max="60" step="0.5" value="${L.sw||4}"><span id="swV">${L.sw||4}</span></label>
       <div class="row"><button id="closePath">Fermer le tracé</button><button id="toShape">Convertir en forme pleine</button></div></div>`:""}
@@ -1444,8 +1611,6 @@ function renderMbar(){
 $("#mbar").addEventListener("click",e=>{ const b=e.target.closest("[data-sheet]"); if(!b) return; openSheet(sheet===b.dataset.sheet?null:b.dataset.sheet); renderMbar(); });
 // a tap on the drawing closes the sheet, so the whole canvas is free to work on
 $("#cv").addEventListener("pointerdown",()=>{ if(mobileMQ.matches && sheet) openSheet(null); });
-$("#menuBtn").onclick=()=>{ const h=document.querySelector("header"), o=!h.classList.contains("menuopen"); h.classList.toggle("menuopen",o); $("#menuBtn").setAttribute("aria-expanded",String(o)); };
-$("#hdrGroup").addEventListener("click",e=>{ if(e.target.closest("[data-sec]")){ document.querySelector("header").classList.remove("menuopen"); $("#menuBtn").setAttribute("aria-expanded","false"); } });
 mobileMQ.addEventListener("change",()=>{ if(!mobileMQ.matches) openSheet(null); });
 // choosing a tool closes the Tools sheet: the canvas is free to draw on
 $("#toolsSec").addEventListener("click",e=>{ if(mobileMQ.matches && e.target.closest(".tools [data-tool]")) openSheet(null); });
@@ -1684,6 +1849,8 @@ window.addEventListener("keydown", e=>{
     if(e.key==="Enter"||e.key==="Escape"){ e.preventDefault(); finishPen(false); return; }
     if(e.key==="Backspace"||e.key==="Delete"){ e.preventDefault(); penPath.pop(); if(!penPath.length) penPath=null; renderOverlay(); return; } }
   if(mod && !e.shiftKey && e.key.toLowerCase()==="r"){ e.preventDefault(); setRulers(!rulersOn); return; }
+  if(mod && !e.shiftKey && e.key.toLowerCase()==="k"){ e.preventDefault(); openSettings("search"); return; }
+  if(mod && !e.shiftKey && e.key.toLowerCase()==="e"){ e.preventDefault(); $("#exportBtn").click(); return; }
   if(e.key==="?"){ e.preventDefault(); openShortcuts(); return; }
   if(mod && e.key.toLowerCase()==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if(mod && e.key.toLowerCase()==="y"){ e.preventDefault(); redo(); return; }
@@ -1918,7 +2085,7 @@ async function toggleRec(n){
   catch(_){ $("#recInfo").textContent="Micro refusé ou bloqué par la page. Enregistrez avec le dictaphone de votre appareil puis importez le fichier."; return; }
   const mime=["audio/webm;codecs=opus","audio/webm","audio/mp4"].find(m=>MediaRecorder.isTypeSupported(m))||"";
   const mr=new MediaRecorder(stream, mime?{mimeType:mime}:{}), chunks=[], t0=Date.now();
-  rec={mr, timer:setInterval(()=>{ const s=Math.round((Date.now()-t0)/1000); const i=$("#recInfo"); if(i) i.innerHTML=`<span class="rec">● Enregistrement ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span>`; },250)};
+  rec={mr, timer:setInterval(()=>{ const s=Math.round((Date.now()-t0)/1000); const i=$("#recInfo"); if(i) i.innerHTML=`<span class="rec"><span class="recdot"></span>Enregistrement ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span>`; },250)};
   mr.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
   mr.onstop=()=>{ clearInterval(rec.timer); rec=null; stream.getTracks().forEach(t=>t.stop()); const blob=new Blob(chunks,{type:(mr.mimeType||"audio/webm").split(";")[0]}); storeAudio(n,blob); };
   mr.start(); renderNoteEditor();
@@ -2112,7 +2279,7 @@ function renderPalette(){
   $("#palSel").innerHTML=pals.map(p=>`<option value="${esc(p.id)}" ${p.id===curPal?"selected":""}>${esc(p.name)}</option>`).join("");
   $("#palDel").disabled=curPal==="main";
   $("#palUse").textContent = curPal==="main" ? "Palette par défaut de tout le logo" : (used.size?"Utilisée par : "+[...used].join(", "):"Attribuez-la à un groupe depuis les calques");
-  el.innerHTML=palette.map((c,i)=>`<button class="sw-btn${pick&&pick.i===i?" editing":""}" draggable="true" data-i="${i}" style="background:${zoneColor(i)}" title="Zone ${i+1}${typeof c==="string"?" · "+c:" · dégradé"}" aria-label="Couleur ${i+1}"><span class="num">${i+1}</span>${typeof c!=="string"?`<span class="gr">◐</span>`:""}${palette.length>1?`<span class="x" data-del="${i}" title="Retirer cette couleur">×</span>`:""}</button>`).join("")+
+  el.innerHTML=palette.map((c,i)=>`<button class="sw-btn${pick&&pick.i===i?" editing":""}" draggable="true" data-i="${i}" style="background:${zoneColor(i)}" title="Zone ${i+1}${typeof c==="string"?" · "+c:" · dégradé"}" aria-label="Couleur ${i+1}"><span class="num">${i+1}</span>${typeof c!=="string"?`<span class="gr">${ico("gradient")}</span>`:""}${palette.length>1?`<span class="x" data-del="${i}" title="Retirer cette couleur">×</span>`:""}</button>`).join("")+
     (palette.length<MAXZ?`<button class="sw-add" id="palAdd" title="Ajouter une couleur (nouvelle zone)" aria-label="Ajouter une couleur">+</button>`:"");
 }
 $("#palSel").addEventListener("change",e=>{ closePicker(); curPal=e.target.value; previewPal=null; sugg=[]; renderSuggestions(); palette=curPalObj().colors; renderAll(); });
@@ -4476,7 +4643,8 @@ $("#stBlank").onclick=async e=>{ e.preventDefault(); const info=startInfo();
   toast("Page vierge : choisissez un outil à gauche. « Annuler » revient au dessin précédent."); };
 $("#stLater").onclick=()=>{ try{ localStorage.setItem(WELCOME_SKIP,"1"); }catch(_){} $("#startDlg").close(); };
 $("#stName").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#stGo").click(); } });
-$("#startBtn").onclick=openStart;
+$("#startBtn").onclick=()=>newProject();   // Plan › Nouveau projet
+$("#brandBtn").onclick=openStart;           // Plan › Marque et propositions (the open project)
 function maybeWelcome(){ let later=false; try{ later=!!localStorage.getItem(WELCOME_SKIP); }catch(_){}
   if(!brand.name && !later && !document.querySelector("dialog[open]")) openStart(); }
 window.__start=applyStart;
@@ -4681,7 +4849,7 @@ async function renderProjects(){
   const all=(await P.all()).sort((a,b)=>b.updated-a.updated), q=plainText(projQuery.trim());
   const count=id=>all.filter(p=>id==="all"||(p.collection||"")===id).length;
   $("#projColls").innerHTML=`<button data-coll="all" class="${projFilter==="all"?"on":""}">Tous les projets <span>${all.length}</span></button>`+
-    collections.map(c=>`<div class="collrow"><button data-coll="${esc(c.id)}" class="${projFilter===c.id?"on":""}">${esc(c.name)} <span>${count(c.id)}</span></button><button class="ib" data-crename="${esc(c.id)}" title="Renommer la collection" aria-label="Renommer la collection ${esc(c.name)}">✎</button><button class="ib" data-cdel="${esc(c.id)}" title="Supprimer la collection (les projets restent)" aria-label="Supprimer la collection ${esc(c.name)}">×</button></div>`).join("")+
+    collections.map(c=>`<div class="collrow"><button data-coll="${esc(c.id)}" class="${projFilter===c.id?"on":""}">${esc(c.name)} <span>${count(c.id)}</span></button><button class="ib" data-crename="${esc(c.id)}" title="Renommer la collection" aria-label="Renommer la collection ${esc(c.name)}">${ico("edit")}</button><button class="ib" data-cdel="${esc(c.id)}" title="Supprimer la collection (les projets restent)" aria-label="Supprimer la collection ${esc(c.name)}">×</button></div>`).join("")+
     `<button data-coll="" class="${projFilter===""?"on":""}">Sans collection <span>${count("")}</span></button>
      <button id="collNew" class="ghost">+ Nouvelle collection</button>`;
   const list=all.filter(p=>(projFilter==="all"||(p.collection||"")===projFilter) && (!q || plainText(p.name+" "+collName(p.collection)+" "+((p.doc&&p.doc.brand&&p.doc.brand.keywords)||[]).join(" ")).includes(q)));
@@ -4798,11 +4966,138 @@ const SHORTCUTS=[
 ];
 let helpOn=false; try{ helpOn=!!localStorage.getItem("atelier-logo-help"); }catch(_){}
 function applyHelp(){ document.body.classList.toggle("nohelp",!helpOn); }
-function openShortcuts(){ $("#scList").innerHTML=SHORTCUTS.map(([t,list])=>`<section><h3>${t}</h3><dl>${list.map(([k,d])=>`<dt>${k.split(" / ").map(x=>x.replace(/([^+ ]+)/g,"<kbd>$1</kbd>").replace(/<kbd>(ou|sur|un|le|du|pendant|une|glisser|Appui|long|maintenu|point|poignée|1er|molette|Clic|clic|clic-glisser|Double-clic|calque|Annuler|Retour|arrière|Entrée|Échap|et)<\/kbd>/g,"$1")).join(" / ")}</dt><dd>${d}</dd>`).join("")}</dl></section>`).join("");
-  $("#scHelp").checked=helpOn; $("#scDlg").showModal(); }
-$("#scHelp").onchange=e=>{ helpOn=e.target.checked; try{ localStorage.setItem("atelier-logo-help", helpOn?"1":""); }catch(_){} applyHelp(); };
-$("#scClose").onclick=()=>$("#scDlg").close();
+function openShortcuts(){ openSettings("keys"); }
 $("#scBtn").onclick=openShortcuts;
+/* ---------- Menu bar: Plan / Édition / Animation / Paramètres / Aide ----------
+   Every command keeps its own button id (scripts and tests use them). Menus open on click, then follow the pointer;
+   the keyboard works as in a desktop app (arrows, Home / End, Enter, Escape). On phones the bar is a sheet under
+   « Menu ». Icons are line drawings (ICO), never emoji. */
+{ // the tools, listed in Édition with their keys
+  const keys={move:"V",pen:"P",pencil:"N",points:"A",shape:"M",text:"T",bubble:"B",hand:"H"};
+  $("#mTools").innerHTML=[...document.querySelectorAll(".tools [data-tool]")].map(b=>`<button role="menuitem" data-mtool="${b.dataset.tool}">${b.querySelector("svg").outerHTML.replace("<svg",'<svg class="i"')}<span>${esc(b.textContent.trim())}</span><kbd>${keys[b.dataset.tool]||""}</kbd></button>`).join("");
+}
+decorate();
+const MB=$("#menubar"), mbItems=mm=>[...mm.querySelectorAll(".mmenu [role^=menuitem]")].filter(b=>!b.disabled&&b.offsetParent!==null);
+function closeMenus(){ MB.querySelectorAll(".mm.open").forEach(m=>{ m.classList.remove("open"); m.querySelector(".mmb").setAttribute("aria-expanded","false"); }); }
+function closeMobileMenu(){ const h=document.querySelector("header"); h.classList.remove("menuopen"); $("#menuBtn").setAttribute("aria-expanded","false"); }
+function refreshMenus(){
+  const on=hist.some(x=>x.on); $("#mUndo").disabled=!on; $("#mRedo").disabled=!redoIds.length;
+  $("#mGrid").setAttribute("aria-checked",String(!!grid.on)); $("#mSnap").setAttribute("aria-checked",String(!!grid.snap));
+  $("#mRulers").setAttribute("aria-checked",String(!!rulersOn)); $("#mHelpOn").setAttribute("aria-checked",String(!!helpOn));
+  MB.querySelectorAll("[data-mtool]").forEach(b=>b.setAttribute("aria-current",String(b.dataset.mtool===tool)));
+}
+function openMenu(mm,focus){ closeMenus(); refreshMenus(); mm.classList.add("open"); const b=mm.querySelector(".mmb"); b.setAttribute("aria-expanded","true"); if(focus){ const it=mbItems(mm); if(it.length) it[focus==="last"?it.length-1:0].focus(); } }
+MB.addEventListener("click",e=>{
+  const b=e.target.closest(".mmb"); if(b){ const mm=b.parentNode; if(mm.classList.contains("open")) closeMenus(); else openMenu(mm,e.detail===0); return; }
+  const it=e.target.closest("[role^=menuitem]"); if(it){ closeMenus(); closeMobileMenu(); }
+});
+MB.addEventListener("pointerover",e=>{ const b=e.target.closest(".mmb"); if(b&&MB.querySelector(".mm.open")&&!b.parentNode.classList.contains("open")) openMenu(b.parentNode,false); });
+document.addEventListener("pointerdown",e=>{ if(!e.target.closest||!e.target.closest("#menubar")) closeMenus(); });
+MB.addEventListener("keydown",e=>{
+  const mms=[...MB.querySelectorAll(".mm")], cur=e.target.closest(".mm"), i=mms.indexOf(cur), inMenu=!!e.target.closest(".mmenu");
+  const go=k=>{ const n=mms[(i+k+mms.length)%mms.length]; if(MB.querySelector(".mm.open")) openMenu(n,"first"); else n.querySelector(".mmb").focus(); };
+  let done=true;
+  if(e.key==="ArrowRight") go(1); else if(e.key==="ArrowLeft") go(-1);
+  else if(e.key==="ArrowDown"||e.key==="ArrowUp"){ if(!inMenu){ openMenu(cur,e.key==="ArrowUp"?"last":"first"); } else { const it=mbItems(cur), j=it.indexOf(document.activeElement); it[(j+(e.key==="ArrowDown"?1:-1)+it.length)%it.length].focus(); } }
+  else if(e.key==="Home"&&inMenu) mbItems(cur)[0].focus(); else if(e.key==="End"&&inMenu){ const it=mbItems(cur); it[it.length-1].focus(); }
+  else if(e.key==="Escape"){ closeMenus(); cur.querySelector(".mmb").focus(); }
+  else if(e.key==="Tab") { closeMenus(); done=false; }
+  else done=false;
+  if(done) e.preventDefault();
+  if(!(e.ctrlKey||e.metaKey)) e.stopPropagation();   // plain keys typed in the menus never reach the drawing shortcuts (Ctrl / Cmd shortcuts still work)
+});
+$("#menuBtn").onclick=()=>{ const h=document.querySelector("header"), o=!h.classList.contains("menuopen"); h.classList.toggle("menuopen",o); $("#menuBtn").setAttribute("aria-expanded",String(o)); if(o) refreshMenus(); };
+/* used by the tests: opens the menu that holds an element */
+window.__openMenuFor=sel=>{ const el=document.querySelector(sel), mm=el&&el.closest(".mm"); if(!mm) return false;
+  if(matchMedia("(max-width:900px)").matches){ document.querySelector("header").classList.add("menuopen"); refreshMenus(); } else openMenu(mm,false); return true; };
+$("#brandHome").onclick=e=>{ e.preventDefault(); openSettings("about"); };
+// commands that have no button elsewhere
+$("#mOpenFile").onclick=()=>$("#projOpenFile").click();
+$("#mSaveFile").onclick=async()=>{ if(!curProject){ toast("Aucun projet ouvert."); return; } await exportProjects([curProject.id], curProject.name); };
+$("#mExport").onclick=()=>$("#exportBtn").click();
+$("#mUndo").onclick=()=>undo(); $("#mRedo").onclick=()=>redo(); $("#mHist").onclick=()=>setTimeout(openHistory,0);
+$("#mTools").addEventListener("click",e=>{ const b=e.target.closest("[data-mtool]"); if(b) setTool(b.dataset.mtool); });
+$("#mImport").onclick=()=>$("#importBtn").click();
+$("#mClaude").onclick=()=>openClaudeDlg(false);
+$("#mGrid").onclick=()=>{ const c=$("#gridOn"); c.checked=!c.checked; c.dispatchEvent(new Event("change")); };
+$("#mSnap").onclick=()=>{ const c=$("#snapOn"); c.checked=!c.checked; c.dispatchEvent(new Event("change")); };
+$("#mRulers").onclick=()=>setRulers(!rulersOn);
+$("#mHelpOn").onclick=()=>setHelp(!helpOn);
+$("#setBtn").onclick=()=>openSettings("prefs");
+$("#mSearch").onclick=()=>openSettings("search"); $("#mGuide").onclick=()=>openSettings("guide"); $("#mFaq").onclick=()=>openSettings("faq"); $("#mKeys").onclick=()=>openSettings("keys");
+$("#mRecipes").onclick=()=>{ openMotion(); setTimeout(()=>{ const r=document.getElementById("moRecipes"); if(r) r.scrollIntoView({block:"start"}); },0); };
+$("#mSound").onclick=()=>{ openMotion(); setTimeout(()=>{ const r=document.getElementById("moSndSec"); if(r) r.scrollIntoView({block:"start"}); },0); };
+$("#mMotionExport").onclick=()=>{ openMotion(); setTimeout(()=>openMotionExport(),0); };
+
+/* ---------- Settings and help center (Paramètres) ----------
+   Preferences, shortcuts, the guide (GUIDE.md, written once) and the full FAQ (content/faq.json, shared with the
+   site), all searchable from one field. */
+const GUIDE = __GUIDE__, FAQ = __FAQ__;
+const fold=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const kbdHtml=k=>k.split(" / ").map(x=>x.replace(/([^+ ]+)/g,"<kbd>$1</kbd>").replace(/<kbd>(ou|sur|un|le|du|pendant|une|glisser|Appui|long|maintenu|point|poignée|1er|molette|Clic|clic|clic-glisser|Double-clic|calque|Annuler|Retour|arrière|Entrée|Échap|et)<\/kbd>/g,"$1")).join(" / ");
+let setSec="prefs";
+function setHelp(on){ helpOn=!!on; try{ localStorage.setItem("atelier-logo-help", helpOn?"1":""); }catch(_){} applyHelp(); const c=document.getElementById("scHelp"); if(c) c.checked=helpOn; }
+const prefRow=(id,title,sub,checked)=>`<label class="setrow"><span class="t"><b>${title}</b><span>${sub}</span></span><input type="checkbox" id="${id}"${checked?" checked":""}></label>`;
+const SET_RENDER={
+  prefs:()=>`<h3>Affichage</h3>${prefRow("scHelp","Aides à l'écran","Rappels des gestes dans le dessin et bulles d'aide des outils.",helpOn)}${prefRow("prefRulers","Règles et guides","Règles en haut et à gauche ; glissez-en un guide.",rulersOn)}${prefRow("prefGrid","Grille","Grille de construction dans le dessin.",grid.on)}${prefRow("prefSnap","Magnétisme","Les points s'accrochent à la grille et aux guides.",grid.snap)}
+    <h3>Vos données</h3><div class="setrow"><span class="t"><b>Sauvegarde</b><span>Vos projets sont sur cet appareil. Enregistrez-les dans un fichier pour les garder ailleurs.</span></span><button id="prefBackup">Tout enregistrer…</button></div>
+    <h3>Connexions</h3><div class="setrow"><span class="t"><b>Claude</b><span>Copier-coller avec claude.ai, ou l'extension Claude Desktop.</span></span><button id="prefClaude">Ouvrir</button></div>`,
+  keys:()=>`<div class="sclist">${SHORTCUTS.map(([t,list])=>`<section><h3>${t}</h3><dl>${list.map(([k,d])=>`<dt>${kbdHtml(k)}</dt><dd>${d}</dd>`).join("")}</dl></section>`).join("")}</div>`,
+  guide:()=>`<div class="guide">${GUIDE.map((g,i)=>`<section data-g="${i}">${g.html}</section>`).join("")}</div>`,
+  faq:()=>{ const cats=[...new Set(FAQ.map(f=>f.cat))]; return `<div class="setfaq">${cats.map(c=>`<h3>${esc(c)}</h3>${FAQ.map((f,i)=>f.cat===c?`<details data-f="${i}"><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`:"").join("")}`).join("")}</div>`; },
+  about:()=>`<h3>Atelier du Logo</h3><p>par John Apple · édition vectorielle. Un atelier pour dessiner son logo, décliner sa charte et l'animer, seul ou avec Claude. Vos projets restent sur votre appareil.</p><div class="setrow"><span class="t"><b>À propos, soutien et appli</b><span>L'auteur, les dons, l'installation de l'appli, les crédits.</span></span><button class="primary" id="prefAbout">Ouvrir</button></div>`,
+};
+// one search index: shortcuts, guide passages, FAQ, preferences
+function setIndex(){
+  if(setIndex.cache) return setIndex.cache; const out=[];
+  SHORTCUTS.forEach(([t,list])=>list.forEach(([k,d],j)=>out.push({sec:"keys",tag:"Raccourci · "+t,title:d,sub:k,go:null})));
+  const tmp=document.createElement("div");
+  GUIDE.forEach((g,i)=>{ tmp.innerHTML=g.html; const h=(tmp.querySelector("h2")||{}).textContent||"Guide";
+    tmp.querySelectorAll("p,li,tr").forEach((el,j)=>out.push({sec:"guide",tag:"Guide · "+h,title:el.textContent.trim().slice(0,160),sub:"",go:{g:i,j,sel:el.tagName.toLowerCase()}})); });
+  FAQ.forEach((f,i)=>out.push({sec:"faq",tag:"Question · "+f.cat,title:f.q,sub:f.a,go:{f:i}}));
+  [["Aides à l'écran","scHelp"],["Règles et guides","prefRulers"],["Grille","prefGrid"],["Magnétisme","prefSnap"],["Sauvegarde de mes projets","prefBackup"],["Claude, connexions","prefClaude"]].forEach(([t,id])=>out.push({sec:"prefs",tag:"Préférence",title:t,sub:"",go:{id}}));
+  out.push({sec:"about",tag:"À propos",title:"À propos, soutien, installer l'appli, crédits",sub:"don PayPal Wero auteur John Apple",go:{id:"prefAbout"}});
+  out.forEach(o=>{ o.k=fold(o.title+" "+o.sub+" "+o.tag); });
+  return setIndex.cache=out;
+}
+function setHi(text,q){ const t=esc(text); if(!q) return t; const f=fold(text), words=fold(q).split(/\s+/).filter(w=>w.length>1); let out="", i=0;
+  const marks=[]; words.forEach(w=>{ let p=f.indexOf(w); while(p>=0){ marks.push([p,p+w.length]); p=f.indexOf(w,p+w.length); } }); marks.sort((a,b)=>a[0]-b[0]);
+  for(const [a,b] of marks){ if(a<i) continue; out+=esc(text.slice(i,a))+"<mark>"+esc(text.slice(a,b))+"</mark>"; i=b; } return out+esc(text.slice(i)); }
+function renderSettings(){
+  const q=$("#setQ").value.trim(), main=$("#setMain");
+  $("#setNav").querySelectorAll("[data-set]").forEach(b=>b.setAttribute("aria-current",String(!q&&b.dataset.set===setSec)));
+  if(q){ const words=fold(q).split(/\s+/).filter(Boolean), res=setIndex().filter(o=>words.every(w=>o.k.includes(w))).slice(0,60);
+    main.innerHTML=`<h3>${res.length?res.length+" résultat"+(res.length>1?"s":""):"Aucun résultat"} pour « ${esc(q)} »</h3>`+(res.length?`<ul class="setres">${res.map((o,i)=>`<li><button data-res="${i}"><small>${esc(o.tag)}</small>${setHi(o.title,q)}${o.sec==="keys"?` <span class="muted">· ${kbdHtml(o.sub)}</span>`:o.sec==="faq"?`<br><span class="muted">${setHi(o.sub.slice(0,140)+(o.sub.length>140?"…":""),q)}</span>`:""}</button></li>`).join("")}</ul>`
+      :`<p class="muted">Essayez un autre mot : « export », « police », « son », « historique »…</p>`);
+    main.dataset.res=JSON.stringify(res.map(o=>({sec:o.sec,go:o.go}))); return; }
+  main.innerHTML=SET_RENDER[setSec](); wireSettings();
+}
+function wireSettings(){
+  const on=(id,f)=>{ const el=document.getElementById(id); if(el) el.onchange=el.onclick=null, (el.type==="checkbox"?el.onchange=f:el.onclick=f); };
+  on("scHelp",e=>setHelp(e.target.checked)); on("prefRulers",e=>setRulers(e.target.checked));
+  on("prefGrid",e=>{ const c=$("#gridOn"); c.checked=e.target.checked; c.dispatchEvent(new Event("change")); });
+  on("prefSnap",e=>{ const c=$("#snapOn"); c.checked=e.target.checked; c.dispatchEvent(new Event("change")); });
+  on("prefBackup",async()=>{ const all=await P.all(); await exportProjects(all.map(p=>p.id),"atelier-du-logo-projets"); });
+  on("prefClaude",()=>{ $("#setDlg").close(); openClaudeDlg(false); });
+  on("prefAbout",()=>{ $("#setDlg").close(); renderAbout(); $("#aboutDlg").showModal(); });
+}
+function openSettings(sec){
+  const d=$("#setDlg"); $("#setQ").value=""; if(sec&&sec!=="search") setSec=sec;
+  if(!d.open) d.showModal(); renderSettings();
+  if(sec==="search") $("#setQ").focus(); else $("#setMain").focus();
+}
+$("#setQ").addEventListener("input",renderSettings);
+$("#setQ").addEventListener("keydown",e=>{ if(e.key==="Enter"){ const b=$("#setMain").querySelector("[data-res]"); if(b){ e.preventDefault(); b.click(); } } });
+$("#setNav").addEventListener("click",e=>{ const b=e.target.closest("[data-set]"); if(!b) return; setSec=b.dataset.set; $("#setQ").value=""; renderSettings(); });
+$("#setMain").addEventListener("click",e=>{ const b=e.target.closest("[data-res]"); if(!b) return;
+  const r=JSON.parse($("#setMain").dataset.res||"[]")[+b.dataset.res]; if(!r) return; setSec=r.sec; $("#setQ").value=""; renderSettings();
+  let el=null; const g=r.go;
+  if(g&&g.f!==undefined){ el=$("#setMain").querySelector(`[data-f="${g.f}"]`); if(el) el.open=true; }
+  else if(g&&g.g!==undefined){ const sec=$("#setMain").querySelector(`[data-g="${g.g}"]`); el=sec&&sec.querySelectorAll("p,li,tr")[g.j]; }
+  else if(g&&g.id){ el=document.getElementById(g.id); el=el&&(el.closest(".setrow")||el); }
+  if(el){ el.scrollIntoView({block:"center"}); el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),1700); } });
+$("#setClose").onclick=()=>$("#setDlg").close();
+
 let hintT=null;
 function flashHint(){ const h=$("#hint"); h.classList.add("flash"); clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove("flash"),3500); }
 applyHelp();
@@ -4816,7 +5111,7 @@ applyHelp();
 const ABOUT={
   bio:"Je m'appelle John Apple. J'ai créé l'Atelier du Logo pour que chacun puisse dessiner son logo et sa charte graphique avec de vraies courbes vectorielles, et travailler avec Claude comme avec un assistant de studio : vous dessinez, vous annotez, Claude propose, et vous gardez toujours la main. L'atelier est gratuit et vos projets restent sur votre appareil. Vous pouvez me contacter pour vous accompagner dans vos créations et vous former à la création graphique, audiovisuelle et aux outils d'IA.",
   contact:"contact.johnapple.fr@gmail.com",
-  paypal:"https://www.paypal.com/donate/?hosted_button_id=P82W3646WTR54", wero:"",
+  paypal:"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4JRW3NTALUR68", wero:"",
 };
 const weroDecode=v=>{ if(!v) return ""; if(!/^~/.test(v)) return v; try{ return decodeURIComponent(escape(atob(v.slice(1)))).split("").reverse().join(""); }catch(_){ return ""; } };
 function setAbout(o){ if(!o) return; for(const k of ["paypal","wero"]) if(typeof o[k]==="string" && o[k].trim()) ABOUT[k]=o[k].trim(); }
@@ -4824,7 +5119,7 @@ setAbout(window.__ABOUT);
 function renderAbout(){
   $("#abBio").innerHTML=esc(ABOUT.bio||"John Apple conçoit et développe l'Atelier du Logo.")+(ABOUT.contact?` <a class="contact" href="mailto:${esc(ABOUT.contact)}">${esc(ABOUT.contact)}</a>`:"");
   const sup=[]; if(/^https:\/\/(www\.)?(paypal\.me|paypal\.com)\//.test(ABOUT.paypal)) sup.push(`<a class="give paypal" href="${esc(ABOUT.paypal)}" target="_blank" rel="noopener">Faire un don avec PayPal</a>`);
-  if(ABOUT.wero) sup.push(`<span class="wero"><b>wero</b> Don par Wero : <strong id="abWeroVal"><button id="abWeroShow" class="ghost">Afficher le numéro</button></strong> <button id="abWeroCopy" class="ib" title="Copier" aria-label="Copier l'identifiant Wero">⧉</button></span>`);
+  if(ABOUT.wero) sup.push(`<span class="wero"><b>wero</b> Don par Wero : <strong id="abWeroVal"><button id="abWeroShow" class="ghost">Afficher le numéro</button></strong> <button id="abWeroCopy" class="ib" title="Copier" aria-label="Copier l'identifiant Wero">${ico("duplicate")}</button></span>`);
   $("#abSupport").innerHTML=sup.length?`<h3>Soutenir le projet</h3><p>L'atelier est gratuit. Si il vous est utile, vous pouvez soutenir son développement :</p><div class="support">${sup.join("")}</div>${ABOUT.wero?`<p class="muted">Wero : ouvrez l'application de votre banque, choisissez Wero, puis envoyez à l'identifiant ci-dessus.</p>`:""}`:"";
   const sh=$("#abWeroShow"); if(sh) sh.onclick=()=>{ $("#abWeroVal").textContent=weroDecode(ABOUT.wero); };
   const c=$("#abWeroCopy"); if(c) c.onclick=async()=>{ const w=weroDecode(ABOUT.wero); try{ await navigator.clipboard.writeText(w); toast("Identifiant Wero copié."); }catch(_){ toast("Copie refusée : "+w); } };

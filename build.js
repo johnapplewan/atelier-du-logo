@@ -101,7 +101,13 @@ const about = aboutLinks();
 // Motion module: its own source file, inlined at the end of the workshop script (shares its renderer, never edits it)
 const motionSrc = fs.readFileSync(path.join(root, "src/motion.js"), "utf8");
 if (!template.includes("/*__MOTION__*/")) throw new Error("src/template.html has no /*__MOTION__*/ placeholder");
-fs.writeFileSync(path.join(root, "app/index.html"), template.replace("/*__MOTION__*/", () => motionSrc).replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
+// Help center content: the guide (GUIDE.md, cut at its "##" headings) and the FAQ (content/faq.json, shared with the site)
+const { md } = require("./build-site");
+const guideHtml = md(fs.readFileSync(path.join(root, "GUIDE.md"), "utf8").replace(/https:\/\/johnapplewan\.github\.io\/atelier-du-logo\/?/g, "https://atelier-du-logo.johnapplewan.workers.dev/atelier/"));
+const guide = guideHtml.split(/(?=<h2 )/).filter(x => /^<h2 /.test(x)).map(html => ({ html }));
+const faq = JSON.parse(fs.readFileSync(path.join(root, "content/faq.json"), "utf8"));
+if (!template.includes("__GUIDE__") || !template.includes("__FAQ__")) throw new Error("src/template.html has no __GUIDE__ / __FAQ__ placeholder");
+fs.writeFileSync(path.join(root, "app/index.html"), template.replace("__GUIDE__", () => JSON.stringify(guide).replace(/</g, "\\u003c")).replace("__FAQ__", () => JSON.stringify(faq).replace(/</g, "\\u003c")).replace("/*__MOTION__*/", () => motionSrc).replace("__GLYPHS__", () => JSON.stringify(glyphs)).replace("__ABOUT__", () => JSON.stringify(about)));
 console.log("app/index.html written (default example: " + DEFAULT_WORD + " / " + DEFAULT_LINE2 + ")");
 
 // ---------- Standalone app: offline file list + service worker ----------
