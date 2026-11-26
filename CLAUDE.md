@@ -26,13 +26,18 @@ Make the workshop a distributable tool. Anyone should be able to load it as an a
 - **Lot A (done)**: menu bar, settings and help center, line icons, FAQ, donation button, business plan, survey proposal.
 - **Lot B (done)**: Plans: a plan is the working document (like a file); a project groups several plans (variants, proposals); a collection groups projects; brand = project name. Assign a plan to a project and / or a collection; save a plan as a template (added to the suggestions of a new project). Motion can create its own plan with a size (landscape, portrait, 4:3, 1:1, banner…) and import images and SVG to animate together; an image can be added to an animation from the workshop too, with effects and keys (= Motion step 7, secure import + terms).
 - **Lot C**: Worker API: Turnstile (conditional) on the donation buttons, feedback cards and AI waitlist (`docs/SONDAGE.md`) stored in D1; the author creates the D1 database and the Turnstile widget.
-- **Lot D**: onboarding at first launch (guided steps through Plan, Édition, Animation, export) and « i » info points on every function explaining it (short text + link to the guide).
+- **Lot D (done)**: onboarding at first launch (guided steps through Plan, Édition, Animation, export) and « i » info points on every function explaining it (short text + link to the guide).
 
 ## Plans (lot B)
 
 - A project record keeps `plans: [{id, name, kind:"logo"|"motion", updated, thumb, doc|null}]` and `plan` (open plan id); the open plan's document stays in `p.doc`, inactive plans keep theirs (`ensurePlans` migrates old projects to one plan « Logo »; `stashPlan` / `switchPlan`). Header button `#planBtn` + popover `#planPop` (open, rename, decline, move, delete, project collection); dialogs `#newPlanDlg` (`openNewPlan(kind)`, formats `PLAN_FORMATS`, blank / copy / template) and `#askDlg` (`askBox`). Templates: meta `templates` (`saveTemplate`), offered in « Nouveau plan » and in the start dialog (« Un de mes modèles »).
 - Animation plans have `doc.frame {w,h}` (global `planFrame`, frame at the origin, dashed on the canvas); Motion's stage (`moAR`, `moViewBox`) and the export aspect « plan » (`moAsp`) follow it.
 - Placed images (`placeFiles`, `#placeIn`, Édition › Placer, Motion › Calques › Importer): rights box (`rightsOk`), raster redrawn ≤ 2048 px and stored once by hash in IndexedDB store `assets` (`P.asset` / `P.putAsset`, cache `IMG`), layer `kind:"image"` with `img {ref,w,h}` and 4 corners; SVG is never inserted as is: shapes only (`placeSVG`), turned into ordinary layers. Project files carry `assets` (validated by `ASSET_RE`). Test: `tests/plans.js`.
+
+## Tour and info points (lot D)
+
+- Guided tour (`TOUR`, `startTour`, `tourGo`, `endTour`; top-layer popover `#tour` with a spotlight and a card): opens once after the first start dialog closes (or ~1 s after load for a returning user), localStorage `atelier-logo-tour`; Aide › Visite guidée (`#mTour`) and Paramètres replay it. Keys are captured while it is open. `tests/helpers.js` marks it seen unless `open(browser, {tour:true})`.
+- Info points: `data-info="key"` on a title → `infoDecorate` adds a « i » button (MutationObserver, so dynamic panels too); text and guide section in `INFO` (`[title, text, guide section number]`); popover `#infoPop`, placed inside an open modal dialog so it stays interactive; `guideGo(i)`. Preference `atelier-logo-info` (`setInfo`, `#mInfoOn`, `#prefInfo`). Give every new panel, dialog or Motion section a `data-info` + an `INFO` entry. Test: `tests/tour.js`.
 
 ## Default example
 

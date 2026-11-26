@@ -346,22 +346,22 @@ body.motion-open .toast{z-index:1000}
     </div>
   </div>
   <div class="mo-side" id="moSide" role="region" aria-label="Animations">
-    <section><h3>Recettes en un clic</h3><div class="mo-recipes" id="moRecipes"></div></section>
-    <section id="moSndSec"><h3>Son</h3>
+    <section><h3 data-info="mo-recipes">Recettes en un clic</h3><div class="mo-recipes" id="moRecipes"></div></section>
+    <section id="moSndSec"><h3 data-info="mo-sound">Son</h3>
       <label class="chk"><input type="checkbox" id="moSndOn"> Son activé</label>
       <label class="mo-p" style="margin-top:6px"><span>Volume général</span><input type="range" id="moSndVol" min="0" max="150" step="1"><output id="moSndVolOut"></output></label>
       <div class="mo-sndgen"><select id="moAmb" aria-label="Ambiance de la bande son"></select><button id="moGen" class="primary">Générer la bande son</button></div>
       <div class="mo-sndgen"><button id="moGen2" title="Même ambiance, d'autres sons">Autre proposition</button><button id="moBankBtn">Banque de sons…</button></div>
       <details class="mo-anim" id="moFxBox"><summary><span>Effets sur tout le son</span></summary><div class="bd" id="moFx"></div></details>
       <div id="moClips"></div></section>
-    <section><h3>Calques</h3>
+    <section><h3 data-info="mo-layers">Calques</h3>
       <div class="mo-quick"><button data-q="all">Tout</button><button data-q="mark">Symbole</button><button data-q="word">Texte</button><button data-q="none">Aucun</button></div>
       <div class="mo-layers" id="moLayers"></div>
       <button class="mo-place" id="moPlace">${ico("place")}Importer une image ou un SVG…</button></section>
-    <section><h3>Ajouter une animation</h3>
+    <section><h3 data-info="mo-add">Ajouter une animation</h3>
       <div class="mo-tabs" id="moTabs" role="group" aria-label="Familles d'animations">${MO_TABS.map(([k, n]) => `<button data-tab="${k}" aria-pressed="false">${n}</button>`).join("")}</div>
       <div class="mo-presets" id="moPresets"></div><p class="mo-hint" id="moHint"></p></section>
-    <section><h3 id="moListTitle">Animations</h3><div id="moList"></div></section>
+    <section><h3 data-info="mo-list"><span id="moListTitle">Animations</span></h3><div id="moList"></div></section>
   </div>
 </div>`;
   document.body.appendChild(root);
@@ -1079,7 +1079,7 @@ function moExportSVG(o) {
 /* ---- export dialog ---- */
 (function moExInit() {
   const d = document.createElement("dialog"); d.id = "moExDlg"; d.className = "moexdlg"; d.setAttribute("aria-labelledby", "moExTitle");
-  d.innerHTML = `<h2 id="moExTitle">Exporter l'animation</h2>
+  d.innerHTML = `<h2 id="moExTitle" data-info="mo-export">Exporter l'animation</h2>
 <div class="moex-fmts" role="radiogroup" aria-label="Format">${Object.entries(MO_FORMATS).map(([k, f], i) => `<label><input type="radio" name="moexf" value="${k}"${i ? "" : " checked"}><span><b>${f.n}</b><small>${f.d}</small></span></label>`).join("")}</div>
 <div class="moex-row"><label>Cadre <select id="moExAsp">${Object.entries(MO_ASPECTS).map(([k, a]) => `<option value="${k}">${a[2]}</option>`).join("")}</select></label>
 <label>Taille <select id="moExSize"></select></label><label>Images/s <select id="moExFps"></select></label>

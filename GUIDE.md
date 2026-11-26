@@ -8,6 +8,8 @@ L'Atelier du Logo sert à dessiner son logo et sa charte graphique en vectoriel,
 
 ## 1. Démarrer
 
+Au premier lancement, une **visite guidée** présente les repères de l'atelier (Aide › Visite guidée pour la revoir). Le petit **« i »** à côté de chaque titre explique la fonction et mène à la bonne page de ce guide.
+
 Au premier lancement, l'atelier vous demande :
 - le nom de votre marque ;
 - votre slogan ;
