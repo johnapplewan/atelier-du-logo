@@ -30,6 +30,8 @@ async function open(browser, opts = {}) {
   await page.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
   // the welcome dialog is tested in start.js; other tests start with it postponed ("Plus tard")
   if (!opts.welcome) await page.addInitScript(() => { try { localStorage.setItem("atelier-logo-welcome-later", "1"); } catch (_) {} });
+  // the guided tour is tested in tour.js; other tests start with it already seen
+  if (!opts.tour) await page.addInitScript(() => { try { localStorage.setItem("atelier-logo-tour", "1"); } catch (_) {} });
   // Most tests were written against the former neutral example (frame, disc, dot + "Marque"): it is seeded as the
   // saved drawing of a fresh browser, unless the test asks for the real default ({ fresh: true }).
   if (!opts.fresh) await page.addInitScript(fx => { try { if (!sessionStorage.getItem("__seeded") && !localStorage.getItem("atelier-logo-v1")) { sessionStorage.setItem("__seeded", "1"); localStorage.setItem("atelier-logo-v1", fx.s); localStorage.setItem("atelier-logo-palette", fx.p); } } catch (_) {} },

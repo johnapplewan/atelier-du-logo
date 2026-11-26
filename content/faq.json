@@ -5,6 +5,11 @@
   "a": "Oui : pendant la bêta, toutes les fonctions sont gratuites, sans compte et sans limite. Le cœur de l'atelier (dessiner, décliner, animer, exporter sur votre appareil) a vocation à rester accessible gratuitement. En revanche, certaines fonctions qui ont un coût réel, comme l'intelligence artificielle, le stockage et la synchronisation en ligne ou le travail en équipe, pourront devenir payantes. Aucun changement ne se fera sans prévenir, et vos créations restent à vous."
  },
  {
+  "cat": "Démarrer",
+  "q": "Comment revoir la visite guidée ou retrouver l'explication d'une fonction ?",
+  "a": "La visite guidée s'ouvre au premier lancement ; Aide › Visite guidée la relance à tout moment. Le petit « i » à côté de chaque titre (panneaux, fenêtres, sections de Motion) explique la fonction en deux phrases et mène à la bonne page du guide. Paramètres › Points d'information « i » les masque."
+ },
+ {
   "cat": "Tarifs et accès",
   "q": "Faut-il créer un compte ?",
   "a": "Non. L'atelier fonctionne sans compte. Un compte ne servira qu'aux futures options en ligne (synchronisation entre appareils, partage, travail en équipe)."
