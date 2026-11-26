@@ -407,6 +407,45 @@ body.nohelp .hint{opacity:0;pointer-events:none;transition:opacity .4s}body.nohe
 .ib .i{width:15px;height:15px}
 .gr .i{width:11px;height:11px;display:inline-block;vertical-align:-1px}
 .recdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--danger);margin-right:5px;vertical-align:0}
+/* ---------- Plans ---------- */
+.planbtn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 6px 3px 10px;border-radius:999px;background:#fff;max-width:240px}
+.planbtn .pl{color:var(--muted)}
+.planbtn #planName{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.planbtn .i{width:14px;height:14px;color:var(--muted)}
+.planpop{position:fixed;z-index:45;width:min(370px,94vw);background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 6px rgba(20,20,25,.06),0 16px 40px rgba(20,20,25,.14);padding:10px}
+.planpop .pph{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:4px 6px 8px;font-size:13px}
+.plist{list-style:none;margin:0;padding:0;max-height:min(50vh,380px);overflow:auto}
+.plist li{display:flex;align-items:center;gap:4px;border-radius:10px}
+.plist li.on{background:#EEF0FB}
+.plist .prow{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:6px}
+.plist .prow:hover:not(:disabled){border-color:transparent}
+.pth{width:52px;height:38px;flex:none;border-radius:7px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pth img{max-width:100%;max-height:100%}
+.plist .pn{min-width:0;display:flex;flex-direction:column}.plist .pn b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plist .pn small{font-size:11.5px;color:var(--muted)}
+.plist .pacts{display:flex;gap:0;opacity:.55}.plist li:hover .pacts,.plist li:focus-within .pacts{opacity:1}
+.planpop .ppf{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 6px}.planpop .ppf button{display:inline-flex;align-items:center;gap:6px;font-size:12.5px}.planpop .ppf .i{width:15px;height:15px}
+.planpop .ppcoll{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:6px 4px 2px}.planpop .ppcoll select{flex:1;font-size:12.5px}
+.pplans{font-size:11px;color:var(--muted);padding:0 8px 6px}
+.askdlg{width:min(440px,94vw)}.askdlg h2{margin:0 0 6px;font-size:22px}
+.askf{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;margin:10px 0 14px}.askf input,.askf select{font:14px Inter,system-ui,sans-serif;font-weight:400;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.npdlg{width:min(680px,96vw)}.npdlg h2{margin:0 0 4px;font-size:24px}.npdlg h3{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:16px 0 8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;background:#fff;margin-top:10px}
+.seg button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;border-radius:8px;padding:7px 12px;font-size:13.5px}
+.seg button .i{width:16px;height:16px}
+.seg button[aria-pressed=true]{background:var(--night);color:#fff}
+.npfmts{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.npfmts button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:8px 10px;border-radius:10px;background:#fff}
+.npfmts button[aria-pressed=true]{border-color:var(--night);box-shadow:0 0 0 1px var(--night)}
+.npfmts .fr{height:32px;width:100%;display:flex;align-items:center}.npfmts .fr i{display:block;border:1.6px solid var(--ink);border-radius:3px}
+.npfmts b{font-size:12.5px}.npfmts small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.npfrom{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px}
+.nptpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:10px}
+.nptpls button{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border-radius:10px;background:#fff}
+.nptpls button[aria-pressed=true]{border-color:var(--night);box-shadow:0 0 0 1px var(--night)}
+.nptpls .pth{width:90px;height:60px}.nptpls small{font-size:11.5px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nptpls .x{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:6px;display:none;align-items:center;justify-content:center;color:var(--muted);background:var(--paper)}
+.nptpls button:hover .x{display:flex}.nptpls .x .i{width:12px;height:12px}
+@media (max-width:900px){ .planbtn .pl{display:none} .planbtn{max-width:130px} }
 /* ---------- Menu bar, icons, settings center ---------- */
 .i{width:18px;height:18px;flex:none;display:block}
 .hb{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:34px;height:34px;padding:0 8px;border-radius:9px}
@@ -532,6 +571,11 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
         <button role="menuitem" id="projBtn" data-ico="folder">Projets et collections…</button>
         <button role="menuitem" id="brandBtn" data-ico="tag">Marque et propositions…</button>
         <hr>
+        <button role="menuitem" id="mNewPlan" data-ico="plus">Nouveau plan…</button>
+        <button role="menuitem" id="mPlans" data-ico="layersIco">Plans du projet…</button>
+        <button role="menuitem" id="mDupPlan" data-ico="duplicate">Décliner ce plan</button>
+        <button role="menuitem" id="mTpl" data-ico="bookmark">Enregistrer comme modèle…</button>
+        <hr>
         <button role="menuitem" id="mOpenFile" data-ico="open">Ouvrir un fichier…</button>
         <button role="menuitem" id="mSaveFile" data-ico="save">Enregistrer le projet dans un fichier</button>
         <hr>
@@ -546,7 +590,8 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
         <hr><div class="mh">Outils</div>
         <div class="mtools" id="mTools"></div>
         <hr>
-        <button role="menuitem" id="mImport" data-ico="image">Importer une image…</button>
+        <button role="menuitem" id="mImport" data-ico="image">Vectoriser une image…</button>
+        <button role="menuitem" id="mPlace" data-ico="place">Placer une image ou un SVG…</button>
         <button role="menuitem" id="mClaude" data-ico="chat">Travailler avec Claude…</button>
         <hr>
         <button role="menuitemcheckbox" id="mGrid" data-ico="grid" aria-checked="false">Grille</button>
@@ -555,6 +600,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
       </div></div>
     <div class="mm"><button class="mmb" role="menuitem" aria-haspopup="menu" aria-expanded="false">Animation</button>
       <div class="mmenu" role="menu" aria-label="Animation">
+        <button role="menuitem" id="mNewAnim" data-ico="plus">Nouveau plan d'animation…</button>
         <button role="menuitem" id="motionBtn" data-ico="film">Animer le plan…</button>
         <button role="menuitem" id="mRecipes" data-ico="wand">Recettes en un clic…</button>
         <button role="menuitem" id="mSound" data-ico="note">Bande son…</button>
@@ -579,6 +625,7 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   </nav>
   <div class="spacer"></div>
   <span id="projName" class="projname"></span>
+  <button id="planBtn" class="planbtn" aria-haspopup="dialog" aria-expanded="false" hidden><span class="pl">Plan</span><span id="planName"></span><span data-ico="caret"></span></button>
   <div id="status" role="status"><i></i><span>Chargement…</span></div>
   <div class="group" id="hdrGroup">
     <span class="split"><button id="undo" class="hb" title="Annuler (Ctrl+Z) · appui long ou clic droit : historique du projet" aria-label="Annuler" data-ico="undo"></button><button id="histBtn" class="hb" title="Historique du projet : décocher / recocher des modifications" aria-label="Historique du projet" aria-haspopup="dialog" data-ico="caret"></button></span>
@@ -752,7 +799,9 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
     <button type="button" role="radio" data-start="image"><b>Une image ou une photo</b><span>Dessin, signature, texture : vectorisé</span></button>
     <button type="button" role="radio" data-start="proposal"><b>Proposition de logo</b><span>Créée à partir de vos mots-clés et lettres clés</span></button>
     <button type="button" role="radio" data-start="example"><b>Le logo d'exemple</b><span>Un symbole simple et votre nom</span></button>
+    <button type="button" role="radio" data-start="template" id="stTplBtn" hidden><b>Un de mes modèles</b><span>Un plan enregistré comme modèle</span></button>
   </div>
+  <div class="nptpls" id="stTpls" hidden></div>
   <div class="stshapes" id="stShapes" hidden></div>
   <div class="stprops" id="stProps" hidden></div>
   <p class="muted" id="stMsg" role="alert"></p>
@@ -858,6 +907,25 @@ kbd{font:600 11.5px ui-monospace,Menlo,monospace;background:#fff;border:1px soli
   </section>
   <section class="cdsec" id="cdMcpSec"></section>
 </dialog>
+<div id="planPop" class="planpop" hidden role="dialog" aria-label="Plans du projet"></div>
+<input type="file" id="placeIn" accept="image/png,image/jpeg,image/webp,image/svg+xml,.svg,.png,.jpg,.jpeg,.webp" multiple hidden>
+<dialog id="askDlg" class="askdlg" aria-labelledby="askTitle">
+  <h2 id="askTitle"></h2><p id="askText" class="muted"></p>
+  <label class="askf"><span id="askLabel"></span><input id="askIn" type="text" maxlength="80" autocomplete="off"><select id="askSel"></select></label>
+  <div class="row" style="justify-content:flex-end"><button id="askNo">Annuler</button><button id="askYes" class="primary"></button></div>
+</dialog>
+<dialog id="newPlanDlg" class="npdlg" aria-labelledby="npTitle">
+  <h2 id="npTitle">Nouveau plan</h2>
+  <p class="muted">Un plan est un document de travail du projet : le logo, une déclinaison, une animation…</p>
+  <div class="seg" role="group" aria-label="Type de plan"><button type="button" data-kind="logo" aria-pressed="true"><span data-ico="tag"></span>Plan de logo</button><button type="button" data-kind="motion" aria-pressed="false"><span data-ico="film"></span>Plan d'animation</button></div>
+  <div id="npFmtBox"><h3>Format</h3><div class="npfmts" id="npFormats"></div>
+    <div class="row" id="npCustom" hidden><label>Largeur <input id="npW" type="number" min="16" max="8000" value="1600"></label><label>Hauteur <input id="npH" type="number" min="16" max="8000" value="900"></label><span class="muted">en pixels</span></div></div>
+  <h3>Contenu</h3>
+  <div class="npfrom"><label><input type="radio" name="npfrom" data-from value="copy" checked> Le dessin du plan ouvert</label><label><input type="radio" name="npfrom" data-from value="blank"> Vide</label><label><input type="radio" name="npfrom" data-from value="template"> Un de mes modèles</label></div>
+  <div class="nptpls" id="npTpls" hidden></div>
+  <label class="askf"><span>Nom du plan</span><input id="npName" type="text" maxlength="80" autocomplete="off"></label>
+  <div class="row" style="justify-content:flex-end"><button id="npCancel">Annuler</button><button id="npGo" class="primary">Créer le plan</button></div>
+</dialog>
 <dialog id="setDlg" class="setdlg" aria-labelledby="setTitle">
   <div class="sethead"><h2 id="setTitle">Paramètres et aide</h2>
     <label class="setq"><span data-ico="search"></span><input type="search" id="setQ" placeholder="Rechercher : un outil, un raccourci, une question…" aria-label="Rechercher dans l'aide et les paramètres" autocomplete="off"></label>
@@ -934,6 +1002,9 @@ const ICO={
   diamond:'<path d="M12 4.5l7.5 7.5-7.5 7.5L4.5 12z"/>',
   plus:'<path d="M12 5v14M5 12h14"/>', trash:'<path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13"/>',
   gradient:'<circle cx="12" cy="12" r="7"/><path d="M12 5a7 7 0 000 14z" fill="currentColor" stroke="none"/>',
+  layersIco:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  bookmark:'<path d="M6 3h12v18l-6-4.5L6 21z"/>',
+  place:'<rect x="3" y="5" width="13" height="11" rx="1.5"/><circle cx="7.5" cy="9" r="1.3"/><path d="M16 13l-3.5-3.5L5 16"/><path d="M19 13v8M15 17h8"/>',
 };
 const ico=(n,cls)=>`<svg class="i${cls?" "+cls:""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[n]||""}</svg>`;
 /* icons and shortcut hints for every element marked data-ico / data-k (menus, header, dialogs) */
@@ -1054,7 +1125,7 @@ function validLayers(v){
     && (l.opacity===undefined || (Number.isFinite(l.opacity) && l.opacity>=0 && l.opacity<=1))
     && (l.blend===undefined || (typeof l.blend==="string" && /^[a-z-]{3,20}$/.test(l.blend)))
     && (l.name.length<=80)
-    && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && LIVE_FAMILY.test(l.live.family)
+    && (l.kind===undefined || l.kind===null || l.kind==="" || (l.kind==="image" && l.img && typeof l.img.ref==="string" && /^[0-9a-f]{16,40}$/.test(l.img.ref) && Number.isFinite(l.img.w) && Number.isFinite(l.img.h)) || (l.kind==="live" && l.live && typeof l.live.str==="string" && l.live.str.length<=120 && typeof l.live.family==="string" && LIVE_FAMILY.test(l.live.family)
          && (l.live.lang===undefined || l.live.lang==="" || (typeof l.live.lang==="string" && /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}$/.test(l.live.lang)))
          && (l.live.dir===undefined || ["auto","ltr","rtl"].includes(l.live.dir)) && (l.live.weight===undefined || (Number.isInteger(l.live.weight) && l.live.weight>=100 && l.live.weight<=900))
          && Number.isFinite(l.live.w0) && Number.isFinite(l.live.h0) && Number.isFinite(l.live.bx) && Number.isFinite(l.live.by) && l.subs.length===1 && l.subs[0].length===4))
@@ -1263,6 +1334,7 @@ function renderArt(){
 function renderOverlay(){
   const k=view.k, L=layerById(sel.layer);
   let h="";
+  if(planFrame) h+=`<rect x="0" y="0" width="${planFrame.w}" height="${planFrame.h}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" stroke-dasharray="${6/k} ${4/k}" pointer-events="none"/><text x="0" y="${-8/k}" font-size="${11/k}" fill="${C.brass}" font-family="Inter,system-ui,sans-serif" pointer-events="none">Cadre de l'animation · ${planFrame.w} × ${planFrame.h}</text>`;
   for(const id of selLayers()){ const M=layerById(id); if(M && M!==L && M.visible) h += `<path d="${layerD(M)}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" pointer-events="none"/>`; }
   if(L && L.visible){
     h += `<path d="${layerD(L)}" fill="none" stroke="${C.brass}" stroke-width="${1.2/k}" pointer-events="none"/>`;
@@ -1539,7 +1611,8 @@ function deleteNode(){
 /* ---------- View ---------- */
 function screenToWorld(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left-view.tx)/view.k, y:(e.clientY-r.top-view.ty)/view.k}; }
 function fit(){
-  const r=cv.getBoundingClientRect(); const vis=layers.filter(l=>l.visible); const b=vis.length?bounds(vis):{x0:0,y0:0,x1:256,y1:256};
+  const r=cv.getBoundingClientRect(); const vis=layers.filter(l=>l.visible); let b=vis.length?bounds(vis):{x0:0,y0:0,x1:256,y1:256};
+  if(planFrame) b={x0:Math.min(0,vis.length?b.x0:0), y0:Math.min(0,vis.length?b.y0:0), x1:Math.max(planFrame.w,vis.length?b.x1:0), y1:Math.max(planFrame.h,vis.length?b.y1:0)};
   const pad=40, k=Math.min((r.width-2*pad)/(b.x1-b.x0||1),(r.height-2*pad)/(b.y1-b.y0||1));
   view.k=Math.max(0.05,k); _baseK=1; view.tx=r.width/2-(b.x0+b.x1)/2*view.k; view.ty=r.height/2-(b.y0+b.y1)/2*view.k; applyView();
 }
@@ -2246,6 +2319,11 @@ function layerSVG(L, opts){
   return r;
 }
 function layerSVG0(L, opts){
+  if(L.kind==="image" && L.img){   // a placed image: drawn on the parallelogram of its first three corners
+    const c=L.subs[0]||[], attrs=opts.attrs||""; if(c.length<3) return {defs:"",body:""};
+    const p0=c[0], p1=c[1], p3=c[3]||c[2], src=IMG.get(L.img.ref);
+    const m=`matrix(${r2(p1.x-p0.x)} ${r2(p1.y-p0.y)} ${r2(p3.x-p0.x)} ${r2(p3.y-p0.y)} ${r2(p0.x)} ${r2(p0.y)})`;
+    return {defs:"", body:(src?`<image href="${src}" x="0" y="0" width="1" height="1" preserveAspectRatio="none" transform="${m}"/>`:"")+`<path ${attrs} d="${pathD(L.subs)}" fill="${src?"rgba(0,0,0,0)":"#E3E3E0"}"/>`}; }
   if(L.kind==="live" && L.live){ const p=paintOf(L);
     if(typeof p==="string") return liveSVG(L,opts,p,"");
     if(p.t==="m4") return liveSVG(L,opts,mixHex(p.p.map(q=>q.c)),"");
@@ -4589,6 +4667,8 @@ function openStart(){
   prop.round=0; prop.pick=0; prop.docs=[]; $("#stProps").innerHTML="";
   startChoice=canKeep?"keep":"word";
   $("#stKeep").hidden=!canKeep;
+  stTpl=null; templates().then(list=>{ stTplList=list; $("#stTplBtn").hidden=!list.length;
+    $("#stTpls").innerHTML=list.map(t=>`<button type="button" data-stpl="${esc(t.id)}" title="${esc(t.name)}"><span class="pth">${thumbImg(t.thumb)||""}</span><small>${esc(t.name)}</small></button>`).join(""); renderStart(); });
   $("#stShapes").innerHTML=Object.keys(START_SHAPES).map(k=>`<button type="button" data-shape="${k}" title="${START_SHAPES[k][0]}" aria-label="${START_SHAPES[k][0]}">${shapeThumb(k)}</button>`).join("");
   renderStart(); $("#stMsg").textContent=""; d.showModal(); $("#stName").focus();
 }
@@ -4596,13 +4676,16 @@ function renderStart(){
   document.querySelectorAll("#startDlg [data-start]").forEach(b=>{ const on=b.dataset.start===startChoice; b.classList.toggle("on",on); b.setAttribute("aria-checked",String(on)); });
   document.querySelectorAll("#stShapes [data-shape]").forEach(b=>b.classList.toggle("on",b.dataset.shape===startShape));
   $("#stShapes").hidden=startChoice!=="shape";
+  $("#stTpls").hidden=startChoice!=="template"; document.querySelectorAll("#stTpls [data-stpl]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.stpl===stTpl)));
   if(startChoice==="proposal"){ if(!prop.docs.length) renderProposals(); else $("#stProps").hidden=false; } else $("#stProps").hidden=true;
   $("#stGo").textContent=startChoice==="image"?"Continuer : choisir l'image":"Commencer";
 }
 $("#startDlg").addEventListener("click",e=>{
   const c=e.target.closest("[data-start]"); if(c){ startChoice=c.dataset.start; renderStart(); return; }
   const s=e.target.closest("[data-shape]"); if(s){ startShape=s.dataset.shape; renderStart(); }
+  const t=e.target.closest("[data-stpl]"); if(t){ stTpl=t.dataset.stpl; renderStart(); }
 });
+let stTpl=null, stTplList=[];
 async function applyStart(choice, info, shape){
   brand={name:info.name, tagline:info.tagline, keywords:info.keywords, letters:info.letters||""};
   const b0=snapshot(), h0=hist.length;
@@ -4613,8 +4696,9 @@ async function applyStart(choice, info, shape){
       if(c.missing){ const ph=layers.filter(l=>l.id==="motif-provisoire"), b=bounds(ph.length?ph:layers.filter(l=>l.group==="mark").concat(layers).slice(0,Math.max(1,layers.length))); notes.push({id:"n"+Date.now().toString(36), n:notes.reduce((m,x)=>Math.max(m,x.n),0)+1, x:r2((b.x0+b.x1)/2), y:r2((b.y0+b.y1)/2), audio:null, at:new Date().toISOString(),
         text:plan.premium?`Concept « ${plan.title} » : dessine le motif « ${plan.unknown} » à la place du cercle provisoire, en aplat d'une seule couleur (${plan.accent}), simple et lisible à 16 px, sans effet (règles premium : DESIGN-RULES.md). Mots-clés : ${brand.keywords.join(", ")}.`
           :`Concept « ${plan.title} » : dessine ${plan.unknown?"le motif « "+plan.unknown+" »":"le symbole"} en style ${STYLE_LABEL(plan.style)} à la place du cercle provisoire. Mots-clés : ${brand.keywords.join(", ")}.`}); scheduleSave("notes"); } }
+    if(choice==="template"){ const t=stTplList.find(x=>x.id===stTpl)||stTplList[0]; if(t&&t.doc){ layers=clone(t.doc.layers||[]); pals=clone(t.doc.pals||pals); groups=clone(t.doc.groups||[]); curPal=t.doc.curPal||pals[0].id; planFrame=validFrame(t.doc.frame)?clone(t.doc.frame):null; loadImages(layers); } }
     if(choice==="shape") layers.push({visible:true,locked:false,id:"forme-depart",name:START_SHAPES[shape][0],group:"mark",fill:EX.ink,subs:START_SHAPES[shape][1]()});
-    ensureZones(); wordText=choice==="example"?GLYPHS.word:brand.name;   // the example is the workshop's own logo, kept as designed
+    ensureZones(); wordText=choice==="example"?GLYPHS.word:choice==="template"?(wordText||brand.name):brand.name;   // the example is the workshop's own logo, kept as designed
     if(choice==="word"||choice==="shape"){
       await loadFonts().catch(()=>null); const f=fontById("instrument");
       if(f) await setText({kind:"word", layers:wordLayers(), x0:choice==="word"?28:undefined}, brand.name, f);
@@ -4622,7 +4706,7 @@ async function applyStart(choice, info, shape){
     }
   }
   hist.length=Math.min(hist.length,h0); redoIds.length=0;
-  record(b0, "Départ : "+({word:"le nom seul",shape:"forme et nom",image:"image",proposal:"concept de logo",blank:"page vierge",example:"logo d'exemple"}[choice]||choice));
+  record(b0, "Départ : "+({word:"le nom seul",shape:"forme et nom",image:"image",proposal:"concept de logo",blank:"page vierge",example:"logo d'exemple",template:"modèle"}[choice]||choice));
   syncFills(); fixSel(); renderAll(); scheduleSave("shape"); scheduleSave("palette"); fit();
 }
 $("#stGo").onclick=async()=>{
@@ -4685,8 +4769,8 @@ function fillPatternSources(){
    (Ctrl+C / Ctrl+V, or "Calques…" on a project card), with their exact paints. */
 const PST={db:null, ls:false};
 const LSP="atelier-logo-store";
-function idbOpen(){ return new Promise((ok,ko)=>{ try{ const r=indexedDB.open("atelier-logo",1);
-  r.onupgradeneeded=()=>{ const d=r.result; if(!d.objectStoreNames.contains("projects")) d.createObjectStore("projects",{keyPath:"id"}); if(!d.objectStoreNames.contains("meta")) d.createObjectStore("meta"); };
+function idbOpen(){ return new Promise((ok,ko)=>{ try{ const r=indexedDB.open("atelier-logo",2);
+  r.onupgradeneeded=()=>{ const d=r.result; if(!d.objectStoreNames.contains("projects")) d.createObjectStore("projects",{keyPath:"id"}); if(!d.objectStoreNames.contains("meta")) d.createObjectStore("meta"); if(!d.objectStoreNames.contains("assets")) d.createObjectStore("assets"); };
   r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error); r.onblocked=()=>ko(new Error("blocked")); }catch(e){ ko(e); } }); }
 async function pstore(){ if(PST.db||PST.ls) return; try{ PST.db=await idbOpen(); }catch(_){ PST.ls=true; } }
 function lsAll(){ try{ return JSON.parse(localStorage.getItem(LSP)||"null")||{projects:{},meta:{}}; }catch(_){ return {projects:{},meta:{}}; } }
@@ -4700,11 +4784,13 @@ const P={
   async del(id){ await pstore(); if(PST.db) return idb("projects","readwrite",s=>s.delete(id)); const v=lsAll(); delete v.projects[id]; lsPut(v); },
   async meta(k){ await pstore(); return PST.db ? await idb("meta","readonly",s=>s.get(k)) : lsAll().meta[k]; },
   async setMeta(k,val){ await pstore(); if(PST.db) return idb("meta","readwrite",s=>s.put(val,k)); const v=lsAll(); v.meta[k]=val; lsPut(v); },
+  async asset(ref){ await pstore(); return PST.db ? await idb("assets","readonly",s=>s.get(ref)) : (lsAll().assets||{})[ref]; },
+  async putAsset(ref,data){ await pstore(); if(PST.db) return idb("assets","readwrite",s=>s.put(data,ref)); const v=lsAll(); v.assets=v.assets||{}; v.assets[ref]=data; if(!lsPut(v)) throw new Error("quota"); },
 };
 let curProject=null, collections=[], projFilter="all", projQuery="", projReady=false;
 const newPid=()=>"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const emptyBrand=()=>({name:"",tagline:"",keywords:[],letters:""});
-function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist), guides:clone(guides), motion:motionNow()}; }
+function docNow(){ return {layers:clone(layers), notes:clone(notes), pals:clone(pals), groups:clone(groups), curPal, wordText, brand:clone(brand), hist:clone(hist), guides:clone(guides), motion:motionNow(), ...(planFrame?{frame:clone(planFrame)}:{})}; }
 function validDoc(d){ return d && validLayers(d.layers) && (d.notes===undefined||validNotes(d.notes)) && (d.pals===undefined||validPals(d.pals)) && (d.groups===undefined||validGroups(d.groups)); }
 function thumbSVG(ls){
   const vis=(ls||layers).filter(l=>l.visible!==false); if(!vis.length) return "";
@@ -4716,10 +4802,11 @@ function loadDoc(d){
   layers=validLayers(d.layers)?clone(d.layers):[]; notes=validNotes(d.notes)?clone(d.notes):[];
   pals=validPals(d.pals)?clone(d.pals):[{id:"main",name:"Principale",colors:[]}]; groups=validGroups(d.groups)?clone(d.groups):[];
   curPal=typeof d.curPal==="string"?d.curPal:"main"; wordText=typeof d.wordText==="string"?d.wordText:""; brand=validBrand(d.brand)?clone(d.brand):emptyBrand();
+  planFrame=validFrame(d.frame)?{w:Math.round(d.frame.w),h:Math.round(d.frame.h)}:null;
   hist=validHist(d.hist)?clone(d.hist):[]; motionLoad(d.motion); redoIds=[]; guides=validGuides(d.guides)?clone(d.guides):[]; renderGuides(); sel={layer:null,node:null}; selNote=null; previewPal=null; sugg=[];
   ensureZones(); fixSel(); setClaudeUndo(null);
   const ed=$("#noteEditor"); if(ed) ed.dataset.for="";
-  renderAll(); renderPins(); renderNotes(); renderNoteEditor(); updateButtons(); fit();
+  renderAll(); renderPins(); renderNotes(); renderNoteEditor(); updateButtons(); fit(); loadImages(layers);
   scheduleSave("shape"); scheduleSave("notes"); scheduleSave("palette");
 }
 let projT=null, projSaving=null;
@@ -4727,11 +4814,12 @@ function projectTouch(){ if(!projReady||!curProject||glyphMode) return; clearTim
 async function projectFlush(){
   clearTimeout(projT); projT=null; if(!curProject) return;
   if(/^Sans titre/.test(curProject.name) && brand.name) curProject.name=brand.name;
-  const p=Object.assign({}, curProject, {updated:Date.now(), doc:docNow(), thumb:thumbSVG()});
-  projSaving=P.put(p).then(()=>{ curProject=p; renderProjName(); }).catch(()=>setStatus("Espace de stockage de l'appareil plein : exportez des projets dans un fichier", true));
+  ensurePlans(curProject); const th=thumbSVG(), e=curPlan(); if(e){ e.thumb=th; e.updated=Date.now(); e.kind=planFrame?"motion":"logo"; }
+  const p=Object.assign({}, curProject, {updated:Date.now(), doc:docNow(), thumb:th});
+  projSaving=P.put(p).then(()=>{ curProject=Object.assign({},p); delete curProject.doc; delete curProject.thumb; renderProjName(); }).catch(()=>setStatus("Espace de stockage de l'appareil plein : exportez des projets dans un fichier", true));
   return projSaving;
 }
-function renderProjName(){ const el=$("#projName"); if(!el) return; el.textContent=curProject?curProject.name:""; el.title=curProject?"Projet ouvert"+(collName(curProject.collection)?" · collection "+collName(curProject.collection):""):""; }
+function renderProjName(){ renderPlanBtn(); const el=$("#projName"); if(!el) return; el.textContent=curProject?curProject.name:""; el.title=curProject?"Projet ouvert"+(collName(curProject.collection)?" · collection "+collName(curProject.collection):""):""; }
 const collName=id=>(collections.find(c=>c.id===id)||{}).name||"";
 async function initProjects(){
   try{
@@ -4741,20 +4829,20 @@ async function initProjects(){
     // the browser cache (or the db) holds the live drawing; if both are empty, the project's own copy is the drawing
     else if(!localLoad() && !lastAt.shape && validDoc(cur.doc)) loadDoc(cur.doc);
     if(cur.doc&&validHist(cur.doc.hist)&&!hist.length) hist=cur.doc.hist;
-    curProject=Object.assign({}, cur); delete curProject.doc; delete curProject.thumb;
+    curProject=Object.assign({}, cur); delete curProject.doc; delete curProject.thumb; ensurePlans(curProject);
     projReady=true; renderHistory(); await projectFlush(); renderProjName();
   }catch(_){ setStatus("Projets indisponibles dans ce navigateur (le dessin reste enregistré)", true); }
 }
 async function openProject(id){
   if(curProject&&curProject.id===id) return;
   await projectFlush(); const p=await P.get(id); if(!p||!validDoc(p.doc)){ toast("Projet illisible."); return; }
-  curProject=Object.assign({}, p); delete curProject.doc; delete curProject.thumb;
+  curProject=Object.assign({}, p); delete curProject.doc; delete curProject.thumb; ensurePlans(curProject);
   await P.setMeta("current", id); loadDoc(p.doc); renderProjName(); toast("Projet « "+p.name+" » ouvert.");
 }
 async function newProject(collection){
   await projectFlush();
   const p={id:newPid(), name:"Sans titre", collection:collection||"", created:Date.now(), updated:Date.now(), doc:{layers:[],notes:[],pals:[{id:"main",name:"Principale",colors:[EX.ink]}],groups:[],curPal:"main",wordText:"",brand:emptyBrand()}};
-  await P.put(p); curProject=Object.assign({},p); delete curProject.doc; await P.setMeta("current",p.id);
+  ensurePlans(p); await P.put(p); curProject=Object.assign({},p); delete curProject.doc; await P.setMeta("current",p.id);
   loadDoc(p.doc); renderProjName(); $("#projDlg").close(); openStart();
 }
 async function duplicateProject(id){
@@ -4820,7 +4908,9 @@ async function saveFile(name, text){
 async function exportProjects(ids, label){
   await projectFlush(); const ps=(await P.all()).filter(p=>ids.includes(p.id));
   const cols=collections.filter(c=>ps.some(p=>p.collection===c.id)), used=new Set(ps.flatMap(p=>((p.doc&&p.doc.layers)||[]).map(l=>l.font)));
-  await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps, fonts:customFonts.filter(c=>used.has(c.id))}));
+  const refs=new Set(); ps.forEach(p=>[p.doc,...(p.plans||[]).map(e=>e.doc)].forEach(d=>((d&&d.layers)||[]).forEach(l=>{ if(l.kind==="image"&&l.img) refs.add(l.img.ref); })));
+  const assets={}; for(const r of refs){ const v=IMG.get(r)||await P.asset(r); if(typeof v==="string") assets[r]=v; }
+  await saveFile(slug(label,"projets"), JSON.stringify({format:"atelier-logo", v:1, exported:new Date().toISOString(), collections:cols, projects:ps, fonts:customFonts.filter(c=>used.has(c.id)), assets}));
 }
 /* imported projects: the thumbnail is redrawn from the validated drawing, never taken from the file */
 function importThumb(doc){ try{ const pal=Array.isArray(doc.pals)&&doc.pals.length?doc.pals:[{id:"main",name:"Principale",colors:[]}];
@@ -4839,7 +4929,12 @@ async function importFile(file){
   for(const p of v.projects){ if(!p||typeof p.name!=="string"||!validDoc(p.doc)) continue;
     if(p.doc.hist!==undefined && !validHist(p.doc.hist)) delete p.doc.hist; if(p.doc.motion!==undefined && !validMotion(p.doc.motion)) delete p.doc.motion;   // an unsafe history is dropped, the drawing is kept
     const q={id:existing.has(p.id)?newPid():String(p.id||newPid()).slice(0,40), name:p.name.slice(0,80)+(existing.has(p.id)?" (importé)":""), collection:cmap[p.collection]||"", created:p.created||Date.now(), updated:Date.now(), doc:p.doc, thumb:importThumb(p.doc)};
+    if(Array.isArray(p.plans)){ const pl=p.plans.filter(validPlanEntry).slice(0,60).map(e=>({id:e.id, name:e.name, kind:e.kind, updated:Date.now(), thumb:e.doc?importThumb(e.doc):"", doc:e.doc||null}));
+      pl.forEach(e=>{ if(e.doc&&e.doc.hist!==undefined&&!validHist(e.doc.hist)) delete e.doc.hist; if(e.doc&&e.doc.motion!==undefined&&!validMotion(e.doc.motion)) delete e.doc.motion; });
+      if(pl.length&&pl.some(e=>e.id===p.plan)){ q.plans=pl; q.plan=p.plan; } }
+    ensurePlans(q);
     if(!/^[\w-]+$/.test(q.id)) q.id=newPid(); await P.put(q); n++; }
+  if(v.assets&&typeof v.assets==="object") for(const [r,d] of Object.entries(v.assets).slice(0,500)) if(/^[0-9a-f]{16,40}$/.test(r)&&typeof d==="string"&&d.length<15e6&&ASSET_RE.test(d)) await P.putAsset(r,d);
   renderProjects(); toast(n?n+" projet"+(n>1?"s importés":" importé")+".":"Aucun projet lisible dans ce fichier.");
 }
 /* ---- dialog ---- */
@@ -4857,7 +4952,7 @@ async function renderProjects(){
   $("#projGrid").innerHTML=list.length?list.map(p=>{ const cur=curProject&&p.id===curProject.id;
     return `<article class="pcard${cur?" cur":""}" data-pid="${esc(p.id)}">
       <button class="pthumb" data-open="${esc(p.id)}" title="${cur?"Projet ouvert":"Ouvrir"}">${thumbImg(p.thumb)||'<span class="muted">Page vierge</span>'}</button>
-      <input class="pname" data-pname="${esc(p.id)}" value="${esc(p.name)}" maxlength="80" aria-label="Nom du projet">
+      <input class="pname" data-pname="${esc(p.id)}" value="${esc(p.name)}" maxlength="80" aria-label="Nom du projet">${Array.isArray(p.plans)&&p.plans.length>1?`<span class="pplans">${p.plans.length} plans</span>`:""}
       <div class="pmeta">${cur?'<b>Ouvert</b> · ':""}${fmt(p.updated)} · ${(p.doc&&p.doc.layers||[]).length} calques</div>
       <select data-pcoll="${esc(p.id)}" aria-label="Collection du projet"><option value="">Sans collection</option>${collections.map(c=>`<option value="${esc(c.id)}" ${p.collection===c.id?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
       <div class="pact">${cur?"":`<button data-open="${esc(p.id)}" class="primary">Ouvrir</button><button data-takelayers="${esc(p.id)}" title="Copier des calques de ce projet dans le projet ouvert">Calques…</button>`}<button data-dup="${esc(p.id)}">Dupliquer</button><button data-file="${esc(p.id)}" title="Enregistrer ce projet dans un fichier">Fichier</button><button data-del="${esc(p.id)}" class="danger" aria-label="Supprimer ${esc(p.name)}">Supprimer</button></div>
@@ -4909,6 +5004,237 @@ $("#projBtn").onclick=openProjects;
 $("#copyBtn").onclick=copyLayers; $("#pasteBtn").onclick=pasteLayers;
 window.addEventListener("pagehide", ()=>{ if(projT) projectFlush(); });
 window.__projects={P, get current(){ return curProject; }, flush:projectFlush, open:openProject};
+window.__plans={ get list(){ return curProject?curProject.plans.map(e=>({id:e.id,name:e.name,kind:e.kind})):[]; }, get current(){ return curProject&&curProject.plan; }, get frame(){ return planFrame; },
+  create:o=>newPlan(o), switchTo:id=>switchPlan(id), templates, place:files=>placeFiles(files) };
+
+/* ---------- Plans (lot B) ----------
+   A plan is the working document (like a file elsewhere); a project (the brand: its name) groups several plans —
+   the logo, variants, animation plans —; a collection groups projects. Storage: a project record keeps its plans in
+   `plans` [{id, name, kind:"logo"|"motion", updated, thumb, doc|null}] and the id of the open one in `plan`; the
+   open plan's document stays in `doc`, as before, so saving, exports, thumbnails and layer copies work unchanged.
+   Older projects get one plan, « Logo ». Templates (meta "templates") are plans saved for reuse. */
+const PLAN_FORMATS=[
+  ["16:9","Paysage",1920,1080],["9:16","Vertical (stories)",1080,1920],["1:1","Carré",1080,1080],["4:5","Portrait",1080,1350],
+  ["4:3","Classique",1440,1080],["3:1","Bannière",1500,500],["4:1","Bannière LinkedIn",1584,396],["728:90","Bandeau web",728,90],
+];
+let planFrame=null;   // {w, h} of an animation plan: its frame, at the origin of the drawing
+const newPlanId=()=>"pl"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const validFrame=f=>!!f&&typeof f==="object"&&Number.isFinite(f.w)&&Number.isFinite(f.h)&&f.w>=16&&f.h>=16&&f.w<=8000&&f.h<=8000;
+function validPlanEntry(e){ return !!e&&typeof e==="object"&&typeof e.id==="string"&&/^[\w-]{1,40}$/.test(e.id)&&typeof e.name==="string"&&e.name.length<=80
+  &&(e.kind==="logo"||e.kind==="motion")&&(e.doc===null||e.doc===undefined||validDoc(e.doc)); }
+/* every project has plans; an older one gets its single plan « Logo » */
+function ensurePlans(p){
+  if(!p) return p;
+  if(!Array.isArray(p.plans)||!p.plans.length||!p.plans.every(validPlanEntry)){ const id=newPlanId(); p.plans=[{id, name:"Logo", kind:p.doc&&validFrame(p.doc.frame)?"motion":"logo", updated:p.updated||Date.now(), thumb:p.thumb||"", doc:null}]; p.plan=id; }
+  if(!p.plans.some(e=>e.id===p.plan)) p.plan=p.plans[0].id;
+  p.plans.forEach(e=>{ if(e.id===p.plan) e.doc=null; });
+  return p;
+}
+const curPlan=()=>curProject&&curProject.plans?curProject.plans.find(e=>e.id===curProject.plan):null;
+function planLabel(e){ if(!e) return ""; if(e.kind!=="motion") return "Logo"; const f=e.id===(curProject&&curProject.plan)?planFrame:(e.doc&&e.doc.frame); return f?`Animation · ${f.w} × ${f.h}`:"Animation"; }
+function renderPlanBtn(){ const e=curPlan(), b=$("#planBtn"); if(!b) return; b.hidden=!e; if(!e) return; $("#planName").textContent=e.name;
+  b.title="Plan ouvert : "+e.name+" ("+planLabel(e)+") · "+curProject.plans.length+" plan"+(curProject.plans.length>1?"s":"")+" dans ce projet"; }
+/* put the open plan's drawing into its entry (before switching away) */
+function stashPlan(){ const e=curPlan(); if(!e) return; e.doc=docNow(); e.thumb=thumbSVG(); e.updated=Date.now(); }
+async function switchPlan(id){
+  if(!curProject||id===curProject.plan) return; const t=curProject.plans.find(e=>e.id===id); if(!t||!validDoc(t.doc)) return;
+  stashPlan(); const d=t.doc; t.doc=null; curProject.plan=id; loadDoc(d); await projectFlush(); renderPlanBtn(); renderPlanPop();
+  toast("Plan « "+t.name+" » ouvert.");
+}
+/* the layers of a drawing, scaled and moved (logo copied into an animation frame) */
+function moveLayersInto(ls, box){
+  const vis=ls.filter(l=>l.subs&&l.subs.length); if(!vis.length) return ls; const b=bounds(vis), w=b.x1-b.x0||1, h=b.y1-b.y0||1;
+  const s=Math.min(box.w/w, box.h/h), dx=box.x+(box.w-w*s)/2-b.x0*s, dy=box.y+(box.h-h*s)/2-b.y0*s, T=p=>p&&{x:r2(p.x*s+dx), y:r2(p.y*s+dy)};
+  return ls.map(L=>{ const M=clone(L); M.subs=M.subs.map(c=>c.map(n=>Object.assign(n,{x:r2(n.x*s+dx),y:r2(n.y*s+dy),i:T(n.i),o:T(n.o)})));
+    if(M.sw) M.sw=r2(M.sw*s); if(Number.isFinite(M.bl)) M.bl=r2(M.bl*s+dy); if(Array.isArray(M.gy)) M.gy=M.gy.map(v=>r2(v*s+dy)); return M; });
+}
+/* a new plan in the open project: blank, a copy of the open plan, or a template; animation plans have a frame */
+async function newPlan(o){
+  if(!curProject) return; await projectFlush(); stashPlan();
+  let d;
+  if(o.from==="template"&&o.tpl) d=clone(o.tpl.doc);
+  else if(o.from==="copy"){ d=docNow(); d.hist=[]; }
+  else d={layers:[], notes:[], pals:clone(pals), groups:[], curPal, wordText:"", brand:clone(brand), guides:[]};
+  d.brand=clone(brand); delete d.motion;
+  if(o.kind==="motion"){ const f={w:o.w, h:o.h}; if(o.from==="copy"||o.from==="template"){ const old=validFrame(d.frame)?null:true; if(old) d.layers=moveLayersInto(d.layers,{x:f.w*.2,y:f.h*.2,w:f.w*.6,h:f.h*.6}); } d.frame=f; d.guides=[]; }
+  else delete d.frame;
+  const e={id:newPlanId(), name:(o.name||"").trim().slice(0,80)||(o.kind==="motion"?"Animation":"Plan "+(curProject.plans.length+1)), kind:o.kind, updated:Date.now(), thumb:"", doc:null};
+  curProject.plans.push(e); curProject.plan=e.id; loadDoc(d); await projectFlush(); renderPlanBtn(); renderPlanPop();
+  toast("Plan « "+e.name+" » créé dans « "+curProject.name+" ».");
+  return e;
+}
+async function renamePlan(id){ const e=curProject.plans.find(x=>x.id===id); if(!e) return;
+  const v=await askBox({title:"Renommer le plan", label:"Nom du plan", value:e.name, yes:"Renommer"}); if(v===null||!v.trim()) return;
+  e.name=v.trim().slice(0,80); await projectFlush(); renderPlanBtn(); renderPlanPop(); }
+async function duplicatePlan(id){ const e=curProject.plans.find(x=>x.id===id); if(!e) return; if(id!==curProject.plan) await switchPlan(id);
+  const n=await newPlan({kind:e.kind, from:"copy", w:planFrame&&planFrame.w, h:planFrame&&planFrame.h, name:e.name+" (déclinaison)"}); if(n&&planFrame){ /* keep the same frame */ } }
+async function deletePlan(id){
+  if(curProject.plans.length<2){ toast("Un projet garde au moins un plan."); return; }
+  const e=curProject.plans.find(x=>x.id===id); if(!e) return;
+  if(!await confirmBox("Supprimer le plan « "+e.name+" » ?","Il est effacé de ce projet, sur cet appareil.","Supprimer")) return;
+  if(id===curProject.plan) await switchPlan(curProject.plans.find(x=>x.id!==id).id);
+  curProject.plans=curProject.plans.filter(x=>x.id!==id); await projectFlush(); renderPlanBtn(); renderPlanPop(); toast("Plan supprimé.");
+}
+/* move a plan to another project (or a new one) */
+async function movePlan(id){
+  if(curProject.plans.length<2){ toast("C'est le seul plan de ce projet : dupliquez-le d'abord, ou ouvrez un autre projet."); return; }
+  const all=(await P.all()).filter(p=>p.id!==curProject.id);
+  const v=await askBox({title:"Déplacer le plan", label:"Vers le projet", options:[["__new","Un nouveau projet"],...all.map(p=>[p.id,p.name])], yes:"Déplacer"}); if(v===null) return;
+  if(id===curProject.plan) await switchPlan(curProject.plans.find(x=>x.id!==id).id);
+  const e=curProject.plans.find(x=>x.id===id); curProject.plans=curProject.plans.filter(x=>x.id!==id); await projectFlush();
+  let tgt;
+  if(v==="__new"){ tgt={id:newPid(), name:e.name, collection:curProject.collection||"", created:Date.now(), updated:Date.now(), doc:e.doc, thumb:e.thumb, plans:[Object.assign({},e,{doc:null})], plan:e.id}; }
+  else { tgt=ensurePlans(await P.get(v)); tgt.plans.push(e); tgt.updated=Date.now(); }
+  await P.put(tgt); renderPlanBtn(); renderPlanPop(); toast("Plan « "+e.name+" » déplacé vers « "+tgt.name+" ».");
+}
+/* templates: a plan saved for reuse, offered when starting a project or a plan */
+async function templates(){ return (await P.meta("templates"))||[]; }
+async function saveTemplate(){
+  const e=curPlan(); const v=await askBox({title:"Enregistrer comme modèle", label:"Nom du modèle", value:(e?e.name:"Modèle")+" ("+(curProject?curProject.name:"")+")", yes:"Enregistrer",
+    text:"Le modèle reprend le dessin de ce plan, ses couleurs et ses effets. Il apparaît ensuite dans « Nouveau projet » et « Nouveau plan »."}); if(v===null||!v.trim()) return;
+  const d=docNow(); d.hist=[]; delete d.motion;
+  const list=await templates(); list.unshift({id:"t"+newPlanId(), name:v.trim().slice(0,60), kind:planFrame?"motion":"logo", created:Date.now(), thumb:thumbSVG(), doc:d});
+  await P.setMeta("templates", list.slice(0,60)); toast("Modèle « "+v.trim()+" » enregistré.");
+}
+async function deleteTemplate(id){ const list=(await templates()).filter(t=>t.id!==id); await P.setMeta("templates", list); }
+
+/* ---- small dialog: a text or a choice ---- */
+function askBox(o){ return new Promise(res=>{ const d=$("#askDlg"); $("#askTitle").textContent=o.title; $("#askText").textContent=o.text||""; $("#askText").hidden=!o.text;
+  $("#askLabel").textContent=o.label||""; const inp=$("#askIn"), sel=$("#askSel"); inp.hidden=!!o.options; sel.hidden=!o.options;
+  if(o.options){ sel.innerHTML=o.options.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join(""); } else inp.value=o.value||"";
+  $("#askYes").textContent=o.yes||"Valider"; let done=false; const fin=v=>{ if(done) return; done=true; d.close(); res(v); };
+  $("#askYes").onclick=()=>fin(o.options?sel.value:inp.value); $("#askNo").onclick=()=>fin(null); d.onclose=()=>fin(null);
+  inp.onkeydown=e=>{ e.stopPropagation(); if(e.key==="Enter"){ e.preventDefault(); fin(inp.value); } };
+  d.showModal(); (o.options?sel:inp).focus(); if(!o.options) inp.select(); }); }
+
+/* ---- the plans popover (header) ---- */
+async function renderPlanPop(){
+  const pop=$("#planPop"); if(!pop||pop.hidden||!curProject) return;
+  const rows=curProject.plans.map(e=>{ const on=e.id===curProject.plan, th=on?thumbSVG():e.thumb;
+    return `<li class="${on?"on":""}"><button class="prow" data-plan="${esc(e.id)}" title="${on?"Plan ouvert":"Ouvrir ce plan"}"><span class="pth">${thumbImg(th)||""}</span><span class="pn"><b>${esc(e.name)}</b><small>${esc(planLabel(e))}</small></span></button>
+      <span class="pacts"><button class="ib" data-pact="ren" data-id="${esc(e.id)}" title="Renommer" aria-label="Renommer ${esc(e.name)}">${ico("edit")}</button><button class="ib" data-pact="dup" data-id="${esc(e.id)}" title="Décliner (dupliquer)" aria-label="Décliner ${esc(e.name)}">${ico("duplicate")}</button><button class="ib" data-pact="move" data-id="${esc(e.id)}" title="Déplacer vers un autre projet" aria-label="Déplacer ${esc(e.name)}">${ico("folder")}</button><button class="ib" data-pact="del" data-id="${esc(e.id)}" title="Supprimer" aria-label="Supprimer ${esc(e.name)}">${ico("trash")}</button></span></li>`; }).join("");
+  pop.innerHTML=`<div class="pph"><b>Plans de « ${esc(curProject.name)} »</b><span class="muted">${curProject.plans.length} plan${curProject.plans.length>1?"s":""}</span></div><ul class="plist">${rows}</ul>
+    <div class="ppf"><button class="primary" data-pact="new">${ico("plus")}Nouveau plan…</button><button data-pact="tpl">${ico("save")}Enregistrer comme modèle…</button></div>
+    <label class="ppcoll">Collection du projet <select id="planColl"><option value="">Sans collection</option>${collections.map(c=>`<option value="${esc(c.id)}"${c.id===(curProject.collection||"")?" selected":""}>${esc(c.name)}</option>`).join("")}</select></label>`;
+}
+function openPlanPop(){ const pop=$("#planPop"), b=$("#planBtn").getBoundingClientRect(); pop.hidden=false; pop.style.top=(b.bottom+6)+"px"; pop.style.left=Math.max(8,Math.min(innerWidth-380,b.left))+"px";
+  $("#planBtn").setAttribute("aria-expanded","true"); projectFlush().then(renderPlanPop); renderPlanPop(); }
+function closePlanPop(){ $("#planPop").hidden=true; $("#planBtn").setAttribute("aria-expanded","false"); }
+
+/* ---- new plan dialog: logo or animation (with its format), blank / copy of the open plan / a template ---- */
+let npKind="logo", npFmt="16:9", npFrom="copy", npTpl=null;
+async function openNewPlan(kind){
+  npKind=kind||"logo"; npFrom="copy"; npTpl=null; const list=await templates();
+  $("#npFormats").innerHTML=PLAN_FORMATS.map(([k,n,w,h])=>{ const s=Math.min(46/w,30/h); return `<button type="button" data-fmt="${k}" aria-pressed="${k===npFmt}"><span class="fr"><i style="width:${Math.round(w*s)}px;height:${Math.round(h*s)}px"></i></span><b>${n}</b><small>${w} × ${h}</small></button>`; }).join("")
+    +`<button type="button" data-fmt="perso" aria-pressed="${npFmt==="perso"}"><span class="fr"><i style="width:30px;height:22px;border-style:dashed"></i></span><b>Personnalisé</b><small>largeur × hauteur</small></button>`;
+  $("#npTpls").innerHTML=list.length?list.map(t=>`<button type="button" class="tpl" data-tpl="${esc(t.id)}" title="${esc(t.name)}"><span class="pth">${thumbImg(t.thumb)||""}</span><small>${esc(t.name)}</small><span class="x" data-tdel="${esc(t.id)}" role="button" aria-label="Supprimer le modèle ${esc(t.name)}">${ico("close")}</span></button>`).join(""):`<p class="muted">Aucun modèle pour l'instant : Plan › Enregistrer comme modèle.</p>`;
+  $("#npName").value=""; renderNewPlan(); $("#newPlanDlg").showModal();
+}
+function renderNewPlan(){
+  document.querySelectorAll("#newPlanDlg [data-kind]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.kind===npKind)));
+  $("#npFmtBox").hidden=npKind!=="motion"; $("#npCustom").hidden=npKind!=="motion"||npFmt!=="perso";
+  document.querySelectorAll("#npFormats [data-fmt]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.fmt===npFmt)));
+  document.querySelectorAll("#newPlanDlg [data-from]").forEach(r=>{ r.checked=r.value===npFrom; });
+  $("#npTpls").hidden=npFrom!=="template"; document.querySelectorAll("#npTpls [data-tpl]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.tpl===npTpl)));
+  const f=PLAN_FORMATS.find(x=>x[0]===npFmt);
+  $("#npName").placeholder=npKind==="motion"?"Animation "+(f?f[0]:"personnalisée"):"Plan "+((curProject&&curProject.plans.length)+1);
+}
+async function createNewPlan(){
+  let w=1920, h=1080; if(npKind==="motion"){ if(npFmt==="perso"){ w=Math.round(+$("#npW").value); h=Math.round(+$("#npH").value); if(!validFrame({w,h})){ toast("Largeur et hauteur : de 16 à 8 000."); return; } } else { const f=PLAN_FORMATS.find(x=>x[0]===npFmt); w=f[2]; h=f[3]; } }
+  let tpl=null; if(npFrom==="template"){ tpl=(await templates()).find(t=>t.id===npTpl); if(!tpl){ toast("Choisissez un modèle."); return; } }
+  $("#newPlanDlg").close();
+  const f=PLAN_FORMATS.find(x=>x[0]===npFmt), name=$("#npName").value.trim()||(npKind==="motion"?"Animation "+(f?f[0]:w+"×"+h):"");
+  await newPlan({kind:npKind, from:npFrom, tpl, w, h, name});
+  if(npKind==="motion") openMotion();
+}
+
+/* ---- images and SVG placed in a plan (Motion step 7): secure import ----
+   Raster images are decoded and redrawn (no metadata, 2048 px at most), stored once on this device (IndexedDB
+   "assets", by content hash) and referenced by the layer: kind "image", img {ref, w, h}, its four corners as subs.
+   SVG files are never inserted as they are: their shapes are read, transformed and turned into ordinary layers. */
+const IMG=new Map();
+const ASSET_RE=/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/, REF_RE=/^[0-9a-f]{16,40}$/;
+async function loadImages(ls){
+  const refs=[...new Set((ls||layers).filter(l=>l.kind==="image"&&l.img).map(l=>l.img.ref))].filter(r=>!IMG.has(r)); if(!refs.length) return;
+  let got=0; for(const r of refs){ const v=await P.asset(r); if(typeof v==="string"&&ASSET_RE.test(v)){ IMG.set(r,v); got++; } }
+  if(got){ renderAll(); if(typeof MO!=="undefined"&&MO&&MO.open) moBuild(); }
+}
+async function rightsOk(kind){
+  try{ if(localStorage.getItem("atelier-logo-droits-images")==="1") return true; }catch(_){}
+  const ok=await confirmBox("Importer "+kind, "Je détiens les droits sur ces fichiers, ou leur licence m'autorise à les utiliser. Je n'importe pas d'œuvre, de marque ou de logo protégés sans l'autorisation de leurs ayants droit (conditions d'utilisation de l'atelier).", "J'atteste détenir les droits");
+  if(ok) try{ localStorage.setItem("atelier-logo-droits-images","1"); }catch(_){}
+  return ok;
+}
+const hex2=n=>n.toString(16).padStart(2,"0");
+async function sha(text){ const b=await crypto.subtle.digest("SHA-1", new TextEncoder().encode(text)); return Array.from(new Uint8Array(b)).slice(0,10).map(hex2).join(""); }
+/* where a new element goes: the animation frame, else the middle of the view */
+function placeBox(ar){
+  if(planFrame){ const w=planFrame.w*.5, h=w/ar; const hh=Math.min(h,planFrame.h*.6), ww=hh*ar; return {x:(planFrame.w-ww)/2, y:(planFrame.h-hh)/2, w:ww, h:hh}; }
+  const r=cv.getBoundingClientRect(), cx=(r.width/2-view.tx)/view.k, cy=(r.height/2-view.ty)/view.k, w=Math.min(320, r.width*.4/view.k), h=w/ar;
+  return {x:cx-w/2, y:cy-h/2, w, h};
+}
+async function placeRaster(file){
+  if(file.size>20*1048576) throw new Error("trop lourd");
+  let bmp; try{ bmp=await createImageBitmap(file); }catch(_){ throw new Error("illisible"); }
+  const sc=Math.min(1, 2048/Math.max(bmp.width,bmp.height)), w=Math.max(1,Math.round(bmp.width*sc)), h=Math.max(1,Math.round(bmp.height*sc));
+  const c=document.createElement("canvas"); c.width=w; c.height=h; const x=c.getContext("2d"); x.drawImage(bmp,0,0,w,h); bmp.close&&bmp.close();
+  let alpha=false; if(!/jpe?g/i.test(file.type)){ const d=x.getImageData(0,0,w,h).data; for(let i=3;i<d.length;i+=16) if(d[i]<250){ alpha=true; break; } }
+  const url=alpha?c.toDataURL("image/png"):c.toDataURL("image/jpeg",.88), ref=await sha(url);
+  await P.putAsset(ref,url); IMG.set(ref,url);
+  const b=placeBox(w/h), n=(x,y)=>({x:r2(x),y:r2(y),i:null,o:null});
+  return [{id:uniqLayerId("image"), name:file.name.replace(/\.[^.]+$/,"").slice(0,60)||"Image", group:"mark", kind:"image", img:{ref,w,h}, zone:0, visible:true, locked:false,
+    subs:[[n(b.x,b.y),n(b.x+b.w,b.y),n(b.x+b.w,b.y+b.h),n(b.x,b.y+b.h)]]}];
+}
+/* SVG → layers: only shapes are read (path, rect, circle, ellipse, line, polyline, polygon), with their transforms and colours */
+async function placeSVG(file){
+  if(file.size>5*1048576) throw new Error("trop lourd");
+  const doc=new DOMParser().parseFromString(await file.text(),"image/svg+xml"), root=doc.documentElement;
+  if(doc.querySelector("parsererror")||root.localName!=="svg") throw new Error("illisible");
+  const NS="http://www.w3.org/2000/svg", host=document.createElementNS(NS,"svg"); host.setAttribute("style","position:absolute;left:-99999px;top:0;width:10px;height:10px;opacity:0;pointer-events:none");
+  const SHAPES=new Set(["path","rect","circle","ellipse","line","polyline","polygon"]), KEEP=new Set(["d","x","y","width","height","rx","ry","cx","cy","r","x1","y1","x2","y2","points","transform","fill","stroke","stroke-width","fill-rule","opacity","fill-opacity","display","visibility"]);
+  // a clean copy: groups and shapes only, geometry and paint attributes only (no script, no link, no style sheet, no event)
+  const copy=(src,dst)=>{ for(const ch of src.children){ const nm=ch.localName; if(nm!=="g"&&nm!=="svg"&&!SHAPES.has(nm)) continue;
+      const el=document.createElementNS(NS,nm==="svg"?"g":nm); for(const a of ch.attributes) if(KEEP.has(a.name)&&!/url\(|javascript:/i.test(a.value)) el.setAttribute(a.name,a.value);
+      const st=ch.getAttribute("style")||""; for(const m of st.matchAll(/(fill|stroke|stroke-width|opacity|fill-opacity|display)\s*:\s*([^;]+)/g)) if(!/url\(/i.test(m[2])) el.setAttribute(m[1],m[2].trim());
+      dst.appendChild(el); if(nm==="g"||nm==="svg") copy(ch,el); } };
+  const top=document.createElementNS(NS,"g"); for(const a of ["fill","stroke","stroke-width"]) if(root.getAttribute(a)) top.setAttribute(a,root.getAttribute(a)); copy(root,top); host.appendChild(top); document.body.appendChild(host);
+  const toD=el=>{ const g=a=>parseFloat(el.getAttribute(a))||0, nm=el.localName;
+    if(nm==="path") return el.getAttribute("d")||"";
+    if(nm==="rect"){ const x=g("x"),y=g("y"),w=g("width"),h=g("height"); let rx=Math.min(g("rx")||g("ry"),w/2), ry=Math.min(g("ry")||rx,h/2); if(!(w>0&&h>0)) return "";
+      if(!rx) return `M${x} ${y}H${x+w}V${y+h}H${x}Z`; return `M${x+rx} ${y}H${x+w-rx}A${rx} ${ry} 0 0 1 ${x+w} ${y+ry}V${y+h-ry}A${rx} ${ry} 0 0 1 ${x+w-rx} ${y+h}H${x+rx}A${rx} ${ry} 0 0 1 ${x} ${y+h-ry}V${y+ry}A${rx} ${ry} 0 0 1 ${x+rx} ${y}Z`; }
+    if(nm==="circle"||nm==="ellipse"){ const cx=g("cx"),cy=g("cy"),rx=nm==="circle"?g("r"):g("rx"),ry=nm==="circle"?g("r"):g("ry"); if(!(rx>0&&ry>0)) return "";
+      return `M${cx-rx} ${cy}A${rx} ${ry} 0 1 0 ${cx+rx} ${cy}A${rx} ${ry} 0 1 0 ${cx-rx} ${cy}Z`; }
+    if(nm==="line") return `M${g("x1")} ${g("y1")}L${g("x2")} ${g("y2")}`;
+    const pts=(el.getAttribute("points")||"").trim().split(/[\s,]+/).map(Number); if(pts.length<4) return ""; let d="M"+pts[0]+" "+pts[1]; for(let i=2;i+1<pts.length;i+=2) d+="L"+pts[i]+" "+pts[i+1]; return nm==="polygon"?d+"Z":d; };
+  const col=v=>{ const m=/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(v||""); if(!m||m[4]==="0") return null; return "#"+[m[1],m[2],m[3]].map(n=>hex2(+n)).join("").toUpperCase(); };
+  const out=[]; let rootM=null;
+  try{ rootM=top.getCTM().inverse(); for(const el of top.querySelectorAll([...SHAPES].join(","))){
+      const cs=getComputedStyle(el); if(cs.display==="none"||cs.visibility==="hidden") continue;
+      let d=toD(el); if(!d) continue; const fill=col(cs.fill), stroke=col(cs.stroke), open=!fill&&!!stroke; if(!fill&&!stroke) continue;
+      const subs=parsePathD(d,{open}); if(!subs.length) continue;
+      const m=rootM.multiply(el.getCTM()), T=p=>p&&{x:m.a*p.x+m.c*p.y+m.e, y:m.b*p.x+m.d*p.y+m.f};
+      out.push({subs:subs.map(c=>c.map(n=>({x:T(n).x,y:T(n).y,i:T(n.i)||null,o:T(n.o)||null}))), color:fill||stroke, open, sw:open?(parseFloat(cs.strokeWidth)||1)*Math.sqrt(Math.abs(m.a*m.d-m.b*m.c)):0, rule:el.getAttribute("fill-rule")||cs.fillRule}); if(out.length>=400) break; } }
+  finally{ host.remove(); }
+  if(!out.length) throw new Error("aucune forme");
+  // fitted to the place, one group with its own palette (6 colours at most, the closest one for the others)
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity; out.forEach(s=>s.subs.forEach(c=>c.forEach(n=>{ x0=Math.min(x0,n.x); y0=Math.min(y0,n.y); x1=Math.max(x1,n.x); y1=Math.max(y1,n.y); })));
+  const b=placeBox((x1-x0||1)/(y1-y0||1)), k=Math.min(b.w/(x1-x0||1), b.h/(y1-y0||1)), dx=b.x-x0*k, dy=b.y-y0*k, Q=p=>p&&{x:r2(p.x*k+dx), y:r2(p.y*k+dy)};
+  const tones=[...new Set(out.map(s=>s.color))].slice(0,MAXZ), near=c=>{ const v=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)), a=v(c); let bi=0,bd=Infinity; tones.forEach((t,i)=>{ const q=v(t), dd=(a[0]-q[0])**2+(a[1]-q[1])**2+(a[2]-q[2])**2; if(dd<bd){ bd=dd; bi=i; } }); return bi; };
+  const nm=file.name.replace(/\.[^.]+$/,"").slice(0,40)||"SVG", g=groupWithPalette("SVG « "+nm+" »", tones);
+  return out.map((s,i)=>{ const L={id:uniqLayerId("svg"), name:nm+" · "+(i+1), group:"mark", grp:g.id, zone:near(s.color), fill:s.color, visible:true, locked:false, subs:s.subs.map(c=>c.map(n=>({x:Q(n).x,y:Q(n).y,i:Q(n.i),o:Q(n.o)})))};
+    if(s.open){ L.open=true; L.sw=r2(Math.max(.5,s.sw*k)); } return L; });
+}
+function uniqLayerId(base){ let i=1, id=base; while(layers.some(l=>l.id===id)) id=base+"-"+(++i); return id; }
+async function placeFiles(files){
+  if(!files.length) return 0; if(!await rightsOk(files.length>1?"ces fichiers":"ce fichier")) return 0;
+  const b=JSON.stringify(layers.map(l=>l.id)); const before=snapshot(); let added=[], bad=0;
+  for(const f of files){ try{ const isSvg=/svg/i.test(f.type)||/\.svg$/i.test(f.name), ok=isSvg||/^image\/(png|jpeg|webp)$/.test(f.type)||/\.(png|jpe?g|webp)$/i.test(f.name);
+      if(!ok){ bad++; continue; } const ls=isSvg?await placeSVG(f):await placeRaster(f); layers.push(...ls); added.push(...ls); }
+    catch(_){ bad++; } }
+  if(added.length){ sel={layer:added[added.length-1].id,node:null}; commit(before, added.some(l=>l.kind==="image")?"Image placée":"SVG importé"); renderAll(); }
+  toast(added.length?(added.length+" calque"+(added.length>1?"s":"")+" ajouté"+(added.length>1?"s":"")+(bad?", "+bad+" fichier"+(bad>1?"s":"")+" ignoré"+(bad>1?"s":"")+" (format ou fichier illisible)":"")+"."):"Aucun fichier utilisable (PNG, JPEG, WebP ou SVG).");
+  return added.length;
+}
 
 /* ---------- Rulers and guides ----------
    Rulers (top, left) in drawing units follow the zoom; drag from a ruler to drop a guide, drag a guide back onto a
@@ -5018,6 +5344,34 @@ $("#mExport").onclick=()=>$("#exportBtn").click();
 $("#mUndo").onclick=()=>undo(); $("#mRedo").onclick=()=>redo(); $("#mHist").onclick=()=>setTimeout(openHistory,0);
 $("#mTools").addEventListener("click",e=>{ const b=e.target.closest("[data-mtool]"); if(b) setTool(b.dataset.mtool); });
 $("#mImport").onclick=()=>$("#importBtn").click();
+/* plans: header button + popover, menu items, new plan dialog, placing images / SVG */
+$("#planBtn").onclick=e=>{ e.stopPropagation(); $("#planPop").hidden?openPlanPop():closePlanPop(); };
+document.addEventListener("pointerdown",e=>{ const pop=$("#planPop"); if(pop&&!pop.hidden&&!e.target.closest("#planPop,#planBtn,#askDlg,dialog")) closePlanPop(); });
+$("#planPop").addEventListener("keydown",e=>{ e.stopPropagation(); if(e.key==="Escape"){ closePlanPop(); $("#planBtn").focus(); } });
+$("#planPop").addEventListener("click",async e=>{
+  const r=e.target.closest("[data-plan]"); if(r){ if(r.dataset.plan!==curProject.plan){ await switchPlan(r.dataset.plan); renderPlanPop(); } else closePlanPop(); return; }
+  const a=e.target.closest("[data-pact]"); if(!a) return; const id=a.dataset.id;
+  ({ren:()=>renamePlan(id), dup:()=>duplicatePlan(id), move:()=>movePlan(id), del:()=>deletePlan(id),
+    new:()=>{ closePlanPop(); openNewPlan(planFrame?"motion":"logo"); }, tpl:()=>{ closePlanPop(); saveTemplate(); }})[a.dataset.pact]();
+});
+$("#planPop").addEventListener("change",async e=>{ if(e.target.id!=="planColl"||!curProject) return; curProject.collection=e.target.value; await projectFlush(); toast("Collection du projet mise à jour."); });
+$("#mNewPlan").onclick=()=>openNewPlan("logo");
+$("#mNewAnim").onclick=()=>openNewPlan("motion");
+$("#mPlans").onclick=()=>setTimeout(openPlanPop,0);
+$("#mDupPlan").onclick=()=>curProject&&duplicatePlan(curProject.plan);
+$("#mTpl").onclick=()=>saveTemplate();
+$("#mPlace").onclick=()=>$("#placeIn").click();
+$("#placeIn").onchange=async e=>{ const fs=[...e.target.files]; e.target.value=""; await placeFiles(fs); if(window.__moAfterPlace) window.__moAfterPlace(); };
+$("#newPlanDlg").addEventListener("keydown",e=>e.stopPropagation());
+$("#newPlanDlg").addEventListener("click",async e=>{
+  const k=e.target.closest("[data-kind]"); if(k){ npKind=k.dataset.kind; renderNewPlan(); return; }
+  const f=e.target.closest("[data-fmt]"); if(f){ npFmt=f.dataset.fmt; renderNewPlan(); return; }
+  const x=e.target.closest("[data-tdel]"); if(x){ e.stopPropagation(); if(!await confirmBox("Supprimer ce modèle ?","Il disparaît des suggestions sur cet appareil.","Supprimer")) return; await deleteTemplate(x.dataset.tdel); x.closest("button").remove(); return; }
+  const t=e.target.closest("[data-tpl]"); if(t){ npTpl=t.dataset.tpl; npFrom="template"; renderNewPlan(); }
+});
+$("#newPlanDlg").addEventListener("change",e=>{ if(e.target.matches("[data-from]")){ npFrom=e.target.value; renderNewPlan(); } });
+$("#npCancel").onclick=()=>$("#newPlanDlg").close();
+$("#npGo").onclick=()=>createNewPlan();
 $("#mClaude").onclick=()=>openClaudeDlg(false);
 $("#mGrid").onclick=()=>{ const c=$("#gridOn"); c.checked=!c.checked; c.dispatchEvent(new Event("change")); };
 $("#mSnap").onclick=()=>{ const c=$("#snapOn"); c.checked=!c.checked; c.dispatchEvent(new Event("change")); };
@@ -5032,7 +5386,7 @@ $("#mMotionExport").onclick=()=>{ openMotion(); setTimeout(()=>openMotionExport(
 /* ---------- Settings and help center (Paramètres) ----------
    Preferences, shortcuts, the guide (GUIDE.md, written once) and the full FAQ (content/faq.json, shared with the
    site), all searchable from one field. */
-const GUIDE = [{"html":"\u003ch2 id=\"demarrer\">1. Démarrer\u003c/h2>\n\u003cp>Au premier lancement, l'atelier vous demande :\u003c/p>\n\u003cul>\u003cli>le nom de votre marque ;\u003c/li>\u003cli>votre slogan ;\u003c/li>\u003cli>quelques mots-clés ;\u003c/li>\u003cli>les lettres importantes de votre nom.\u003c/li>\u003c/ul>\n\u003cp>Choisissez ensuite un point de départ :\u003c/p>\n\u003cul>\u003cli>\u003cb>le nom seul\u003c/b> ou \u003cb>une forme + le nom\u003c/b> ;\u003c/li>\u003cli>\u003cb>une image ou une photo\u003c/b> : croquis, signature ou texture, transformés en courbes modifiables ;\u003c/li>\u003cli>\u003cb>des propositions de logo\u003c/b>, imaginées à partir de vos mots-clés ;\u003c/li>\u003cli>\u003cb>l'exemple\u003c/b> ;\u003c/li>\u003cli>ou « Page vierge ».\u003c/li>\u003c/ul>\n\u003cp>Le menu en haut de l'écran réunit tout : \u003cb>Plan\u003c/b> (nouveau projet, projets et collections, marque et propositions, fichiers, export, charte), \u003cb>Édition\u003c/b> (annuler, historique, outils, import d'image, Claude, grille et règles), \u003cb>Animation\u003c/b>, \u003cb>Paramètres\u003c/b> (préférences, raccourcis, aides à l'écran, à propos) et \u003cb>Aide\u003c/b> (recherche, guide, questions fréquentes). Plan › Marque et propositions rouvre ces choix pour le projet ouvert ; Plan › Nouveau projet en crée un autre.\u003c/p>\n"},{"html":"\u003ch2 id=\"dessiner\">2. Dessiner\u003c/h2>\n\u003ctable>\u003cthead>\u003ctr>\u003cth>Outil\u003c/th>\u003cth>Touche\u003c/th>\u003cth>Usage\u003c/th>\u003c/tr>\u003c/thead>\u003ctbody>\u003ctr>\u003ctd>Calque\u003c/td>\u003ctd>V\u003c/td>\u003ctd>sélectionner et déplacer ; Suppr efface (avec confirmation)\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Plume\u003c/td>\u003ctd>P\u003c/td>\u003ctd>clic = point, clic-glisser = courbe, clic sur le 1er point = fermer, Entrée = tracé ouvert\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Crayon\u003c/td>\u003ctd>N\u003c/td>\u003ctd>à main levée, sensible à la pression du stylet (Trait ou Pinceau)\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Points\u003c/td>\u003ctd>A\u003c/td>\u003ctd>déplacer les points et leurs poignées ; Alt+glisser sort les poignées\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Forme\u003c/td>\u003ctd>M\u003c/td>\u003ctd>rectangle, ellipse, polygone, étoile\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Texte\u003c/td>\u003ctd>T\u003c/td>\u003ctd>nouveau texte, dans l'une des 56 polices\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Bulle\u003c/td>\u003ctd>B\u003c/td>\u003ctd>annotation pour Claude\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Vue\u003c/td>\u003ctd>H ou Espace\u003c/td>\u003ctd>se déplacer dans le dessin\u003c/td>\u003c/tr>\u003c/tbody>\u003c/table>\n\u003cp>La touche \u003cb>?\u003c/b> liste tous les raccourcis, et \u003cb>Ctrl+K\u003c/b> cherche dans l'aide (un outil, un raccourci, une question). \u003cb>Annuler\u003c/b> défait la dernière action. Un appui long sur ce bouton ouvre l'historique : vous pouvez y décocher ou recocher n'importe quelle modification.\u003c/p>\n"},{"html":"\u003ch2 id=\"couleurs-styles-et-polices\">3. Couleurs, styles et polices\u003c/h2>\n\u003cul>\u003cli>\u003cb>Palette\u003c/b> : cliquez une couleur pour la changer. Glissez-la pour changer sa place sur le logo.\u003c/li>\u003cli>\u003cb>Styles\u003c/b> (dans Sélection) : low poly, line art, gravure, isométrie, cartoon… Les styles se règlent avec un curseur d'intensité.\u003c/li>\u003cli>\u003cb>Polices\u003c/b> : le bouton F change la police du mot entier ou des lettres sélectionnées. « Mes polices » permet d'importer une police, d'en dupliquer une pour la modifier, ou de créer la vôtre, exportable en .otf.\u003c/li>\u003c/ul>\n"},{"html":"\u003ch2 id=\"travailler-avec-claude\">4. Travailler avec Claude\u003c/h2>\n\u003col>\u003cli>Posez une \u003cb>bulle\u003c/b> (B) sur la partie à modifier, et écrivez votre demande : « arrondis ce coin », « essaie un cerf plus stylisé »…\u003c/li>\u003cli>Envoyez-la à Claude :\u003c/li>\u003cli>\u003cb>dans Claude (artifact)\u003c/b> : « Envoyer à Claude » ;\u003c/li>\u003cli>\u003cb>sur claude.ai, gratuit\u003c/b> : « Copier la demande », collez-la dans une conversation, puis copiez la réponse de Claude et faites « Coller la réponse » ;\u003c/li>\u003cli>\u003cb>avec Claude Desktop\u003c/b> : installez l'extension (Connexions Claude › Télécharger l'extension), puis demandez dans une conversation « Traite mes bulles dans l'atelier ». À l'installation, Claude Desktop prévient que l'extension n'est pas signée : c'est normal pour une extension indépendante. Installez-la seulement si elle vient du site de l'atelier ;\u003c/li>\u003cli>Les changements de Claude arrivent avec un bandeau \u003cb>« Annuler la modification de Claude »\u003c/b>. Claude répond aussi dans chaque bulle.\u003c/li>\u003c/ol>\n\u003cp>Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des calques).\u003c/p>\n"},{"html":"\u003ch2 id=\"projets-export-et-charte\">5. Projets, export et charte\u003c/h2>\n\u003cul>\u003cli>\u003cb>Projets\u003c/b> : enregistrés dans votre navigateur. Vous pouvez dupliquer un projet, copier des calques d'un projet à l'autre, classer vos projets en collections, et exporter un fichier \u003ccode>.atelier.json\u003c/code> pour passer à un autre appareil.\u003c/li>\u003cli>\u003cb>Exporter\u003c/b> : SVG, PNG ou JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP.\u003c/li>\u003cli>\u003cb>Charte\u003c/b> : un questionnaire (style, couleurs, typographies, ton), puis les pages de la charte. Vous l'exportez en PDF (A4 portrait, paysage ou slides) ou en pack de dépôt.\u003c/li>\u003c/ul>\n"},{"html":"\u003ch2 id=\"animer-votre-logo-motion\">6. Animer votre logo (Motion)\u003c/h2>\n\u003cp>Le menu \u003cb>Animation › Animer le plan\u003c/b> ouvre Motion, sur le logo du projet ouvert.\u003c/p>\n\u003cul>\u003cli>\u003cb>Recettes en un clic\u003c/b> : « Du croquis au rendu », « Révélation élégante », « Tracé d'architecte », « Rebond joyeux »… Chaque recette compose une animation complète, que vous réglez ensuite.\u003c/li>\u003cli>\u003cb>Animations par calque\u003c/b> : choisissez des calques, puis une animation (apparition, disparition, texte, mouvement, caméra). Chaque animation a ses curseurs : début, durée, décalage entre les calques, courbe de vitesse.\u003c/li>\u003cli>\u003cb>Frise\u003c/b> : glissez une barre pour la déplacer, ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres ; « Courbe personnalisée » dessine votre propre accélération.\u003c/li>\u003cli>\u003cb>Son\u003c/b> : « Générer la bande son » choisit une ambiance (cinématique, élégante, dynamique, minimale, technologique) et place les sons sur les temps forts de l'animation, le moment fort de chaque son tombant pile sur l'apparition ou la révélation du logo. Chaque son se règle (début, volume, hauteur, fondus, coupe) et se déplace sur la frise ; « Effets sur tout le son » ajoute réverbération, écho, filtre, égaliseur et compresseur.\u003c/li>\u003cli>\u003cb>Banque de sons\u003c/b> : les sons de l'atelier, créés dans le navigateur, et « Mes sons » : importez vos fichiers (MP3, WAV, OGG, M4A, FLAC) ou un dossier zippé, à condition d'en détenir les droits. Ils restent sur votre appareil.\u003c/li>\u003cli>\u003cb>Exporter\u003c/b> : MP4 ou WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site) ou WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil.\u003c/li>\u003c/ul>\n\u003cp>La durée va de 1 à 12 secondes. Sur téléphone : recettes, réglages simples et export ; la frise est réservée à la tablette et à l'ordinateur.\u003c/p>\n"},{"html":"\u003ch2 id=\"tablette-et-telephone\">7. Tablette et téléphone\u003c/h2>\n\u003cp>Le dessin occupe tout l'écran. La barre du bas ouvre les panneaux (Outils, Calques, Sélection, Palette, Bulles) ; touchez le dessin pour les refermer. Le menu ☰ donne accès à À propos, Projets, Charte et Marque et départ. Zoomez à deux doigts. Le Crayon tient compte de la pression du stylet.\u003c/p>\n"},{"html":"\u003ch2 id=\"plusieurs-ecrans\">8. Plusieurs écrans\u003c/h2>\n\u003cp>Dans l'appli autonome, le bouton \u003cb>« Fenêtres »\u003c/b> détache les panneaux (Outils, Calques, Sélection, Palette, Bulles) dans des fenêtres séparées. Fermez une fenêtre pour remettre son panneau en place.\u003c/p>\n\u003cp>---\u003c/p>\n\u003cp>Besoin d'aide, d'un accompagnement ou d'une formation : contact.johnapple.fr@gmail.com\u003c/p>"}], FAQ = [{"cat":"Tarifs et accès","q":"Est-ce vraiment gratuit ?","a":"Oui : pendant la bêta, toutes les fonctions sont gratuites, sans compte et sans limite. Le cœur de l'atelier (dessiner, décliner, animer, exporter sur votre appareil) a vocation à rester accessible gratuitement. En revanche, certaines fonctions qui ont un coût réel, comme l'intelligence artificielle, le stockage et la synchronisation en ligne ou le travail en équipe, pourront devenir payantes. Aucun changement ne se fera sans prévenir, et vos créations restent à vous."},{"cat":"Tarifs et accès","q":"Faut-il créer un compte ?","a":"Non. L'atelier fonctionne sans compte. Un compte ne servira qu'aux futures options en ligne (synchronisation entre appareils, partage, travail en équipe)."},{"cat":"Tarifs et accès","q":"Comment soutenir le projet ?","a":"Dans Paramètres › À propos et soutien, ou sur la page À propos du site : un don par PayPal ou Wero aide à financer le développement et l'hébergement. Merci !"},{"cat":"Démarrer","q":"Faut-il savoir dessiner ?","a":"Non. Vous pouvez partir d'une proposition de logo imaginée à partir de vos mots-clés, d'une photo de croquis ou de l'exemple, puis demander des retouches à Claude avec une bulle."},{"cat":"Démarrer","q":"Par où commencer ?","a":"Plan › Nouveau projet : donnez le nom de votre marque, un slogan et quelques mots-clés, puis choisissez un point de départ (le nom seul, une forme, une image, une proposition de logo ou l'exemple)."},{"cat":"Démarrer","q":"Quelle différence entre plan, projet, collection et marque ?","a":"Le plan est votre document de travail (comme un fichier dans un autre logiciel). Un projet réunit les plans d'une même marque, et son nom est celui de la marque. Une collection réunit plusieurs projets, par exemple une direction artistique ou un client."},{"cat":"Démarrer","q":"Sur quels appareils fonctionne l'atelier ?","a":"Dans un navigateur récent sur ordinateur, tablette et téléphone (Chrome, Edge, Safari, Firefox). Sur téléphone, l'interface se réduit à l'essentiel ; la frise d'animation est réservée à la tablette et à l'ordinateur."},{"cat":"Démarrer","q":"Peut-on l'installer et l'utiliser sans connexion ?","a":"Oui. Paramètres › À propos et soutien › Installer l'appli, ou le menu de votre navigateur. Une fois installé, l'atelier s'ouvre sans connexion. Seules les polices du texte vivant et Claude ont besoin d'Internet."},{"cat":"Dessiner","q":"Comment dessiner une courbe précise ?","a":"Avec la Plume (P) : clic pour un point anguleux, clic-glisser pour une courbe, clic sur le premier point pour fermer, Entrée pour laisser le tracé ouvert. L'outil Points (A) modifie ensuite chaque point et ses poignées."},{"cat":"Dessiner","q":"Puis-je importer un croquis ou une signature ?","a":"Oui : Édition › Importer une image. Le papier, ses ombres et sa texture sont retirés et les contours deviennent des courbes modifiables. Sur tablette et téléphone, « Prendre une photo » ouvre l'appareil photo."},{"cat":"Dessiner","q":"Comment annuler une modification ancienne sans perdre les suivantes ?","a":"Ouvrez l'historique (Édition › Historique, ou appui long sur Annuler) : chaque modification se décoche et se recoche, dans n'importe quel ordre. Une propriété modifiée ensuite n'est jamais écrasée."},{"cat":"Dessiner","q":"Quelles polices puis-je utiliser ?","a":"Les 56 polices libres de l'atelier (latin, cyrillique, arabe, hébreu, devanagari, thaï, CJK…), vos polices importées (TTF, OTF, WOFF) et vos propres polices créées glyphe par glyphe, exportables en OTF."},{"cat":"Dessiner","q":"À quoi servent les effets et les styles ?","a":"Les effets (métal brossé, dorure, ombre, hachures, fondus…) habillent un calque sans toucher à ses courbes. Les transformations (low poly, pixel art, pointillisme…) redessinent les courbes dans de nouveaux calques."},{"cat":"Marque et charte","q":"Comment l'atelier propose-t-il des logos ?","a":"À partir du nom, des mots-clés et des lettres importantes : il choisit des pictogrammes de métier, une matière, un style et une police accordée, et compose des propositions premium et illustrées. « Autres concepts » en propose une nouvelle série."},{"cat":"Marque et charte","q":"Que contient la charte graphique ?","a":"Après un questionnaire (style, couleurs, typographies, ton) : couverture, marque et ambiance, variantes du logo, zone de protection et tailles minimales, couleurs (HEX, RVB, CMJN, contrastes), typographie, fonds autorisés, à ne pas faire, applications et fichiers fournis."},{"cat":"Marque et charte","q":"Dans quels formats sort la charte ?","a":"En PDF (A4 portrait pour l'impression, A4 paysage ou 16:9 pour une présentation) et en pack de dépôt (.zip) avec les variantes du logo en SVG et PNG et le favicon."},{"cat":"Animation et son","q":"Comment animer mon logo ?","a":"Menu Animation : choisissez une recette en un clic (par exemple « Du croquis au rendu »), puis ajustez chaque animation avec ses curseurs ou directement sur la frise. Durée de 1 à 12 secondes."},{"cat":"Animation et son","q":"Puis-je régler l'animation image par image ?","a":"Oui : sur la frise, glissez une barre pour la déplacer et ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres, et « Courbe personnalisée » dessine votre propre accélération."},{"cat":"Animation et son","q":"Comment ajouter du son ?","a":"« Générer la bande son » choisit une ambiance et place les sons sur les temps forts : le moment fort de chaque son tombe sur l'apparition ou la révélation du logo. Chaque son se règle (volume, hauteur, fondus, coupe) et des effets s'appliquent à l'ensemble."},{"cat":"Animation et son","q":"Puis-je utiliser mes propres sons ?","a":"Oui, dans Banque de sons › Importer mes sons (MP3, WAV, OGG, M4A, FLAC ou un .zip), à condition d'en détenir les droits ou d'avoir une licence qui le permet. Ils restent sur votre appareil et ne sont jamais envoyés ni partagés."},{"cat":"Animation et son","q":"Dans quels formats exporter l'animation ?","a":"MP4 et WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site, net à toute taille) et WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil."},{"cat":"Animation et son","q":"Pourquoi mon MP4 a-t-il un son en Opus ?","a":"Quand le navigateur ne sait pas encoder l'AAC, le son du MP4 est en Opus. Il se lit dans Chrome, Edge et Firefox, mais pas toujours dans d'anciens lecteurs Apple : exportez alors en WebM, ou depuis un autre navigateur."},{"cat":"Projets et fichiers","q":"Où sont enregistrés mes projets ?","a":"Dans le stockage de votre navigateur, sur votre appareil. Rien n'est envoyé sur un serveur. Pour les retrouver ailleurs ou les sauvegarder, utilisez Plan › Enregistrer dans un fichier, puis rouvrez ce fichier sur l'autre appareil."},{"cat":"Projets et fichiers","q":"Puis-je perdre mes projets ?","a":"Oui, si vous effacez les données du site dans votre navigateur ou si vous changez d'appareil. Enregistrez régulièrement vos projets dans un fichier .atelier.json : c'est votre sauvegarde."},{"cat":"Projets et fichiers","q":"Quels formats d'export pour le logo ?","a":"SVG, PNG et JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP ; motifs en mosaïque ; polices en OTF."},{"cat":"Projets et fichiers","q":"Comment copier des éléments d'un projet à l'autre ?","a":"Sélectionnez des calques puis Ctrl+C, ouvrez l'autre projet et Ctrl+V : les couleurs et dégradés suivent. Depuis Projets et collections, « Calques… » sur une carte fait de même."},{"cat":"Claude et IA","q":"Comment travailler avec Claude ?","a":"Posez une bulle sur le dessin pour demander une retouche. Dans claude.ai, l'atelier s'ouvre comme un artifact ; ailleurs, utilisez le copier-coller ou l'extension Claude Desktop. Chaque retouche de Claude arrive avec un bandeau pour l'annuler."},{"cat":"Claude et IA","q":"L'atelier envoie-t-il mes données à une IA ?","a":"Non, pas de lui-même. Seul ce que vous choisissez d'envoyer à Claude (votre dessin et vos bulles) est transmis, par la connexion que vous utilisez, et traité selon les conditions d'Anthropic. L'atelier ne stocke ni n'envoie aucune clé d'API."},{"cat":"Claude et IA","q":"D'autres IA seront-elles proposées ?","a":"C'est à l'étude. Dites-nous lesquelles vous intéressent : vos réponses orientent les prochaines connexions."},{"cat":"Droits et licences","q":"Mon logo m'appartient-il ?","a":"Oui, ce que vous créez vous appartient et peut être utilisé commercialement. Vérifiez qu'il ne reprend pas une marque, une œuvre, une police ou un son protégés sans autorisation, et qu'il ne crée pas de confusion avec une marque existante avant un dépôt."},{"cat":"Droits et licences","q":"Puis-je utiliser les pictogrammes et les sons de l'atelier ?","a":"Oui, dans vos créations. Les polices restent soumises à leurs licences libres (SIL OFL, Apache), indiquées dans À propos."},{"cat":"Confidentialité","q":"L'atelier utilise-t-il des cookies ou un suivi ?","a":"Non : ni cookie de suivi, ni publicité. Le stockage local sert uniquement au fonctionnement de l'atelier."},{"cat":"Confidentialité","q":"Comment tout effacer ?","a":"Supprimez les données du site dans les réglages de votre navigateur. Pensez à enregistrer vos projets dans un fichier avant."},{"cat":"Technique","q":"L'export vidéo est lent, est-ce normal ?","a":"Chaque image est calculée sur votre appareil, effets compris. Choisissez 720p et 30 images/s pour aller plus vite ; les logos très riches en effets (métal brossé, flous) demandent plus de calcul."},{"cat":"Technique","q":"Puis-je utiliser plusieurs écrans ?","a":"Oui, dans l'appli installée : « Fenêtres » détache les panneaux (outils, calques, sélection, palette, bulles) dans des fenêtres séparées."}];
+const GUIDE = [{"html":"\u003ch2 id=\"demarrer\">1. Démarrer\u003c/h2>\n\u003cp>Au premier lancement, l'atelier vous demande :\u003c/p>\n\u003cul>\u003cli>le nom de votre marque ;\u003c/li>\u003cli>votre slogan ;\u003c/li>\u003cli>quelques mots-clés ;\u003c/li>\u003cli>les lettres importantes de votre nom.\u003c/li>\u003c/ul>\n\u003cp>Choisissez ensuite un point de départ :\u003c/p>\n\u003cul>\u003cli>\u003cb>le nom seul\u003c/b> ou \u003cb>une forme + le nom\u003c/b> ;\u003c/li>\u003cli>\u003cb>une image ou une photo\u003c/b> : croquis, signature ou texture, transformés en courbes modifiables ;\u003c/li>\u003cli>\u003cb>des propositions de logo\u003c/b>, imaginées à partir de vos mots-clés ;\u003c/li>\u003cli>\u003cb>l'exemple\u003c/b> ;\u003c/li>\u003cli>ou « Page vierge ».\u003c/li>\u003c/ul>\n\u003cp>Le menu en haut de l'écran réunit tout : \u003cb>Plan\u003c/b> (nouveau projet, projets et collections, marque et propositions, fichiers, export, charte), \u003cb>Édition\u003c/b> (annuler, historique, outils, import d'image, Claude, grille et règles), \u003cb>Animation\u003c/b>, \u003cb>Paramètres\u003c/b> (préférences, raccourcis, aides à l'écran, à propos) et \u003cb>Aide\u003c/b> (recherche, guide, questions fréquentes). Plan › Marque et propositions rouvre ces choix pour le projet ouvert ; Plan › Nouveau projet en crée un autre.\u003c/p>\n"},{"html":"\u003ch2 id=\"dessiner\">2. Dessiner\u003c/h2>\n\u003ctable>\u003cthead>\u003ctr>\u003cth>Outil\u003c/th>\u003cth>Touche\u003c/th>\u003cth>Usage\u003c/th>\u003c/tr>\u003c/thead>\u003ctbody>\u003ctr>\u003ctd>Calque\u003c/td>\u003ctd>V\u003c/td>\u003ctd>sélectionner et déplacer ; Suppr efface (avec confirmation)\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Plume\u003c/td>\u003ctd>P\u003c/td>\u003ctd>clic = point, clic-glisser = courbe, clic sur le 1er point = fermer, Entrée = tracé ouvert\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Crayon\u003c/td>\u003ctd>N\u003c/td>\u003ctd>à main levée, sensible à la pression du stylet (Trait ou Pinceau)\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Points\u003c/td>\u003ctd>A\u003c/td>\u003ctd>déplacer les points et leurs poignées ; Alt+glisser sort les poignées\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Forme\u003c/td>\u003ctd>M\u003c/td>\u003ctd>rectangle, ellipse, polygone, étoile\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Texte\u003c/td>\u003ctd>T\u003c/td>\u003ctd>nouveau texte, dans l'une des 56 polices\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Bulle\u003c/td>\u003ctd>B\u003c/td>\u003ctd>annotation pour Claude\u003c/td>\u003c/tr>\u003ctr>\u003ctd>Vue\u003c/td>\u003ctd>H ou Espace\u003c/td>\u003ctd>se déplacer dans le dessin\u003c/td>\u003c/tr>\u003c/tbody>\u003c/table>\n\u003cp>La touche \u003cb>?\u003c/b> liste tous les raccourcis, et \u003cb>Ctrl+K\u003c/b> cherche dans l'aide (un outil, un raccourci, une question). \u003cb>Annuler\u003c/b> défait la dernière action. Un appui long sur ce bouton ouvre l'historique : vous pouvez y décocher ou recocher n'importe quelle modification.\u003c/p>\n"},{"html":"\u003ch2 id=\"couleurs-styles-et-polices\">3. Couleurs, styles et polices\u003c/h2>\n\u003cul>\u003cli>\u003cb>Palette\u003c/b> : cliquez une couleur pour la changer. Glissez-la pour changer sa place sur le logo.\u003c/li>\u003cli>\u003cb>Styles\u003c/b> (dans Sélection) : low poly, line art, gravure, isométrie, cartoon… Les styles se règlent avec un curseur d'intensité.\u003c/li>\u003cli>\u003cb>Polices\u003c/b> : le bouton F change la police du mot entier ou des lettres sélectionnées. « Mes polices » permet d'importer une police, d'en dupliquer une pour la modifier, ou de créer la vôtre, exportable en .otf.\u003c/li>\u003c/ul>\n"},{"html":"\u003ch2 id=\"travailler-avec-claude\">4. Travailler avec Claude\u003c/h2>\n\u003col>\u003cli>Posez une \u003cb>bulle\u003c/b> (B) sur la partie à modifier, et écrivez votre demande : « arrondis ce coin », « essaie un cerf plus stylisé »…\u003c/li>\u003cli>Envoyez-la à Claude :\u003c/li>\u003cli>\u003cb>dans Claude (artifact)\u003c/b> : « Envoyer à Claude » ;\u003c/li>\u003cli>\u003cb>sur claude.ai, gratuit\u003c/b> : « Copier la demande », collez-la dans une conversation, puis copiez la réponse de Claude et faites « Coller la réponse » ;\u003c/li>\u003cli>\u003cb>avec Claude Desktop\u003c/b> : installez l'extension (Connexions Claude › Télécharger l'extension), puis demandez dans une conversation « Traite mes bulles dans l'atelier ». À l'installation, Claude Desktop prévient que l'extension n'est pas signée : c'est normal pour une extension indépendante. Installez-la seulement si elle vient du site de l'atelier ;\u003c/li>\u003cli>Les changements de Claude arrivent avec un bandeau \u003cb>« Annuler la modification de Claude »\u003c/b>. Claude répond aussi dans chaque bulle.\u003c/li>\u003c/ol>\n\u003cp>Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des calques).\u003c/p>\n"},{"html":"\u003ch2 id=\"projets-export-et-charte\">5. Projets, export et charte\u003c/h2>\n\u003cul>\u003cli>\u003cb>Plans\u003c/b> : un plan est votre document de travail. Un projet (votre marque) réunit plusieurs plans : le logo, ses déclinaisons, des animations. Le bouton \u003cb>Plan\u003c/b> à côté du nom du projet les liste ; \u003cb>Plan › Nouveau plan\u003c/b> part du plan ouvert, d'une page vide ou d'un de vos modèles ; \u003cb>Décliner ce plan\u003c/b> le duplique ; \u003cb>Enregistrer comme modèle\u003c/b> l'ajoute à vos suggestions de départ.\u003c/li>\u003cli>\u003cb>Images et SVG\u003c/b> : \u003cb>Édition › Placer une image ou un SVG\u003c/b> ajoute une photo (PNG, JPEG, WebP) comme calque, ou les formes d'un SVG comme calques modifiables.\u003c/li>\u003cli>\u003cb>Projets\u003c/b> : enregistrés dans votre navigateur. Vous pouvez dupliquer un projet, copier des calques d'un projet à l'autre, classer vos projets en collections, et exporter un fichier \u003ccode>.atelier.json\u003c/code> pour passer à un autre appareil.\u003c/li>\u003cli>\u003cb>Exporter\u003c/b> : SVG, PNG ou JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP.\u003c/li>\u003cli>\u003cb>Charte\u003c/b> : un questionnaire (style, couleurs, typographies, ton), puis les pages de la charte. Vous l'exportez en PDF (A4 portrait, paysage ou slides) ou en pack de dépôt.\u003c/li>\u003c/ul>\n"},{"html":"\u003ch2 id=\"animer-votre-logo-motion\">6. Animer votre logo (Motion)\u003c/h2>\n\u003cp>Le menu \u003cb>Animation › Animer le plan\u003c/b> ouvre Motion, sur le logo du projet ouvert. \u003cb>Animation › Nouveau plan d'animation\u003c/b> crée un plan à un format précis (paysage, vertical, carré, 4:3, bannière…) : un cadre montre la zone filmée, vous y placez logos, images et SVG à animer ensemble, et l'export reprend ce format.\u003c/p>\n\u003cul>\u003cli>\u003cb>Recettes en un clic\u003c/b> : « Du croquis au rendu », « Révélation élégante », « Tracé d'architecte », « Rebond joyeux »… Chaque recette compose une animation complète, que vous réglez ensuite.\u003c/li>\u003cli>\u003cb>Animations par calque\u003c/b> : choisissez des calques, puis une animation (apparition, disparition, texte, mouvement, caméra). Chaque animation a ses curseurs : début, durée, décalage entre les calques, courbe de vitesse.\u003c/li>\u003cli>\u003cb>Frise\u003c/b> : glissez une barre pour la déplacer, ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres ; « Courbe personnalisée » dessine votre propre accélération.\u003c/li>\u003cli>\u003cb>Son\u003c/b> : « Générer la bande son » choisit une ambiance (cinématique, élégante, dynamique, minimale, technologique) et place les sons sur les temps forts de l'animation, le moment fort de chaque son tombant pile sur l'apparition ou la révélation du logo. Chaque son se règle (début, volume, hauteur, fondus, coupe) et se déplace sur la frise ; « Effets sur tout le son » ajoute réverbération, écho, filtre, égaliseur et compresseur.\u003c/li>\u003cli>\u003cb>Banque de sons\u003c/b> : les sons de l'atelier, créés dans le navigateur, et « Mes sons » : importez vos fichiers (MP3, WAV, OGG, M4A, FLAC) ou un dossier zippé, à condition d'en détenir les droits. Ils restent sur votre appareil.\u003c/li>\u003cli>\u003cb>Exporter\u003c/b> : MP4 ou WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site) ou WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil.\u003c/li>\u003c/ul>\n\u003cp>La durée va de 1 à 12 secondes. Sur téléphone : recettes, réglages simples et export ; la frise est réservée à la tablette et à l'ordinateur.\u003c/p>\n"},{"html":"\u003ch2 id=\"tablette-et-telephone\">7. Tablette et téléphone\u003c/h2>\n\u003cp>Le dessin occupe tout l'écran. La barre du bas ouvre les panneaux (Outils, Calques, Sélection, Palette, Bulles) ; touchez le dessin pour les refermer. Le menu ☰ donne accès à À propos, Projets, Charte et Marque et départ. Zoomez à deux doigts. Le Crayon tient compte de la pression du stylet.\u003c/p>\n"},{"html":"\u003ch2 id=\"plusieurs-ecrans\">8. Plusieurs écrans\u003c/h2>\n\u003cp>Dans l'appli autonome, le bouton \u003cb>« Fenêtres »\u003c/b> détache les panneaux (Outils, Calques, Sélection, Palette, Bulles) dans des fenêtres séparées. Fermez une fenêtre pour remettre son panneau en place.\u003c/p>\n\u003cp>---\u003c/p>\n\u003cp>Besoin d'aide, d'un accompagnement ou d'une formation : contact.johnapple.fr@gmail.com\u003c/p>"}], FAQ = [{"cat":"Tarifs et accès","q":"Est-ce vraiment gratuit ?","a":"Oui : pendant la bêta, toutes les fonctions sont gratuites, sans compte et sans limite. Le cœur de l'atelier (dessiner, décliner, animer, exporter sur votre appareil) a vocation à rester accessible gratuitement. En revanche, certaines fonctions qui ont un coût réel, comme l'intelligence artificielle, le stockage et la synchronisation en ligne ou le travail en équipe, pourront devenir payantes. Aucun changement ne se fera sans prévenir, et vos créations restent à vous."},{"cat":"Tarifs et accès","q":"Faut-il créer un compte ?","a":"Non. L'atelier fonctionne sans compte. Un compte ne servira qu'aux futures options en ligne (synchronisation entre appareils, partage, travail en équipe)."},{"cat":"Tarifs et accès","q":"Comment soutenir le projet ?","a":"Dans Paramètres › À propos et soutien, ou sur la page À propos du site : un don par PayPal ou Wero aide à financer le développement et l'hébergement. Merci !"},{"cat":"Démarrer","q":"Faut-il savoir dessiner ?","a":"Non. Vous pouvez partir d'une proposition de logo imaginée à partir de vos mots-clés, d'une photo de croquis ou de l'exemple, puis demander des retouches à Claude avec une bulle."},{"cat":"Démarrer","q":"Par où commencer ?","a":"Plan › Nouveau projet : donnez le nom de votre marque, un slogan et quelques mots-clés, puis choisissez un point de départ (le nom seul, une forme, une image, une proposition de logo ou l'exemple)."},{"cat":"Démarrer","q":"Quelle différence entre plan, projet, collection et marque ?","a":"Le plan est votre document de travail (comme un fichier dans un autre logiciel). Un projet réunit les plans d'une même marque, et son nom est celui de la marque. Une collection réunit plusieurs projets, par exemple une direction artistique ou un client. Le bouton « Plan » à côté du nom du projet liste ses plans : ouvrir, renommer, décliner, déplacer vers un autre projet, supprimer, et choisir la collection du projet."},{"cat":"Projets et fichiers","q":"Qu'est-ce qu'un modèle ?","a":"Plan › Enregistrer comme modèle garde le dessin du plan ouvert, ses couleurs et ses effets. Le modèle apparaît ensuite dans « Nouveau projet » (Un de mes modèles) et dans « Nouveau plan ». Les modèles restent sur votre appareil."},{"cat":"Animation et son","q":"Comment animer plusieurs images et logos ensemble ?","a":"Animation › Nouveau plan d'animation crée un plan au format voulu : paysage 16:9, vertical 9:16, carré, portrait 4:5, 4:3, bannières ou taille libre. Un cadre montre la zone filmée. Placez-y des images (PNG, JPEG, WebP) ou des SVG avec Édition › Placer une image ou un SVG, ou depuis Motion (Calques › Importer). L'export reprend le format du plan."},{"cat":"Droits et licences","q":"Que devient une image que je place dans un plan ?","a":"Elle est redessinée sur votre appareil (2 048 px au plus, sans ses métadonnées) et enregistrée une seule fois dans votre navigateur. Un SVG n'est jamais inséré tel quel : seules ses formes sont lues et deviennent des calques modifiables ; scripts, liens et images externes sont écartés. Vous attestez détenir les droits sur les fichiers importés."},{"cat":"Démarrer","q":"Sur quels appareils fonctionne l'atelier ?","a":"Dans un navigateur récent sur ordinateur, tablette et téléphone (Chrome, Edge, Safari, Firefox). Sur téléphone, l'interface se réduit à l'essentiel ; la frise d'animation est réservée à la tablette et à l'ordinateur."},{"cat":"Démarrer","q":"Peut-on l'installer et l'utiliser sans connexion ?","a":"Oui. Paramètres › À propos et soutien › Installer l'appli, ou le menu de votre navigateur. Une fois installé, l'atelier s'ouvre sans connexion. Seules les polices du texte vivant et Claude ont besoin d'Internet."},{"cat":"Dessiner","q":"Comment dessiner une courbe précise ?","a":"Avec la Plume (P) : clic pour un point anguleux, clic-glisser pour une courbe, clic sur le premier point pour fermer, Entrée pour laisser le tracé ouvert. L'outil Points (A) modifie ensuite chaque point et ses poignées."},{"cat":"Dessiner","q":"Puis-je importer un croquis ou une signature ?","a":"Oui : Édition › Importer une image. Le papier, ses ombres et sa texture sont retirés et les contours deviennent des courbes modifiables. Sur tablette et téléphone, « Prendre une photo » ouvre l'appareil photo."},{"cat":"Dessiner","q":"Comment annuler une modification ancienne sans perdre les suivantes ?","a":"Ouvrez l'historique (Édition › Historique, ou appui long sur Annuler) : chaque modification se décoche et se recoche, dans n'importe quel ordre. Une propriété modifiée ensuite n'est jamais écrasée."},{"cat":"Dessiner","q":"Quelles polices puis-je utiliser ?","a":"Les 56 polices libres de l'atelier (latin, cyrillique, arabe, hébreu, devanagari, thaï, CJK…), vos polices importées (TTF, OTF, WOFF) et vos propres polices créées glyphe par glyphe, exportables en OTF."},{"cat":"Dessiner","q":"À quoi servent les effets et les styles ?","a":"Les effets (métal brossé, dorure, ombre, hachures, fondus…) habillent un calque sans toucher à ses courbes. Les transformations (low poly, pixel art, pointillisme…) redessinent les courbes dans de nouveaux calques."},{"cat":"Marque et charte","q":"Comment l'atelier propose-t-il des logos ?","a":"À partir du nom, des mots-clés et des lettres importantes : il choisit des pictogrammes de métier, une matière, un style et une police accordée, et compose des propositions premium et illustrées. « Autres concepts » en propose une nouvelle série."},{"cat":"Marque et charte","q":"Que contient la charte graphique ?","a":"Après un questionnaire (style, couleurs, typographies, ton) : couverture, marque et ambiance, variantes du logo, zone de protection et tailles minimales, couleurs (HEX, RVB, CMJN, contrastes), typographie, fonds autorisés, à ne pas faire, applications et fichiers fournis."},{"cat":"Marque et charte","q":"Dans quels formats sort la charte ?","a":"En PDF (A4 portrait pour l'impression, A4 paysage ou 16:9 pour une présentation) et en pack de dépôt (.zip) avec les variantes du logo en SVG et PNG et le favicon."},{"cat":"Animation et son","q":"Comment animer mon logo ?","a":"Menu Animation : choisissez une recette en un clic (par exemple « Du croquis au rendu »), puis ajustez chaque animation avec ses curseurs ou directement sur la frise. Durée de 1 à 12 secondes."},{"cat":"Animation et son","q":"Puis-je régler l'animation image par image ?","a":"Oui : sur la frise, glissez une barre pour la déplacer et ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres, et « Courbe personnalisée » dessine votre propre accélération."},{"cat":"Animation et son","q":"Comment ajouter du son ?","a":"« Générer la bande son » choisit une ambiance et place les sons sur les temps forts : le moment fort de chaque son tombe sur l'apparition ou la révélation du logo. Chaque son se règle (volume, hauteur, fondus, coupe) et des effets s'appliquent à l'ensemble."},{"cat":"Animation et son","q":"Puis-je utiliser mes propres sons ?","a":"Oui, dans Banque de sons › Importer mes sons (MP3, WAV, OGG, M4A, FLAC ou un .zip), à condition d'en détenir les droits ou d'avoir une licence qui le permet. Ils restent sur votre appareil et ne sont jamais envoyés ni partagés."},{"cat":"Animation et son","q":"Dans quels formats exporter l'animation ?","a":"MP4 et WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site, net à toute taille) et WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil."},{"cat":"Animation et son","q":"Pourquoi mon MP4 a-t-il un son en Opus ?","a":"Quand le navigateur ne sait pas encoder l'AAC, le son du MP4 est en Opus. Il se lit dans Chrome, Edge et Firefox, mais pas toujours dans d'anciens lecteurs Apple : exportez alors en WebM, ou depuis un autre navigateur."},{"cat":"Projets et fichiers","q":"Où sont enregistrés mes projets ?","a":"Dans le stockage de votre navigateur, sur votre appareil. Rien n'est envoyé sur un serveur. Pour les retrouver ailleurs ou les sauvegarder, utilisez Plan › Enregistrer dans un fichier, puis rouvrez ce fichier sur l'autre appareil."},{"cat":"Projets et fichiers","q":"Puis-je perdre mes projets ?","a":"Oui, si vous effacez les données du site dans votre navigateur ou si vous changez d'appareil. Enregistrez régulièrement vos projets dans un fichier .atelier.json : c'est votre sauvegarde."},{"cat":"Projets et fichiers","q":"Quels formats d'export pour le logo ?","a":"SVG, PNG et JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP ; motifs en mosaïque ; polices en OTF."},{"cat":"Projets et fichiers","q":"Comment copier des éléments d'un projet à l'autre ?","a":"Sélectionnez des calques puis Ctrl+C, ouvrez l'autre projet et Ctrl+V : les couleurs et dégradés suivent. Depuis Projets et collections, « Calques… » sur une carte fait de même."},{"cat":"Claude et IA","q":"Comment travailler avec Claude ?","a":"Posez une bulle sur le dessin pour demander une retouche. Dans claude.ai, l'atelier s'ouvre comme un artifact ; ailleurs, utilisez le copier-coller ou l'extension Claude Desktop. Chaque retouche de Claude arrive avec un bandeau pour l'annuler."},{"cat":"Claude et IA","q":"L'atelier envoie-t-il mes données à une IA ?","a":"Non, pas de lui-même. Seul ce que vous choisissez d'envoyer à Claude (votre dessin et vos bulles) est transmis, par la connexion que vous utilisez, et traité selon les conditions d'Anthropic. L'atelier ne stocke ni n'envoie aucune clé d'API."},{"cat":"Claude et IA","q":"D'autres IA seront-elles proposées ?","a":"C'est à l'étude. Dites-nous lesquelles vous intéressent : vos réponses orientent les prochaines connexions."},{"cat":"Droits et licences","q":"Mon logo m'appartient-il ?","a":"Oui, ce que vous créez vous appartient et peut être utilisé commercialement. Vérifiez qu'il ne reprend pas une marque, une œuvre, une police ou un son protégés sans autorisation, et qu'il ne crée pas de confusion avec une marque existante avant un dépôt."},{"cat":"Droits et licences","q":"Puis-je utiliser les pictogrammes et les sons de l'atelier ?","a":"Oui, dans vos créations. Les polices restent soumises à leurs licences libres (SIL OFL, Apache), indiquées dans À propos."},{"cat":"Confidentialité","q":"L'atelier utilise-t-il des cookies ou un suivi ?","a":"Non : ni cookie de suivi, ni publicité. Le stockage local sert uniquement au fonctionnement de l'atelier."},{"cat":"Confidentialité","q":"Comment tout effacer ?","a":"Supprimez les données du site dans les réglages de votre navigateur. Pensez à enregistrer vos projets dans un fichier avant."},{"cat":"Technique","q":"L'export vidéo est lent, est-ce normal ?","a":"Chaque image est calculée sur votre appareil, effets compris. Choisissez 720p et 30 images/s pour aller plus vite ; les logos très riches en effets (métal brossé, flous) demandent plus de calcul."},{"cat":"Technique","q":"Puis-je utiliser plusieurs écrans ?","a":"Oui, dans l'appli installée : « Fenêtres » détache les panneaux (outils, calques, sélection, palette, bulles) dans des fenêtres séparées."}];
 const fold=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const kbdHtml=k=>k.split(" / ").map(x=>x.replace(/([^+ ]+)/g,"<kbd>$1</kbd>").replace(/<kbd>(ou|sur|un|le|du|pendant|une|glisser|Appui|long|maintenu|point|poignée|1er|molette|Clic|clic|clic-glisser|Double-clic|calque|Annuler|Retour|arrière|Entrée|Échap|et)<\/kbd>/g,"$1")).join(" / ");
 let setSec="prefs";
@@ -5664,7 +6018,7 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
 #motion .mo-main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #motion .mo-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px 20px;container-type:size}
-#motion .mo-frame{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);width:min(100cqw,100cqh*16/9);aspect-ratio:16/9;display:flex;overflow:hidden}
+#motion .mo-frame{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);width:min(100cqw,100cqh*var(--ar,1.7778));aspect-ratio:var(--ar,1.7778);display:flex;overflow:hidden}
 #motion .mo-frame svg{width:100%;height:100%;display:block}
 #motion .mo-frame g[data-mo]{cursor:pointer}
 #motion .mo-bar{display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
@@ -5705,6 +6059,8 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-note{color:var(--muted);font-size:12px;text-align:center;padding:0 16px 10px}
 #motion .mo-side{border-left:1px solid var(--line);background:var(--paper);overflow:auto;padding:14px 16px 24px;display:flex;flex-direction:column;gap:16px}
 #motion .mo-side h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
+#motion .mo-place{display:flex;align-items:center;gap:7px;width:100%;margin-top:8px;font-size:12.5px;justify-content:center}
+#motion .mo-place svg{width:15px;height:15px}
 #motion .mo-quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 #motion .mo-quick button,#motion .mo-tabs button{font-size:12px;padding:4px 9px}
 #motion .mo-layers{max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
@@ -5789,7 +6145,8 @@ body.motion-open .toast{z-index:1000}
       <div id="moClips"></div></section>
     <section><h3>Calques</h3>
       <div class="mo-quick"><button data-q="all">Tout</button><button data-q="mark">Symbole</button><button data-q="word">Texte</button><button data-q="none">Aucun</button></div>
-      <div class="mo-layers" id="moLayers"></div></section>
+      <div class="mo-layers" id="moLayers"></div>
+      <button class="mo-place" id="moPlace">${ico("place")}Importer une image ou un SVG…</button></section>
     <section><h3>Ajouter une animation</h3>
       <div class="mo-tabs" id="moTabs" role="group" aria-label="Familles d'animations">${MO_TABS.map(([k, n]) => `<button data-tab="${k}" aria-pressed="false">${n}</button>`).join("")}</div>
       <div class="mo-presets" id="moPresets"></div><p class="mo-hint" id="moHint"></p></section>
@@ -5810,6 +6167,7 @@ body.motion-open .toast{z-index:1000}
   moEl("moScrub").oninput = e => { moPlay(false); moSeek(+e.target.value); };
   moEl("moDur").oninput = e => { motion.dur = moC(+e.target.value, MOTION_MIN, MOTION_MAX); moBuild(); moPanel(); moSave(); };
   moEl("moLoop").onchange = e => { motion.loop = e.target.checked; moSave(); };
+  moEl("moPlace").onclick = () => { window.__moAfterPlace = () => { window.__moAfterPlace = null; if (MO.open) { moBuild(); moPanel(); } }; $("#placeIn").click(); };
   moEl("moSvg").addEventListener("click", e => { const g = e.target.closest && e.target.closest("g[data-mo]"); if (!g) return;
     moSelect(g.dataset.mo, e.shiftKey || e.metaKey || e.ctrlKey); });
   const side = moEl("moSide");
@@ -5952,7 +6310,7 @@ function moBuild() {
     a.ids.forEach(id => { const n = need[id] || (need[id] = {}); if (f === "clip") n.clip = Math.max(n.clip || 1, a.o.bands || MO_PRESETS[a.p].o.bands || 1); else n[f] = true; }); }
   let defs = "", body = "";
   if (vis.length) {
-    const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, vb = moViewBox(16 / 9);
+    const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, vb = moViewBox(moAR());
     MO.S = Math.max(w, h) || 1; MO.c = { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 };
     svg.setAttribute("viewBox", `${r2(vb.x)} ${r2(vb.y)} ${r2(vb.w)} ${r2(vb.h)}`);
     vis.forEach((L, k) => {
@@ -5967,6 +6325,7 @@ function moBuild() {
       body += `<g data-mo="${esc(L.id)}"${nd.filter ? ` filter="url(#mof-${k})"` : ""}><g data-c${nd.clip ? ` clip-path="url(#moc-${k})"` : ""}><g data-b>${r.body}</g>${tr}</g></g>`;
     });
   } else { MO.S = 1; MO.c = { x: 80, y: 45 }; svg.setAttribute("viewBox", "0 0 160 90"); }
+  moEl("moFrame").style.setProperty("--ar", String(Math.round(moAR() * 1e4) / 1e4));
   svg.innerHTML = (defs ? `<defs>${defs}</defs>` : "") + (body ? `<g data-scene>${body}</g><g data-selbox pointer-events="none"></g>` : `<text x="80" y="47" text-anchor="middle" font-size="6" fill="#6B6B70" font-family="Inter,system-ui,sans-serif">Le projet ne contient encore aucun calque visible.</text>`);
   MO.groups = {}; svg.querySelectorAll("g[data-mo]").forEach(g => { MO.groups[g.dataset.mo] = { g, c: g.firstChild, b: g.firstChild.firstChild, tr: g.querySelector("[data-tr]") }; });
   MO.scene = svg.querySelector("g[data-scene]");
@@ -5982,7 +6341,11 @@ function moBuild() {
   moSelBoxes(); moSeek(Math.min(MO.t, motion.dur));
 }
 /* the drawing framed with a margin in a given aspect ratio (width / height) */
+/* an animation plan has its own frame (planFrame, at the origin): the stage and the exports show that frame */
+const moAR = () => planFrame ? planFrame.w / planFrame.h : 16 / 9;
 function moViewBox(aspect) {
+  if (planFrame) { let vw = planFrame.w, vh = planFrame.h; if (vw / vh < aspect) vw = vh * aspect; else vh = vw / aspect;
+    return { x: (planFrame.w - vw) / 2, y: (planFrame.h - vh) / 2, w: vw, h: vh }; }
   const vis = moVisible(); if (!vis.length) return { x: 0, y: 0, w: 160, h: 90 };
   const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, pad = Math.max(w, h) * 0.12;
   let vw = w + 2 * pad, vh = h + 2 * pad; if (vw / vh < aspect) vw = vh * aspect; else vh = vw / aspect;
@@ -6313,7 +6676,8 @@ const MO_FORMATS = {
   svg: { n: "SVG animé", d: "Pour un site : net à toute taille, très léger", ext: "svg" },
   wav: { n: "WAV (son seul)", d: "La bande son, pour un montage", ext: "wav" },
 };
-function moDims(aspect, short) { const [a, b] = MO_ASPECTS[aspect]; const even = v => Math.max(2, Math.round(v / 2) * 2);
+const moAsp = k => k === "plan" && planFrame ? [planFrame.w, planFrame.h, `Format du plan (${planFrame.w} × ${planFrame.h})`] : MO_ASPECTS[k] || MO_ASPECTS["16:9"];
+function moDims(aspect, short) { const [a, b] = moAsp(aspect); const even = v => Math.max(2, Math.round(v / 2) * 2);
   return a >= b ? { W: even(short * a / b), H: even(short) } : { W: even(short), H: even(short * b / a) }; }
 function moLoadVendor(name, global) {
   if (window[global]) return Promise.resolve(window[global]);
@@ -6553,7 +6917,7 @@ function moExportSVG(o) {
   moEl("moExGo").onclick = async () => {
     const f = fmt(), asp = moEl("moExAsp").value, short = +moEl("moExSize").value, fps = +moEl("moExFps").value;
     const bgSel = moEl("moExBg").value, bg = bgSel === "custom" ? moEl("moExCol").value : bgSel;
-    const [a, b] = MO_ASPECTS[asp], vb = moViewBox(a / b), { W, H } = f === "svg" ? moDims(asp, 900) : moDims(asp, short);
+    const [a, b] = moAsp(asp), vb = moViewBox(a / b), { W, H } = f === "svg" ? moDims(asp, 900) : moDims(asp, short);
     const msg = moEl("moExMsg"), prog = moEl("moExProg"), go = moEl("moExGo");
     MO.exBusy = true; MO.exCancel = false; go.disabled = true; moEl("moExCancel").textContent = "Annuler"; prog.hidden = false; prog.value = 0; msg.textContent = "Préparation…";
     moPlay(false); MO.exporting = true; moSelBoxes(); const t0 = MO.t, started = performance.now();
@@ -6564,7 +6928,7 @@ function moExportSVG(o) {
       else if (f === "svg") { msg.textContent = "Calcul des images…"; await new Promise(r => setTimeout(r, 20)); blob = new Blob([moExportSVG({ W, H, bg, vb, fps })], { type: "image/svg+xml" }); prog.value = 1; }
       else if (f === "gif") blob = await moEncodeGif({ W, H, fps, bg, vb }, step);
       else blob = await moEncodeVideo(f, { W, H, fps, bg, vb }, step);
-      const name = filePfx() + "-animation" + (asp === "16:9" ? "" : "-" + asp.replace(":", "x")) + "." + MO_FORMATS[f].ext;
+      const name = filePfx() + "-animation" + (asp === "16:9" || asp === "plan" ? "" : "-" + asp.replace(":", "x")) + "." + MO_FORMATS[f].ext;
       await saveBlob(name, blob);
       msg.textContent = (f === "mp4" || f === "webm" ? (MO.exAudio ? (f === "mp4" && MO.exAudio === "opus" ? "Avec le son (en Opus : certains anciens lecteurs Apple ne le lisent pas ; WebM est une alternative). " : "Avec le son. ") : motion.audio.on && motion.audio.clips.length ? "Sans le son (ce navigateur ne sait pas l'encoder). " : "") : "") + `Enregistré : ${name} (${blob.size > 1048576 ? (Math.round(blob.size / 104857.6) / 10).toString().replace(".", ",") + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko"})`;
     } catch (err) {
@@ -6581,7 +6945,11 @@ function moExportSVG(o) {
       if (inp.disabled && inp.checked) { d.querySelector("input[value=gif]").checked = true; refresh(); } }
   };
 })();
-function openMotionExport() { if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; } moPlay(false); moEl("moExMsg").textContent = ""; moEl("moExDlg").showModal(); MO.exRefresh(); }
+function openMotionExport() { if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; } moPlay(false); moEl("moExMsg").textContent = "";
+  const sel = moEl("moExAsp"), keep = sel.value;
+  sel.innerHTML = (planFrame ? `<option value="plan">${esc(moAsp("plan")[2])}</option>` : "") + Object.entries(MO_ASPECTS).map(([k, a]) => `<option value="${k}">${a[2]}</option>`).join("");
+  sel.value = planFrame ? "plan" : ([...sel.options].some(o => o.value === keep) ? keep : "16:9");
+  moEl("moExDlg").showModal(); MO.exRefresh(); }
 
 
 /* ---------- Sound (step 6) ----------
