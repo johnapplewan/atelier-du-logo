@@ -57,13 +57,15 @@ Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des c
 
 ## 5. Projets, export et charte
 
+- **Plans** : un plan est votre document de travail. Un projet (votre marque) réunit plusieurs plans : le logo, ses déclinaisons, des animations. Le bouton **Plan** à côté du nom du projet les liste ; **Plan › Nouveau plan** part du plan ouvert, d'une page vide ou d'un de vos modèles ; **Décliner ce plan** le duplique ; **Enregistrer comme modèle** l'ajoute à vos suggestions de départ.
+- **Images et SVG** : **Édition › Placer une image ou un SVG** ajoute une photo (PNG, JPEG, WebP) comme calque, ou les formes d'un SVG comme calques modifiables.
 - **Projets** : enregistrés dans votre navigateur. Vous pouvez dupliquer un projet, copier des calques d'un projet à l'autre, classer vos projets en collections, et exporter un fichier `.atelier.json` pour passer à un autre appareil.
 - **Exporter** : SVG, PNG ou JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP.
 - **Charte** : un questionnaire (style, couleurs, typographies, ton), puis les pages de la charte. Vous l'exportez en PDF (A4 portrait, paysage ou slides) ou en pack de dépôt.
 
 ## 6. Animer votre logo (Motion)
 
-Le menu **Animation › Animer le plan** ouvre Motion, sur le logo du projet ouvert.
+Le menu **Animation › Animer le plan** ouvre Motion, sur le logo du projet ouvert. **Animation › Nouveau plan d'animation** crée un plan à un format précis (paysage, vertical, carré, 4:3, bannière…) : un cadre montre la zone filmée, vous y placez logos, images et SVG à animer ensemble, et l'export reprend ce format.
 
 - **Recettes en un clic** : « Du croquis au rendu », « Révélation élégante », « Tracé d'architecte », « Rebond joyeux »… Chaque recette compose une animation complète, que vous réglez ensuite.
 - **Animations par calque** : choisissez des calques, puis une animation (apparition, disparition, texte, mouvement, caméra). Chaque animation a ses curseurs : début, durée, décalage entre les calques, courbe de vitesse.

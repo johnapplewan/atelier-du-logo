@@ -229,7 +229,7 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 340px}
 #motion .mo-main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #motion .mo-stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px 20px;container-type:size}
-#motion .mo-frame{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);width:min(100cqw,100cqh*16/9);aspect-ratio:16/9;display:flex;overflow:hidden}
+#motion .mo-frame{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 30px rgba(0,0,0,.06);width:min(100cqw,100cqh*var(--ar,1.7778));aspect-ratio:var(--ar,1.7778);display:flex;overflow:hidden}
 #motion .mo-frame svg{width:100%;height:100%;display:block}
 #motion .mo-frame g[data-mo]{cursor:pointer}
 #motion .mo-bar{display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
@@ -270,6 +270,8 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-note{color:var(--muted);font-size:12px;text-align:center;padding:0 16px 10px}
 #motion .mo-side{border-left:1px solid var(--line);background:var(--paper);overflow:auto;padding:14px 16px 24px;display:flex;flex-direction:column;gap:16px}
 #motion .mo-side h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
+#motion .mo-place{display:flex;align-items:center;gap:7px;width:100%;margin-top:8px;font-size:12.5px;justify-content:center}
+#motion .mo-place svg{width:15px;height:15px}
 #motion .mo-quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 #motion .mo-quick button,#motion .mo-tabs button{font-size:12px;padding:4px 9px}
 #motion .mo-layers{max-height:190px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
@@ -354,7 +356,8 @@ body.motion-open .toast{z-index:1000}
       <div id="moClips"></div></section>
     <section><h3>Calques</h3>
       <div class="mo-quick"><button data-q="all">Tout</button><button data-q="mark">Symbole</button><button data-q="word">Texte</button><button data-q="none">Aucun</button></div>
-      <div class="mo-layers" id="moLayers"></div></section>
+      <div class="mo-layers" id="moLayers"></div>
+      <button class="mo-place" id="moPlace">${ico("place")}Importer une image ou un SVG…</button></section>
     <section><h3>Ajouter une animation</h3>
       <div class="mo-tabs" id="moTabs" role="group" aria-label="Familles d'animations">${MO_TABS.map(([k, n]) => `<button data-tab="${k}" aria-pressed="false">${n}</button>`).join("")}</div>
       <div class="mo-presets" id="moPresets"></div><p class="mo-hint" id="moHint"></p></section>
@@ -375,6 +378,7 @@ body.motion-open .toast{z-index:1000}
   moEl("moScrub").oninput = e => { moPlay(false); moSeek(+e.target.value); };
   moEl("moDur").oninput = e => { motion.dur = moC(+e.target.value, MOTION_MIN, MOTION_MAX); moBuild(); moPanel(); moSave(); };
   moEl("moLoop").onchange = e => { motion.loop = e.target.checked; moSave(); };
+  moEl("moPlace").onclick = () => { window.__moAfterPlace = () => { window.__moAfterPlace = null; if (MO.open) { moBuild(); moPanel(); } }; $("#placeIn").click(); };
   moEl("moSvg").addEventListener("click", e => { const g = e.target.closest && e.target.closest("g[data-mo]"); if (!g) return;
     moSelect(g.dataset.mo, e.shiftKey || e.metaKey || e.ctrlKey); });
   const side = moEl("moSide");
@@ -517,7 +521,7 @@ function moBuild() {
     a.ids.forEach(id => { const n = need[id] || (need[id] = {}); if (f === "clip") n.clip = Math.max(n.clip || 1, a.o.bands || MO_PRESETS[a.p].o.bands || 1); else n[f] = true; }); }
   let defs = "", body = "";
   if (vis.length) {
-    const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, vb = moViewBox(16 / 9);
+    const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, vb = moViewBox(moAR());
     MO.S = Math.max(w, h) || 1; MO.c = { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 };
     svg.setAttribute("viewBox", `${r2(vb.x)} ${r2(vb.y)} ${r2(vb.w)} ${r2(vb.h)}`);
     vis.forEach((L, k) => {
@@ -532,6 +536,7 @@ function moBuild() {
       body += `<g data-mo="${esc(L.id)}"${nd.filter ? ` filter="url(#mof-${k})"` : ""}><g data-c${nd.clip ? ` clip-path="url(#moc-${k})"` : ""}><g data-b>${r.body}</g>${tr}</g></g>`;
     });
   } else { MO.S = 1; MO.c = { x: 80, y: 45 }; svg.setAttribute("viewBox", "0 0 160 90"); }
+  moEl("moFrame").style.setProperty("--ar", String(Math.round(moAR() * 1e4) / 1e4));
   svg.innerHTML = (defs ? `<defs>${defs}</defs>` : "") + (body ? `<g data-scene>${body}</g><g data-selbox pointer-events="none"></g>` : `<text x="80" y="47" text-anchor="middle" font-size="6" fill="#6B6B70" font-family="Inter,system-ui,sans-serif">Le projet ne contient encore aucun calque visible.</text>`);
   MO.groups = {}; svg.querySelectorAll("g[data-mo]").forEach(g => { MO.groups[g.dataset.mo] = { g, c: g.firstChild, b: g.firstChild.firstChild, tr: g.querySelector("[data-tr]") }; });
   MO.scene = svg.querySelector("g[data-scene]");
@@ -547,7 +552,11 @@ function moBuild() {
   moSelBoxes(); moSeek(Math.min(MO.t, motion.dur));
 }
 /* the drawing framed with a margin in a given aspect ratio (width / height) */
+/* an animation plan has its own frame (planFrame, at the origin): the stage and the exports show that frame */
+const moAR = () => planFrame ? planFrame.w / planFrame.h : 16 / 9;
 function moViewBox(aspect) {
+  if (planFrame) { let vw = planFrame.w, vh = planFrame.h; if (vw / vh < aspect) vw = vh * aspect; else vh = vw / aspect;
+    return { x: (planFrame.w - vw) / 2, y: (planFrame.h - vh) / 2, w: vw, h: vh }; }
   const vis = moVisible(); if (!vis.length) return { x: 0, y: 0, w: 160, h: 90 };
   const b = bounds(vis), w = b.x1 - b.x0, h = b.y1 - b.y0, pad = Math.max(w, h) * 0.12;
   let vw = w + 2 * pad, vh = h + 2 * pad; if (vw / vh < aspect) vw = vh * aspect; else vh = vw / aspect;
@@ -878,7 +887,8 @@ const MO_FORMATS = {
   svg: { n: "SVG animé", d: "Pour un site : net à toute taille, très léger", ext: "svg" },
   wav: { n: "WAV (son seul)", d: "La bande son, pour un montage", ext: "wav" },
 };
-function moDims(aspect, short) { const [a, b] = MO_ASPECTS[aspect]; const even = v => Math.max(2, Math.round(v / 2) * 2);
+const moAsp = k => k === "plan" && planFrame ? [planFrame.w, planFrame.h, `Format du plan (${planFrame.w} × ${planFrame.h})`] : MO_ASPECTS[k] || MO_ASPECTS["16:9"];
+function moDims(aspect, short) { const [a, b] = moAsp(aspect); const even = v => Math.max(2, Math.round(v / 2) * 2);
   return a >= b ? { W: even(short * a / b), H: even(short) } : { W: even(short), H: even(short * b / a) }; }
 function moLoadVendor(name, global) {
   if (window[global]) return Promise.resolve(window[global]);
@@ -1118,7 +1128,7 @@ function moExportSVG(o) {
   moEl("moExGo").onclick = async () => {
     const f = fmt(), asp = moEl("moExAsp").value, short = +moEl("moExSize").value, fps = +moEl("moExFps").value;
     const bgSel = moEl("moExBg").value, bg = bgSel === "custom" ? moEl("moExCol").value : bgSel;
-    const [a, b] = MO_ASPECTS[asp], vb = moViewBox(a / b), { W, H } = f === "svg" ? moDims(asp, 900) : moDims(asp, short);
+    const [a, b] = moAsp(asp), vb = moViewBox(a / b), { W, H } = f === "svg" ? moDims(asp, 900) : moDims(asp, short);
     const msg = moEl("moExMsg"), prog = moEl("moExProg"), go = moEl("moExGo");
     MO.exBusy = true; MO.exCancel = false; go.disabled = true; moEl("moExCancel").textContent = "Annuler"; prog.hidden = false; prog.value = 0; msg.textContent = "Préparation…";
     moPlay(false); MO.exporting = true; moSelBoxes(); const t0 = MO.t, started = performance.now();
@@ -1129,7 +1139,7 @@ function moExportSVG(o) {
       else if (f === "svg") { msg.textContent = "Calcul des images…"; await new Promise(r => setTimeout(r, 20)); blob = new Blob([moExportSVG({ W, H, bg, vb, fps })], { type: "image/svg+xml" }); prog.value = 1; }
       else if (f === "gif") blob = await moEncodeGif({ W, H, fps, bg, vb }, step);
       else blob = await moEncodeVideo(f, { W, H, fps, bg, vb }, step);
-      const name = filePfx() + "-animation" + (asp === "16:9" ? "" : "-" + asp.replace(":", "x")) + "." + MO_FORMATS[f].ext;
+      const name = filePfx() + "-animation" + (asp === "16:9" || asp === "plan" ? "" : "-" + asp.replace(":", "x")) + "." + MO_FORMATS[f].ext;
       await saveBlob(name, blob);
       msg.textContent = (f === "mp4" || f === "webm" ? (MO.exAudio ? (f === "mp4" && MO.exAudio === "opus" ? "Avec le son (en Opus : certains anciens lecteurs Apple ne le lisent pas ; WebM est une alternative). " : "Avec le son. ") : motion.audio.on && motion.audio.clips.length ? "Sans le son (ce navigateur ne sait pas l'encoder). " : "") : "") + `Enregistré : ${name} (${blob.size > 1048576 ? (Math.round(blob.size / 104857.6) / 10).toString().replace(".", ",") + " Mo" : Math.max(1, Math.round(blob.size / 1024)) + " Ko"})`;
     } catch (err) {
@@ -1146,7 +1156,11 @@ function moExportSVG(o) {
       if (inp.disabled && inp.checked) { d.querySelector("input[value=gif]").checked = true; refresh(); } }
   };
 })();
-function openMotionExport() { if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; } moPlay(false); moEl("moExMsg").textContent = ""; moEl("moExDlg").showModal(); MO.exRefresh(); }
+function openMotionExport() { if (!moVisible().length) { toast("Le projet ne contient aucun calque visible."); return; } moPlay(false); moEl("moExMsg").textContent = "";
+  const sel = moEl("moExAsp"), keep = sel.value;
+  sel.innerHTML = (planFrame ? `<option value="plan">${esc(moAsp("plan")[2])}</option>` : "") + Object.entries(MO_ASPECTS).map(([k, a]) => `<option value="${k}">${a[2]}</option>`).join("");
+  sel.value = planFrame ? "plan" : ([...sel.options].some(o => o.value === keep) ? keep : "16:9");
+  moEl("moExDlg").showModal(); MO.exRefresh(); }
 
 
 /* ---------- Sound (step 6) ----------

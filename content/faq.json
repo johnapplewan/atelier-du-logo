@@ -1,37 +1,192 @@
 [
-  {"cat": "Tarifs et accès", "q": "Est-ce vraiment gratuit ?", "a": "Oui : pendant la bêta, toutes les fonctions sont gratuites, sans compte et sans limite. Le cœur de l'atelier (dessiner, décliner, animer, exporter sur votre appareil) a vocation à rester accessible gratuitement. En revanche, certaines fonctions qui ont un coût réel, comme l'intelligence artificielle, le stockage et la synchronisation en ligne ou le travail en équipe, pourront devenir payantes. Aucun changement ne se fera sans prévenir, et vos créations restent à vous."},
-  {"cat": "Tarifs et accès", "q": "Faut-il créer un compte ?", "a": "Non. L'atelier fonctionne sans compte. Un compte ne servira qu'aux futures options en ligne (synchronisation entre appareils, partage, travail en équipe)."},
-  {"cat": "Tarifs et accès", "q": "Comment soutenir le projet ?", "a": "Dans Paramètres › À propos et soutien, ou sur la page À propos du site : un don par PayPal ou Wero aide à financer le développement et l'hébergement. Merci !"},
-  {"cat": "Démarrer", "q": "Faut-il savoir dessiner ?", "a": "Non. Vous pouvez partir d'une proposition de logo imaginée à partir de vos mots-clés, d'une photo de croquis ou de l'exemple, puis demander des retouches à Claude avec une bulle."},
-  {"cat": "Démarrer", "q": "Par où commencer ?", "a": "Plan › Nouveau projet : donnez le nom de votre marque, un slogan et quelques mots-clés, puis choisissez un point de départ (le nom seul, une forme, une image, une proposition de logo ou l'exemple)."},
-  {"cat": "Démarrer", "q": "Quelle différence entre plan, projet, collection et marque ?", "a": "Le plan est votre document de travail (comme un fichier dans un autre logiciel). Un projet réunit les plans d'une même marque, et son nom est celui de la marque. Une collection réunit plusieurs projets, par exemple une direction artistique ou un client."},
-  {"cat": "Démarrer", "q": "Sur quels appareils fonctionne l'atelier ?", "a": "Dans un navigateur récent sur ordinateur, tablette et téléphone (Chrome, Edge, Safari, Firefox). Sur téléphone, l'interface se réduit à l'essentiel ; la frise d'animation est réservée à la tablette et à l'ordinateur."},
-  {"cat": "Démarrer", "q": "Peut-on l'installer et l'utiliser sans connexion ?", "a": "Oui. Paramètres › À propos et soutien › Installer l'appli, ou le menu de votre navigateur. Une fois installé, l'atelier s'ouvre sans connexion. Seules les polices du texte vivant et Claude ont besoin d'Internet."},
-  {"cat": "Dessiner", "q": "Comment dessiner une courbe précise ?", "a": "Avec la Plume (P) : clic pour un point anguleux, clic-glisser pour une courbe, clic sur le premier point pour fermer, Entrée pour laisser le tracé ouvert. L'outil Points (A) modifie ensuite chaque point et ses poignées."},
-  {"cat": "Dessiner", "q": "Puis-je importer un croquis ou une signature ?", "a": "Oui : Édition › Importer une image. Le papier, ses ombres et sa texture sont retirés et les contours deviennent des courbes modifiables. Sur tablette et téléphone, « Prendre une photo » ouvre l'appareil photo."},
-  {"cat": "Dessiner", "q": "Comment annuler une modification ancienne sans perdre les suivantes ?", "a": "Ouvrez l'historique (Édition › Historique, ou appui long sur Annuler) : chaque modification se décoche et se recoche, dans n'importe quel ordre. Une propriété modifiée ensuite n'est jamais écrasée."},
-  {"cat": "Dessiner", "q": "Quelles polices puis-je utiliser ?", "a": "Les 56 polices libres de l'atelier (latin, cyrillique, arabe, hébreu, devanagari, thaï, CJK…), vos polices importées (TTF, OTF, WOFF) et vos propres polices créées glyphe par glyphe, exportables en OTF."},
-  {"cat": "Dessiner", "q": "À quoi servent les effets et les styles ?", "a": "Les effets (métal brossé, dorure, ombre, hachures, fondus…) habillent un calque sans toucher à ses courbes. Les transformations (low poly, pixel art, pointillisme…) redessinent les courbes dans de nouveaux calques."},
-  {"cat": "Marque et charte", "q": "Comment l'atelier propose-t-il des logos ?", "a": "À partir du nom, des mots-clés et des lettres importantes : il choisit des pictogrammes de métier, une matière, un style et une police accordée, et compose des propositions premium et illustrées. « Autres concepts » en propose une nouvelle série."},
-  {"cat": "Marque et charte", "q": "Que contient la charte graphique ?", "a": "Après un questionnaire (style, couleurs, typographies, ton) : couverture, marque et ambiance, variantes du logo, zone de protection et tailles minimales, couleurs (HEX, RVB, CMJN, contrastes), typographie, fonds autorisés, à ne pas faire, applications et fichiers fournis."},
-  {"cat": "Marque et charte", "q": "Dans quels formats sort la charte ?", "a": "En PDF (A4 portrait pour l'impression, A4 paysage ou 16:9 pour une présentation) et en pack de dépôt (.zip) avec les variantes du logo en SVG et PNG et le favicon."},
-  {"cat": "Animation et son", "q": "Comment animer mon logo ?", "a": "Menu Animation : choisissez une recette en un clic (par exemple « Du croquis au rendu »), puis ajustez chaque animation avec ses curseurs ou directement sur la frise. Durée de 1 à 12 secondes."},
-  {"cat": "Animation et son", "q": "Puis-je régler l'animation image par image ?", "a": "Oui : sur la frise, glissez une barre pour la déplacer et ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres, et « Courbe personnalisée » dessine votre propre accélération."},
-  {"cat": "Animation et son", "q": "Comment ajouter du son ?", "a": "« Générer la bande son » choisit une ambiance et place les sons sur les temps forts : le moment fort de chaque son tombe sur l'apparition ou la révélation du logo. Chaque son se règle (volume, hauteur, fondus, coupe) et des effets s'appliquent à l'ensemble."},
-  {"cat": "Animation et son", "q": "Puis-je utiliser mes propres sons ?", "a": "Oui, dans Banque de sons › Importer mes sons (MP3, WAV, OGG, M4A, FLAC ou un .zip), à condition d'en détenir les droits ou d'avoir une licence qui le permet. Ils restent sur votre appareil et ne sont jamais envoyés ni partagés."},
-  {"cat": "Animation et son", "q": "Dans quels formats exporter l'animation ?", "a": "MP4 et WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site, net à toute taille) et WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil."},
-  {"cat": "Animation et son", "q": "Pourquoi mon MP4 a-t-il un son en Opus ?", "a": "Quand le navigateur ne sait pas encoder l'AAC, le son du MP4 est en Opus. Il se lit dans Chrome, Edge et Firefox, mais pas toujours dans d'anciens lecteurs Apple : exportez alors en WebM, ou depuis un autre navigateur."},
-  {"cat": "Projets et fichiers", "q": "Où sont enregistrés mes projets ?", "a": "Dans le stockage de votre navigateur, sur votre appareil. Rien n'est envoyé sur un serveur. Pour les retrouver ailleurs ou les sauvegarder, utilisez Plan › Enregistrer dans un fichier, puis rouvrez ce fichier sur l'autre appareil."},
-  {"cat": "Projets et fichiers", "q": "Puis-je perdre mes projets ?", "a": "Oui, si vous effacez les données du site dans votre navigateur ou si vous changez d'appareil. Enregistrez régulièrement vos projets dans un fichier .atelier.json : c'est votre sauvegarde."},
-  {"cat": "Projets et fichiers", "q": "Quels formats d'export pour le logo ?", "a": "SVG, PNG et JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP ; motifs en mosaïque ; polices en OTF."},
-  {"cat": "Projets et fichiers", "q": "Comment copier des éléments d'un projet à l'autre ?", "a": "Sélectionnez des calques puis Ctrl+C, ouvrez l'autre projet et Ctrl+V : les couleurs et dégradés suivent. Depuis Projets et collections, « Calques… » sur une carte fait de même."},
-  {"cat": "Claude et IA", "q": "Comment travailler avec Claude ?", "a": "Posez une bulle sur le dessin pour demander une retouche. Dans claude.ai, l'atelier s'ouvre comme un artifact ; ailleurs, utilisez le copier-coller ou l'extension Claude Desktop. Chaque retouche de Claude arrive avec un bandeau pour l'annuler."},
-  {"cat": "Claude et IA", "q": "L'atelier envoie-t-il mes données à une IA ?", "a": "Non, pas de lui-même. Seul ce que vous choisissez d'envoyer à Claude (votre dessin et vos bulles) est transmis, par la connexion que vous utilisez, et traité selon les conditions d'Anthropic. L'atelier ne stocke ni n'envoie aucune clé d'API."},
-  {"cat": "Claude et IA", "q": "D'autres IA seront-elles proposées ?", "a": "C'est à l'étude. Dites-nous lesquelles vous intéressent : vos réponses orientent les prochaines connexions."},
-  {"cat": "Droits et licences", "q": "Mon logo m'appartient-il ?", "a": "Oui, ce que vous créez vous appartient et peut être utilisé commercialement. Vérifiez qu'il ne reprend pas une marque, une œuvre, une police ou un son protégés sans autorisation, et qu'il ne crée pas de confusion avec une marque existante avant un dépôt."},
-  {"cat": "Droits et licences", "q": "Puis-je utiliser les pictogrammes et les sons de l'atelier ?", "a": "Oui, dans vos créations. Les polices restent soumises à leurs licences libres (SIL OFL, Apache), indiquées dans À propos."},
-  {"cat": "Confidentialité", "q": "L'atelier utilise-t-il des cookies ou un suivi ?", "a": "Non : ni cookie de suivi, ni publicité. Le stockage local sert uniquement au fonctionnement de l'atelier."},
-  {"cat": "Confidentialité", "q": "Comment tout effacer ?", "a": "Supprimez les données du site dans les réglages de votre navigateur. Pensez à enregistrer vos projets dans un fichier avant."},
-  {"cat": "Technique", "q": "L'export vidéo est lent, est-ce normal ?", "a": "Chaque image est calculée sur votre appareil, effets compris. Choisissez 720p et 30 images/s pour aller plus vite ; les logos très riches en effets (métal brossé, flous) demandent plus de calcul."},
-  {"cat": "Technique", "q": "Puis-je utiliser plusieurs écrans ?", "a": "Oui, dans l'appli installée : « Fenêtres » détache les panneaux (outils, calques, sélection, palette, bulles) dans des fenêtres séparées."}
+ {
+  "cat": "Tarifs et accès",
+  "q": "Est-ce vraiment gratuit ?",
+  "a": "Oui : pendant la bêta, toutes les fonctions sont gratuites, sans compte et sans limite. Le cœur de l'atelier (dessiner, décliner, animer, exporter sur votre appareil) a vocation à rester accessible gratuitement. En revanche, certaines fonctions qui ont un coût réel, comme l'intelligence artificielle, le stockage et la synchronisation en ligne ou le travail en équipe, pourront devenir payantes. Aucun changement ne se fera sans prévenir, et vos créations restent à vous."
+ },
+ {
+  "cat": "Tarifs et accès",
+  "q": "Faut-il créer un compte ?",
+  "a": "Non. L'atelier fonctionne sans compte. Un compte ne servira qu'aux futures options en ligne (synchronisation entre appareils, partage, travail en équipe)."
+ },
+ {
+  "cat": "Tarifs et accès",
+  "q": "Comment soutenir le projet ?",
+  "a": "Dans Paramètres › À propos et soutien, ou sur la page À propos du site : un don par PayPal ou Wero aide à financer le développement et l'hébergement. Merci !"
+ },
+ {
+  "cat": "Démarrer",
+  "q": "Faut-il savoir dessiner ?",
+  "a": "Non. Vous pouvez partir d'une proposition de logo imaginée à partir de vos mots-clés, d'une photo de croquis ou de l'exemple, puis demander des retouches à Claude avec une bulle."
+ },
+ {
+  "cat": "Démarrer",
+  "q": "Par où commencer ?",
+  "a": "Plan › Nouveau projet : donnez le nom de votre marque, un slogan et quelques mots-clés, puis choisissez un point de départ (le nom seul, une forme, une image, une proposition de logo ou l'exemple)."
+ },
+ {
+  "cat": "Démarrer",
+  "q": "Quelle différence entre plan, projet, collection et marque ?",
+  "a": "Le plan est votre document de travail (comme un fichier dans un autre logiciel). Un projet réunit les plans d'une même marque, et son nom est celui de la marque. Une collection réunit plusieurs projets, par exemple une direction artistique ou un client. Le bouton « Plan » à côté du nom du projet liste ses plans : ouvrir, renommer, décliner, déplacer vers un autre projet, supprimer, et choisir la collection du projet."
+ },
+ {
+  "cat": "Projets et fichiers",
+  "q": "Qu'est-ce qu'un modèle ?",
+  "a": "Plan › Enregistrer comme modèle garde le dessin du plan ouvert, ses couleurs et ses effets. Le modèle apparaît ensuite dans « Nouveau projet » (Un de mes modèles) et dans « Nouveau plan ». Les modèles restent sur votre appareil."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Comment animer plusieurs images et logos ensemble ?",
+  "a": "Animation › Nouveau plan d'animation crée un plan au format voulu : paysage 16:9, vertical 9:16, carré, portrait 4:5, 4:3, bannières ou taille libre. Un cadre montre la zone filmée. Placez-y des images (PNG, JPEG, WebP) ou des SVG avec Édition › Placer une image ou un SVG, ou depuis Motion (Calques › Importer). L'export reprend le format du plan."
+ },
+ {
+  "cat": "Droits et licences",
+  "q": "Que devient une image que je place dans un plan ?",
+  "a": "Elle est redessinée sur votre appareil (2 048 px au plus, sans ses métadonnées) et enregistrée une seule fois dans votre navigateur. Un SVG n'est jamais inséré tel quel : seules ses formes sont lues et deviennent des calques modifiables ; scripts, liens et images externes sont écartés. Vous attestez détenir les droits sur les fichiers importés."
+ },
+ {
+  "cat": "Démarrer",
+  "q": "Sur quels appareils fonctionne l'atelier ?",
+  "a": "Dans un navigateur récent sur ordinateur, tablette et téléphone (Chrome, Edge, Safari, Firefox). Sur téléphone, l'interface se réduit à l'essentiel ; la frise d'animation est réservée à la tablette et à l'ordinateur."
+ },
+ {
+  "cat": "Démarrer",
+  "q": "Peut-on l'installer et l'utiliser sans connexion ?",
+  "a": "Oui. Paramètres › À propos et soutien › Installer l'appli, ou le menu de votre navigateur. Une fois installé, l'atelier s'ouvre sans connexion. Seules les polices du texte vivant et Claude ont besoin d'Internet."
+ },
+ {
+  "cat": "Dessiner",
+  "q": "Comment dessiner une courbe précise ?",
+  "a": "Avec la Plume (P) : clic pour un point anguleux, clic-glisser pour une courbe, clic sur le premier point pour fermer, Entrée pour laisser le tracé ouvert. L'outil Points (A) modifie ensuite chaque point et ses poignées."
+ },
+ {
+  "cat": "Dessiner",
+  "q": "Puis-je importer un croquis ou une signature ?",
+  "a": "Oui : Édition › Importer une image. Le papier, ses ombres et sa texture sont retirés et les contours deviennent des courbes modifiables. Sur tablette et téléphone, « Prendre une photo » ouvre l'appareil photo."
+ },
+ {
+  "cat": "Dessiner",
+  "q": "Comment annuler une modification ancienne sans perdre les suivantes ?",
+  "a": "Ouvrez l'historique (Édition › Historique, ou appui long sur Annuler) : chaque modification se décoche et se recoche, dans n'importe quel ordre. Une propriété modifiée ensuite n'est jamais écrasée."
+ },
+ {
+  "cat": "Dessiner",
+  "q": "Quelles polices puis-je utiliser ?",
+  "a": "Les 56 polices libres de l'atelier (latin, cyrillique, arabe, hébreu, devanagari, thaï, CJK…), vos polices importées (TTF, OTF, WOFF) et vos propres polices créées glyphe par glyphe, exportables en OTF."
+ },
+ {
+  "cat": "Dessiner",
+  "q": "À quoi servent les effets et les styles ?",
+  "a": "Les effets (métal brossé, dorure, ombre, hachures, fondus…) habillent un calque sans toucher à ses courbes. Les transformations (low poly, pixel art, pointillisme…) redessinent les courbes dans de nouveaux calques."
+ },
+ {
+  "cat": "Marque et charte",
+  "q": "Comment l'atelier propose-t-il des logos ?",
+  "a": "À partir du nom, des mots-clés et des lettres importantes : il choisit des pictogrammes de métier, une matière, un style et une police accordée, et compose des propositions premium et illustrées. « Autres concepts » en propose une nouvelle série."
+ },
+ {
+  "cat": "Marque et charte",
+  "q": "Que contient la charte graphique ?",
+  "a": "Après un questionnaire (style, couleurs, typographies, ton) : couverture, marque et ambiance, variantes du logo, zone de protection et tailles minimales, couleurs (HEX, RVB, CMJN, contrastes), typographie, fonds autorisés, à ne pas faire, applications et fichiers fournis."
+ },
+ {
+  "cat": "Marque et charte",
+  "q": "Dans quels formats sort la charte ?",
+  "a": "En PDF (A4 portrait pour l'impression, A4 paysage ou 16:9 pour une présentation) et en pack de dépôt (.zip) avec les variantes du logo en SVG et PNG et le favicon."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Comment animer mon logo ?",
+  "a": "Menu Animation : choisissez une recette en un clic (par exemple « Du croquis au rendu »), puis ajustez chaque animation avec ses curseurs ou directement sur la frise. Durée de 1 à 12 secondes."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Puis-je régler l'animation image par image ?",
+  "a": "Oui : sur la frise, glissez une barre pour la déplacer et ses bords pour changer sa durée. L'onglet « Clés » pose des clés libres, et « Courbe personnalisée » dessine votre propre accélération."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Comment ajouter du son ?",
+  "a": "« Générer la bande son » choisit une ambiance et place les sons sur les temps forts : le moment fort de chaque son tombe sur l'apparition ou la révélation du logo. Chaque son se règle (volume, hauteur, fondus, coupe) et des effets s'appliquent à l'ensemble."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Puis-je utiliser mes propres sons ?",
+  "a": "Oui, dans Banque de sons › Importer mes sons (MP3, WAV, OGG, M4A, FLAC ou un .zip), à condition d'en détenir les droits ou d'avoir une licence qui le permet. Ils restent sur votre appareil et ne sont jamais envoyés ni partagés."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Dans quels formats exporter l'animation ?",
+  "a": "MP4 et WebM (vidéo avec le son), GIF (boucle légère), SVG animé (pour un site, net à toute taille) et WAV (le son seul), en paysage, carré, vertical ou portrait. Tout est calculé sur votre appareil."
+ },
+ {
+  "cat": "Animation et son",
+  "q": "Pourquoi mon MP4 a-t-il un son en Opus ?",
+  "a": "Quand le navigateur ne sait pas encoder l'AAC, le son du MP4 est en Opus. Il se lit dans Chrome, Edge et Firefox, mais pas toujours dans d'anciens lecteurs Apple : exportez alors en WebM, ou depuis un autre navigateur."
+ },
+ {
+  "cat": "Projets et fichiers",
+  "q": "Où sont enregistrés mes projets ?",
+  "a": "Dans le stockage de votre navigateur, sur votre appareil. Rien n'est envoyé sur un serveur. Pour les retrouver ailleurs ou les sauvegarder, utilisez Plan › Enregistrer dans un fichier, puis rouvrez ce fichier sur l'autre appareil."
+ },
+ {
+  "cat": "Projets et fichiers",
+  "q": "Puis-je perdre mes projets ?",
+  "a": "Oui, si vous effacez les données du site dans votre navigateur ou si vous changez d'appareil. Enregistrez régulièrement vos projets dans un fichier .atelier.json : c'est votre sauvegarde."
+ },
+ {
+  "cat": "Projets et fichiers",
+  "q": "Quels formats d'export pour le logo ?",
+  "a": "SVG, PNG et JPG, pour le logo entier, le symbole, le mot ou un calque, en un fichier ou en ZIP ; motifs en mosaïque ; polices en OTF."
+ },
+ {
+  "cat": "Projets et fichiers",
+  "q": "Comment copier des éléments d'un projet à l'autre ?",
+  "a": "Sélectionnez des calques puis Ctrl+C, ouvrez l'autre projet et Ctrl+V : les couleurs et dégradés suivent. Depuis Projets et collections, « Calques… » sur une carte fait de même."
+ },
+ {
+  "cat": "Claude et IA",
+  "q": "Comment travailler avec Claude ?",
+  "a": "Posez une bulle sur le dessin pour demander une retouche. Dans claude.ai, l'atelier s'ouvre comme un artifact ; ailleurs, utilisez le copier-coller ou l'extension Claude Desktop. Chaque retouche de Claude arrive avec un bandeau pour l'annuler."
+ },
+ {
+  "cat": "Claude et IA",
+  "q": "L'atelier envoie-t-il mes données à une IA ?",
+  "a": "Non, pas de lui-même. Seul ce que vous choisissez d'envoyer à Claude (votre dessin et vos bulles) est transmis, par la connexion que vous utilisez, et traité selon les conditions d'Anthropic. L'atelier ne stocke ni n'envoie aucune clé d'API."
+ },
+ {
+  "cat": "Claude et IA",
+  "q": "D'autres IA seront-elles proposées ?",
+  "a": "C'est à l'étude. Dites-nous lesquelles vous intéressent : vos réponses orientent les prochaines connexions."
+ },
+ {
+  "cat": "Droits et licences",
+  "q": "Mon logo m'appartient-il ?",
+  "a": "Oui, ce que vous créez vous appartient et peut être utilisé commercialement. Vérifiez qu'il ne reprend pas une marque, une œuvre, une police ou un son protégés sans autorisation, et qu'il ne crée pas de confusion avec une marque existante avant un dépôt."
+ },
+ {
+  "cat": "Droits et licences",
+  "q": "Puis-je utiliser les pictogrammes et les sons de l'atelier ?",
+  "a": "Oui, dans vos créations. Les polices restent soumises à leurs licences libres (SIL OFL, Apache), indiquées dans À propos."
+ },
+ {
+  "cat": "Confidentialité",
+  "q": "L'atelier utilise-t-il des cookies ou un suivi ?",
+  "a": "Non : ni cookie de suivi, ni publicité. Le stockage local sert uniquement au fonctionnement de l'atelier."
+ },
+ {
+  "cat": "Confidentialité",
+  "q": "Comment tout effacer ?",
+  "a": "Supprimez les données du site dans les réglages de votre navigateur. Pensez à enregistrer vos projets dans un fichier avant."
+ },
+ {
+  "cat": "Technique",
+  "q": "L'export vidéo est lent, est-ce normal ?",
+  "a": "Chaque image est calculée sur votre appareil, effets compris. Choisissez 720p et 30 images/s pour aller plus vite ; les logos très riches en effets (métal brossé, flous) demandent plus de calcul."
+ },
+ {
+  "cat": "Technique",
+  "q": "Puis-je utiliser plusieurs écrans ?",
+  "a": "Oui, dans l'appli installée : « Fenêtres » détache les panneaux (outils, calques, sélection, palette, bulles) dans des fenêtres séparées."
+ }
 ]
