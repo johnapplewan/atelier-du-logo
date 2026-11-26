@@ -55,6 +55,10 @@ function buildSite() {
   // the guide is written once, in GUIDE.md; on the site its "open the workshop" link points to /atelier/
   const guide = md(fs.readFileSync(path.join(root, "GUIDE.md"), "utf8").replace(/https:\/\/johnapplewan\.github\.io\/atelier-du-logo\/?/g, "/atelier/"));
   pages.push({ name: "aide", title: "Guide — Atelier du Logo", desc: "Le guide de l'Atelier du Logo : démarrer, dessiner, décliner la charte, animer, travailler avec Claude.", nav: "aide", body: `<section><div class="wrap prose">${guide}</div></section>` });
+  // the full FAQ, written once in content/faq.json (also shown in the workshop's help center)
+  const faq = JSON.parse(fs.readFileSync(path.join(root, "content/faq.json"), "utf8")), cats = [...new Set(faq.map(f => f.cat))];
+  pages.push({ name: "faq", title: "Questions fréquentes — Atelier du Logo", desc: "Toutes les réponses : démarrer, dessiner, charte, animation et son, projets, Claude, confidentialité, tarifs, droits.", nav: "aide",
+    body: `<section><div class="wrap prose"><span class="eyebrow">Questions fréquentes</span><h1>Toutes les réponses</h1>${cats.map(c => `<h2>${esc(c)}</h2><div class="faq" style="margin:0">${faq.filter(f => f.cat === c).map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("")}</div>`).join("")}<p style="margin-top:32px">Une autre question ? <a href="/contact/">Écrivez-nous</a>.</p></div></section>` });
   const urls = [];
   for (const p of pages) {
     const rel = p.name === "index" ? "" : p.name === "404" ? "404.html" : p.name + "/";

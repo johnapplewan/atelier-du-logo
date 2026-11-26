@@ -35,6 +35,10 @@ async function open(browser, opts = {}) {
   if (!opts.fresh) await page.addInitScript(fx => { try { if (!sessionStorage.getItem("__seeded") && !localStorage.getItem("atelier-logo-v1")) { sessionStorage.setItem("__seeded", "1"); localStorage.setItem("atelier-logo-v1", fx.s); localStorage.setItem("atelier-logo-palette", fx.p); } } catch (_) {} },
     { s: JSON.stringify(FIXTURE.shape), p: JSON.stringify(FIXTURE.palette) });
   if (opts.init) await page.addInitScript(opts.init);
+  // commands now live in the menu bar (Plan, Édition, Animation, Paramètres, Aide): clicking or tapping one opens its menu first
+  for (const k of ["click", "tap"]) { const orig = page[k].bind(page);
+    page[k] = async (sel, o) => { if (typeof sel === "string" && /^#\w+$/.test(sel)) { const inMenu = await page.$eval(sel, el => !!el.closest(".mmenu") && el.offsetParent === null).catch(() => false);
+      if (inMenu) await page.evaluate(s => window.__openMenuFor && __openMenuFor(s), sel); } return orig(sel, o); }; }
   await page.goto(await serve());
   await page.waitForFunction(() => window.__atelier && Array.isArray(window.__atelier.layers));
   await page.waitForTimeout(300);

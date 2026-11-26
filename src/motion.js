@@ -234,6 +234,9 @@ body.motion-open .toast{z-index:1000}
 #motion .mo-frame g[data-mo]{cursor:pointer}
 #motion .mo-bar{display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
 #motion .mo-bar button{min-width:36px;height:36px}
+#motion .mo-anim .acts button,#motion .mo-keys button,.mobank-list .it button{display:inline-flex;align-items:center;gap:5px}
+#motion .mo-anim .acts .i,#motion .mo-keys .i,.mobank-list .it .i{width:13px;height:13px}
+#motion .mo-tr .lb .i{width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:5px;color:#2F8F6B}
 #motion .mo-bar input[type=range]{flex:1}
 #motion .mo-time{font-variant-numeric:tabular-nums;font-size:13px;min-width:120px;text-align:right;white-space:nowrap}
 #motion .mo-tl{border-top:1px solid var(--line);background:var(--paper);max-height:30vh;min-height:92px;overflow:auto;flex:none;user-select:none;-webkit-user-select:none}
@@ -317,7 +320,7 @@ body.motion-open .toast{z-index:1000}
   root.id = "motion"; root.hidden = true; root.setAttribute("role", "dialog"); root.setAttribute("aria-label", "Motion : animer le logo");
   root.innerHTML = `
 <div class="mo-top">
-  <button id="moBack" title="Revenir à l'atelier (Échap)">‹ Atelier</button>
+  <button id="moBack" class="hb" title="Revenir à l'atelier (Échap)">${ico("prev")}Atelier</button>
   <div><h2>Motion</h2><div class="sub">Animer le logo du projet ouvert</div></div>
   <div class="spacer"></div>
   <button id="moExport" class="primary" title="Exporter en MP4, WebM, GIF ou SVG animé">Exporter</button>
@@ -331,10 +334,10 @@ body.motion-open .toast{z-index:1000}
     <div class="mo-tl" id="moTl" aria-label="Frise chronologique"><div class="mo-tl-in" id="moTlIn"></div></div>
     <div class="mo-note" id="moNote"></div>
     <div class="mo-bar">
-      <button id="moStart" title="Début (Origine)" aria-label="Revenir au début">⏮</button>
-      <button id="moPrev" title="Image précédente (←)" aria-label="Image précédente">‹</button>
-      <button id="moPlay" class="primary" title="Lecture / pause (Espace)" aria-label="Lecture">▶</button>
-      <button id="moNext" title="Image suivante (→)" aria-label="Image suivante">›</button>
+      <button id="moStart" class="hb" title="Début (Origine)" aria-label="Revenir au début">${ico("skipStart")}</button>
+      <button id="moPrev" class="hb" title="Image précédente (←)" aria-label="Image précédente">${ico("prev")}</button>
+      <button id="moPlay" class="primary hb" title="Lecture / pause (Espace)" aria-label="Lecture">${ico("play")}</button>
+      <button id="moNext" class="hb" title="Image suivante (→)" aria-label="Image suivante">${ico("next")}</button>
       <input type="range" id="moScrub" min="0" step="${1 / MOTION_FPS}" value="0" aria-label="Position dans l'animation">
       <label class="chk"><input type="checkbox" id="moLoop"> Boucle</label>
       <span class="mo-time" id="moTime"></span>
@@ -688,7 +691,7 @@ function moKSlider(a, i, f, v) {
 }
 function moKeyCard(a, n) {
   const i = MO.key && MO.key.a === a.id ? Math.min(MO.key.i, a.keys.length - 1) : 0, K = a.keys[i];
-  let h = `<div class="mo-keys" role="group" aria-label="Clés">${a.keys.map((k, j) => `<button data-act="selkey" data-id="${a.id}" data-i="${j}" aria-pressed="${j === i}">◆ ${moNum(k.t)} s</button>`).join("")}</div>`;
+  let h = `<div class="mo-keys" role="group" aria-label="Clés">${a.keys.map((k, j) => `<button data-act="selkey" data-id="${a.id}" data-i="${j}" aria-pressed="${j === i}">${ico("diamond")}${moNum(k.t)} s</button>`).join("")}</div>`;
   h += moKSlider(a, i, "t", K.t);
   for (const f in MO_KF) h += moKSlider(a, i, f, K[f]);
   if (i < a.keys.length - 1) h += `<label class="mo-p"><span>Courbe vers la clé suivante</span><select data-a="${a.id}" data-kk="e" data-i="${i}">${Object.entries(MO_EASES).map(([k, e]) => `<option value="${k}"${k === (K.e || "douce") ? " selected" : ""}>${esc(e.n)}</option>`).join("")}</select></label>`;
@@ -722,7 +725,7 @@ function moCard(a) {
 function moCardWrap(a, P, n, h) {
   const who = a.k === "cam" ? "toute la scène" : n + " calque" + (n > 1 ? "s" : "");
   return `<details class="mo-anim" data-id="${a.id}"${MO.focus === a.id ? " open" : ""}><summary><span><span class="k">${moTitle(a)}</span><br>${esc(P.n)} <small style="color:var(--muted)">· ${who}</small></span><span class="t" data-time="${a.id}">${moNum(a.at)}–${moNum(moEnd(a))} s</span></summary>
-<div class="bd">${h}<div class="acts">${a.k !== "cam" ? `<button data-act="sel" data-id="${a.id}">Sélectionner ses calques</button>` : ""}<button data-act="play" data-id="${a.id}">▶ Voir</button><button data-act="del" data-id="${a.id}">Retirer</button></div></div></details>`;
+<div class="bd">${h}<div class="acts">${a.k !== "cam" ? `<button data-act="sel" data-id="${a.id}">Sélectionner ses calques</button>` : ""}<button data-act="play" data-id="${a.id}">${ico("play")}Voir</button><button data-act="del" data-id="${a.id}">Retirer</button></div></div></details>`;
 }
 function moPanelTimes() { for (const a of motion.anims) { const el = moEl("moList").querySelector(`[data-time="${a.id}"]`); if (el) el.textContent = `${moNum(a.at)}–${moNum(moEnd(a))} s`; } }
 function moPanel() {
@@ -764,7 +767,7 @@ function moTl() {
   }
   for (const c of motion.audio.clips) {
     const sp = moClipSpan(c), on = MO.focusClip === c.id ? " on" : "";
-    rows += `<div class="mo-tr${on}${motion.audio.on ? "" : " off"}" data-clip="${c.id}"><div class="lb" data-cfocus="${c.id}" title="${esc(moSndName(c.s))}">♪ ${esc(moSndName(c.s))}</div><div class="mo-lane"><div class="mo-bar2 snd" data-drag="move" style="--c:#2F8F6B;left:${f(c.at)};width:calc(${f(Math.min(D, c.at + sp.L))} - ${f(c.at)})" title="${esc(moSndName(c.s))} : ${moNum(c.at)}–${moNum(c.at + sp.L)} s"><div class="hl" data-drag="start"></div><div class="hr" data-drag="end"></div></div></div></div>`;
+    rows += `<div class="mo-tr${on}${motion.audio.on ? "" : " off"}" data-clip="${c.id}"><div class="lb" data-cfocus="${c.id}" title="${esc(moSndName(c.s))}">${ico("note")}${esc(moSndName(c.s))}</div><div class="mo-lane"><div class="mo-bar2 snd" data-drag="move" style="--c:#2F8F6B;left:${f(c.at)};width:calc(${f(Math.min(D, c.at + sp.L))} - ${f(c.at)})" title="${esc(moSndName(c.s))} : ${moNum(c.at)}–${moNum(c.at + sp.L)} s"><div class="hl" data-drag="start"></div><div class="hr" data-drag="end"></div></div></div></div>`;
   }
   box.innerHTML = `<div class="mo-tr head"><div class="lb"><small>Frise · ${moNum(D)} s</small></div><div class="mo-lane" data-ruler>${ticks}</div></div>${rows || `<div class="mo-tl-empty">Ajoutez une animation : elle apparaît ici, et se règle à la souris (déplacer, étirer).</div>`}<div class="mo-ph"></div>`;
   box.style.setProperty("--f", moC(MO.t / D, 0, 1));
@@ -842,7 +845,7 @@ function moSeek(t) {
 function moStep(k) { moPlay(false); moSeek((Math.round(MO.t * MOTION_FPS) + k) / MOTION_FPS); }
 function moPlay(on) {
   MO.playing = !!on; cancelAnimationFrame(MO.raf);
-  const b = moEl("moPlay"); b.textContent = MO.playing ? "❚❚" : "▶"; b.setAttribute("aria-label", MO.playing ? "Pause" : "Lecture");
+  const b = moEl("moPlay"); b.innerHTML = ico(MO.playing ? "pause" : "play"); b.setAttribute("aria-label", MO.playing ? "Pause" : "Lecture");
   moSelBoxes();
   if (!MO.playing) { moAudioStop(); return; }
   if (MO.t >= motion.dur) MO.t = 0;
@@ -1443,7 +1446,7 @@ function moSndPanel() {
     const lim = { at: [0, motion.dur], cut: [0, Math.max(.05, (m ? m.d : 1) - .05)], len: [.05, Math.max(.06, r2(sp.max))] };
     return `<details class="mo-anim mo-clip" data-clip="${c.id}"${MO.focusClip === c.id ? " open" : ""}><summary><span><span class="k">Son</span><br>${esc(moSndName(c.s))}${m ? "" : ` <small style="color:var(--danger)">· manquant</small>`}</span><span class="t">${moNum(c.at)}–${moNum(c.at + sp.L)} s</span></summary><div class="bd">`
       + Object.entries(MO_CLIPF).map(([k, [n, mi, ma, st, u]]) => { const [a0, a1] = lim[k] || [mi, ma]; return `<label class="mo-p"><span>${n}</span><input type="range" data-cl="${c.id}" data-ck="${k}" min="${a0}" max="${a1}" step="${st}" value="${v[k]}"><output>${moNum(v[k])}${u}</output></label>`; }).join("")
-      + `<div class="acts"><button data-cact="play" data-cl="${c.id}">▶ Écouter</button><button data-cact="del" data-cl="${c.id}">Retirer</button></div></div></details>`; }).join("")
+      + `<div class="acts"><button data-cact="play" data-cl="${c.id}">${ico("play")}Écouter</button><button data-cact="del" data-cl="${c.id}">Retirer</button></div></div></details>`; }).join("")
     : `<p class="mo-hint">Pas encore de son : « Générer la bande son » place des sons sur les temps forts de l'animation, ou ajoutez-en depuis la banque.</p>`;
 }
 function moClipSet(c, k, v) {
@@ -1540,7 +1543,7 @@ function moBankRender() {
   const tab = MO.bankTab || "tous", tabs = [["tous", "Tous"], ["mes", "Mes sons"], ...Object.entries(MO_SND_CATS)];
   moEl("moBankTabs").innerHTML = tabs.map(([k, n]) => `<button data-btab="${k}" aria-pressed="${k === tab}">${n}</button>`).join("");
   const all = [...MO_SND.user, ...[...MO_SND.meta.values()].filter(m => m.syn)], list = tab === "tous" ? all : tab === "mes" ? MO_SND.user : all.filter(m => m.cat === tab);
-  const row = m => `<div class="it"><button data-bact="play" data-id="${esc(m.id)}" aria-label="Écouter ${esc(m.n)}">▶</button><span class="n">${esc(m.n)}</span><small>${moNum(m.d)} s</small><button data-bact="add" data-id="${esc(m.id)}">+ Ajouter</button>${m.syn ? "" : `<button data-bact="del" data-id="${esc(m.id)}" aria-label="Supprimer ${esc(m.n)}">✕</button>`}</div>`;
+  const row = m => `<div class="it"><button data-bact="play" data-id="${esc(m.id)}" aria-label="Écouter ${esc(m.n)}">${ico("play")}</button><span class="n">${esc(m.n)}</span><small>${moNum(m.d)} s</small><button data-bact="add" data-id="${esc(m.id)}">+ Ajouter</button>${m.syn ? "" : `<button data-bact="del" data-id="${esc(m.id)}" aria-label="Supprimer ${esc(m.n)}">${ico("trash")}</button>`}</div>`;
   const mine = list.filter(m => !m.syn), ours = list.filter(m => m.syn);
   moEl("moBankList").innerHTML = (mine.length ? `<h4>Mes sons (sur cet appareil)</h4>${mine.map(row).join("")}` : tab === "mes" ? `<p class="mo-hint" style="padding:10px">Aucun son importé pour l'instant.</p>` : "")
     + (ours.length ? `<h4>Sons de l'atelier (générés)</h4>${ours.map(row).join("")}` : "");

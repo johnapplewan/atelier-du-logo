@@ -4,7 +4,7 @@
 
 L'Atelier du Logo sert à dessiner son logo et sa charte graphique en vectoriel, seul ou avec Claude. Il est gratuit et vos projets restent sur votre appareil.
 
-**Ouvrir l'atelier** : https://johnapplewan.github.io/atelier-du-logo/. Pour l'installer comme une application utilisable sans connexion : À propos › « Installer l'appli », ou le menu du navigateur.
+**Ouvrir l'atelier** : https://johnapplewan.github.io/atelier-du-logo/. Pour l'installer comme une application utilisable sans connexion : Paramètres › À propos et soutien › « Installer l'appli », ou le menu du navigateur.
 
 ## 1. Démarrer
 
@@ -21,7 +21,7 @@ Choisissez ensuite un point de départ :
 - **l'exemple** ;
 - ou « Page vierge ».
 
-Vous retrouvez ces choix à tout moment avec le bouton « Marque et départ ».
+Le menu en haut de l'écran réunit tout : **Plan** (nouveau projet, projets et collections, marque et propositions, fichiers, export, charte), **Édition** (annuler, historique, outils, import d'image, Claude, grille et règles), **Animation**, **Paramètres** (préférences, raccourcis, aides à l'écran, à propos) et **Aide** (recherche, guide, questions fréquentes). Plan › Marque et propositions rouvre ces choix pour le projet ouvert ; Plan › Nouveau projet en crée un autre.
 
 ## 2. Dessiner
 
@@ -36,7 +36,7 @@ Vous retrouvez ces choix à tout moment avec le bouton « Marque et départ ».
 | Bulle | B | annotation pour Claude |
 | Vue | H ou Espace | se déplacer dans le dessin |
 
-Le bouton **?** liste tous les raccourcis. **Annuler** défait la dernière action. Un appui long sur ce bouton ouvre l'historique : vous pouvez y décocher ou recocher n'importe quelle modification.
+La touche **?** liste tous les raccourcis, et **Ctrl+K** cherche dans l'aide (un outil, un raccourci, une question). **Annuler** défait la dernière action. Un appui long sur ce bouton ouvre l'historique : vous pouvez y décocher ou recocher n'importe quelle modification.
 
 ## 3. Couleurs, styles et polices
 
@@ -63,7 +63,7 @@ Claude ne touche jamais aux calques verrouillés (le cadenas dans la liste des c
 
 ## 6. Animer votre logo (Motion)
 
-Le bouton **Animer** ouvre Motion, sur le logo du projet ouvert.
+Le menu **Animation › Animer le plan** ouvre Motion, sur le logo du projet ouvert.
 
 - **Recettes en un clic** : « Du croquis au rendu », « Révélation élégante », « Tracé d'architecte », « Rebond joyeux »… Chaque recette compose une animation complète, que vous réglez ensuite.
 - **Animations par calque** : choisissez des calques, puis une animation (apparition, disparition, texte, mouvement, caméra). Chaque animation a ses curseurs : début, durée, décalage entre les calques, courbe de vitesse.

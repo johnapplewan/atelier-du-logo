@@ -7,7 +7,7 @@ const { chromium, assert, open, check, done } = require("./helpers");
     window.__files = [];
     window.claude = { use: async n => n === "downloads" ? { save: async ({ filename, data }) => { const b = new Uint8Array(await (data.arrayBuffer ? data : new Blob([data])).arrayBuffer()); let s = ""; for (let i = 0; i < b.length; i += 8192) s += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); window.__files.push([filename, s]); return { status: "saved" }; } } : null };
   } });
-  await p.click("#startBtn"); await p.fill("#stName", "Atelier Nova"); await p.fill("#stTag", "Des meubles qui durent"); await p.fill("#stKw", "bois, artisanal, premium");
+  await p.click("#brandBtn"); await p.fill("#stName", "Atelier Nova"); await p.fill("#stTag", "Des meubles qui durent"); await p.fill("#stKw", "bois, artisanal, premium");
   await p.click('[data-start="example"]'); await p.click("#stGo"); await p.waitForTimeout(500);
 
   // 1. style: six themes previewed with the logo

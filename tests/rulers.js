@@ -15,10 +15,10 @@ const { chromium, assert, open, worldToScreen, check, done } = require("./helper
   await p.keyboard.press("v");
 
   // shortcuts directory with "?", and help back on
-  await p.keyboard.press("?"); await p.waitForSelector("#scDlg[open]");
-  const sc = await p.evaluate(() => [document.querySelectorAll("#scList section").length, document.querySelectorAll("#scList kbd").length, /Plume : créer un tracé/.test(document.querySelector("#scList").textContent)]);
+  await p.keyboard.press("?"); await p.waitForSelector("#setDlg[open]");
+  const sc = await p.evaluate(() => [document.querySelectorAll("#setMain .sclist section").length, document.querySelectorAll("#setMain .sclist kbd").length, /Plume : créer un tracé/.test(document.querySelector("#setMain").textContent)]);
   check("shortcuts directory grouped, with keys", () => { assert.strictEqual(sc[0], 4); assert.ok(sc[1] > 30); assert.ok(sc[2]); });
-  await p.check("#scHelp"); await p.click("#scClose");
+  await p.click('#setNav [data-set="prefs"]'); await p.check("#scHelp"); await p.click("#setClose");
   const shown = await p.evaluate(() => getComputedStyle(document.querySelector(".help")).display !== "none");
   check("'Afficher les aides à l'écran' brings help texts back", () => assert.ok(shown));
 
